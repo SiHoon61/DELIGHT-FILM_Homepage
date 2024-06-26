@@ -27,6 +27,15 @@ export const VideoContainer = styled.div`
     width: 100%;
     height: ${props => props.$height}px;
     z-index: 0;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    &::-webkit-scrollbar {
+    width: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background: #A4A4A4;
+    }
 `;
 
 export const Video = styled.video`
