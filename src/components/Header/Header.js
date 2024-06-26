@@ -1,22 +1,30 @@
 import React from 'react';
 
+import {
+    Container,
+    MenuBar,
+    IndexLI,
+    IndexUL,
+} from './style';
 const Header = () => {
     return (
         <>
-            <ul>
-                <li>
-                    Home a
-                </li>
-                <li>
-                    About
-                </li>
-                <li>
-                    Works
-                </li>
-                <li>
-                    Contact
-                </li>
-            </ul>
+            <MenuBar>
+                <IndexUL>
+                    <IndexLI>
+                        Home
+                    </IndexLI>
+                    <IndexLI>
+                        About
+                    </IndexLI>
+                    <IndexLI>
+                        Works
+                    </IndexLI>
+                    <IndexLI>
+                        Contact
+                    </IndexLI>
+                </IndexUL>
+            </MenuBar>
         </>
     );
 };
