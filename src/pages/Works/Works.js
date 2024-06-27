@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import Header from '../../components/Header/Header';
 import NavBar from '../../components/NavBar/NavBar';
+import VideoBox from '../../components/VideoBox/VideoBox';
 
 import {
     HeaderContainer,
@@ -29,7 +30,7 @@ const Works = () => {
                 <NavBar onMenuClick={handleMenuClick} />
             </MenuContainer>
             <BodyContainer>
-                <h1>화면 출력: {selectedMenu}</h1>
+                <VideoBox/>
             </BodyContainer>
         </>
     );

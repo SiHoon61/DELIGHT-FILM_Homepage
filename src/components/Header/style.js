@@ -22,7 +22,7 @@ export const IndexLI = styled.li`
     position: relative;
     justify-content: center;
     margin: 0 20px;
-    font-size: 18px;
+    font-size: 20px;
     font-family: var(--font-sansMedium);
     color: white;
     cursor: pointer;
