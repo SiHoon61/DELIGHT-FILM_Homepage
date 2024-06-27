@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import Header from '../../components/Header/Header';
+import Bottom from '../../components/Bottom/Bottom';
 import {
   HeaderContainer,
   Logo,
@@ -53,6 +54,7 @@ const Home = () => {
           <source src={mainVideo} type="video/mp4" />
         </Video>
       </VideoContainer>
+      <Bottom/>
     </>
   );
 };
