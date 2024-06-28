@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import Header from '../../components/Header/Header';
 import NavBar from '../../components/NavBar/NavBar';
 import VideoBox from '../../components/VideoBox/VideoBox';
+import Broadcast from '../../components/Broadcast/Broadcast';
+import Photo from '../../components/Photo/Photo';
 
 import {
     HeaderContainer,
@@ -30,7 +32,9 @@ const Works = () => {
                 <NavBar onMenuClick={handleMenuClick} />
             </MenuContainer>
             <BodyContainer>
-                <VideoBox/>
+                {selectedMenu === 'Video' && <VideoBox />}
+                {selectedMenu === 'Broadcast' && <Broadcast />}
+                {selectedMenu === 'Photo' && <Photo />}
             </BodyContainer>
         </>
     );
