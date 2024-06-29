@@ -19,7 +19,6 @@ const NavLink = styled.div`
     font-family: var(--font-sansBold);
     cursor: pointer;
     position: relative;
-    z-index: 1;
     color: ${({ $active }) => ($active ? '#000' : '#9D9D9D')};
     transition: color 0.3s;
 `;
@@ -34,7 +33,6 @@ const Background = styled.div`
     background-color: #eee;
     border-radius: 30px;
     transition: left 0.3s, width 0.3s;
-    z-index: 0;
 `;
 
 const NavBar = ({ onMenuClick }) => {

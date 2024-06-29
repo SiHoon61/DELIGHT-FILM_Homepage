@@ -5,6 +5,7 @@ import NavBar from '../../components/NavBar/NavBar';
 import VideoBox from '../../components/VideoBox/VideoBox';
 import Broadcast from '../../components/Broadcast/Broadcast';
 import Photo from '../../components/Photo/Photo';
+import Bottom from '../../components/Bottom/Bottom';
 
 import {
     HeaderContainer,
@@ -36,6 +37,7 @@ const Works = () => {
                 {selectedMenu === 'Broadcast' && <Broadcast />}
                 {selectedMenu === 'Photo' && <Photo />}
             </BodyContainer>
+            <Bottom/>
         </>
     );
 };

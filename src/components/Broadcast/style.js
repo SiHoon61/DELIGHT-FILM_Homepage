@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const VideoContainer = styled.div`
     display: flex;
     flex-direction: column;
-    width: calc(33.3333333333% - 4rem);
+    width: 32%;
 `
 
 export const Thumbnail = styled.img`

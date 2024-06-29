@@ -6,11 +6,11 @@ import {
     LogoImg,
     InfoBox,
     Text,
+    TextInfo,
     SnsBox,
     NewLine,
     LogoImgBox,
     SnsImg,
-    ScrollBar,
 } from './style';
 
 import logoImg from '../../assets/Home/logo.png'
@@ -31,17 +31,17 @@ const Bottom = () => {
                             <Text>
                                 Call
                             </Text>
-                            <div>
+                            <TextInfo>
                                 010-1234-5678
-                            </div>
+                            </TextInfo>
                         </NewLine>
                         <NewLine>
                             <Text>
                                 Email
                             </Text>
-                            <div>
+                            <TextInfo>
                                 abbcc123@gmail.com
-                            </div>
+                            </TextInfo>
                         </NewLine>
                     </InfoBox>
                 </LogoImgBox>

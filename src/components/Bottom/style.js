@@ -16,6 +16,7 @@ export const LogoBox = styled.div`
     align-items: center;
     width: 150px;
     margin-left: 50px;
+    white-space: nowrap;
 `
 
 export const LogoImg = styled.img`
@@ -39,6 +40,11 @@ export const NewLine = styled.div`
 export const Text = styled.div`
     width: 60px;
 `
+
+export const TextInfo = styled.div`
+    white-space: nowrap;
+`
+
 export const LogoImgBox = styled.div`
     display: flex;
     align-items: center;

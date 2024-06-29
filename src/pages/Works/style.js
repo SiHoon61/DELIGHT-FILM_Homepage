@@ -32,6 +32,7 @@ export const BodyContainer = styled.div`
     justify-content: flex-start;
     align-items: center;
     color: white;
-    gap: 6rem;
+    gap: 2%;
     padding: 0 20px;
+    margin-bottom: 80px;
 `

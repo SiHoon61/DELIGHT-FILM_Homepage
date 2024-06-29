@@ -11,6 +11,7 @@ export const LogoFont = styled.div`
     font-size: 20px;
     font-family: var(--font-sansMedium);
     color: white;
+    white-space: nowrap;
 `
 
 export const HeaderContainer = styled.div`
