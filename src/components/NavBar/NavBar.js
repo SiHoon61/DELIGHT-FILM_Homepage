@@ -20,7 +20,10 @@ const NavLink = styled.div`
     cursor: pointer;
     position: relative;
     color: ${({ $active }) => ($active ? '#000' : '#9D9D9D')};
-    transition: color 0.3s;
+    transition: color 0.4s;
+    &:hover{
+        color: black;
+    }
 `;
 
 const Background = styled.div`

@@ -46,8 +46,7 @@ export const KeyText = styled.div`
     color: white;
     font-family: var(--font-sansMedium);
     font-size: 18px;
-
-
+    margin-bottom: 3px;
 `
 
 export const TextInput = styled.input`
@@ -137,11 +136,18 @@ export const Submit = styled.div`
     justify-content: center;
     align-items: center;
     font-size: 18px;
-    color: white;
+    color: ${props => props.$isFilled ? 'white' : '#505050'};
     width: 280px;
     height: 60px;
-    background-color: ${props => props.$isFilled ? '#0052A7' : '#E0E0E0'};
+    background-color: black;
+    border: ${props => props.$isFilled ? '1px solid white' : '1px solid #505050'};
     pointer-events: ${props => props.$isFilled ? 'auto' : 'none'};
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
+    font-family: var(--font-sansMedium);
+
     cursor: pointer;
+    &:hover{
+        background-color: white;
+        color: black;
+    }
 `

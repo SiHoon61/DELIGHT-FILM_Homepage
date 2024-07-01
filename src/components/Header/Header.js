@@ -5,6 +5,7 @@ import {
     MenuBar,
     IndexLI,
     IndexUL,
+    GradientText,
 } from './style';
 const Header = () => {
     //navigation
@@ -26,16 +27,19 @@ const Header = () => {
             <MenuBar>
                 <IndexUL>
                     <IndexLI onClick={goHome}>
-                        Home
+                        <GradientText data-text="Home">Home</GradientText>
                     </IndexLI>
                     <IndexLI onClick={goAbout}>
-                        About
+                        <GradientText data-text="About">About</GradientText>
+                        
                     </IndexLI >
                     <IndexLI onClick={goWorks}>
-                        Works
+                        <GradientText data-text="Works">Works</GradientText>
+                        
                     </IndexLI>
                     <IndexLI onClick={goContact}>
-                        Contact
+                        <GradientText data-text="Contact">Contact</GradientText>
+                        
                     </IndexLI>
                 </IndexUL>
             </MenuBar>

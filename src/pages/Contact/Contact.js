@@ -27,7 +27,9 @@ const Contact = () => {
     const [visibleCost, setVisibleCost] = useState(false);
     const [isSelectCost, setIsSelectCost] = useState(0);
     const costList = ['상담 후 결정', '~ 50', '50 ~ 100', '100 ~ 500', '500 ~ 1000', '1000 ~'];
+    const [isFilled, setIsFilled] = useState(false);
 
+    //드롭다운
     useEffect(() => {
         // 이벤트 리스너 설정: 바깥쪽 클릭 감지
         const handleClickOutside = (event) => {
@@ -42,10 +44,41 @@ const Contact = () => {
         };
     }, [dropdownRef]);
 
-    const domainToggleDropdown = () => {
+    const costToggleDropdown = () => {
         setVisibleCost(!visibleCost);
     };
 
+    //유효성 검사
+    const isEmpty = (value) => {
+        if (typeof value === 'string') {
+            return value.trim() !== '';
+        }
+        else if (typeof value === 'boolean') {
+            return value === true;
+        }
+        return !value;
+    };
+    useEffect(() => {
+        if ([nameValue, numValue, videoType, bodyText].every(isEmpty)) {
+            setIsFilled(true);
+        }
+        else {
+            setIsFilled(false);
+        }
+    }, [nameValue, numValue, videoType, bodyText])
+
+    //emailjs
+    const sendEmail = () => {
+        const templateParams = {
+            to_Email: 'abc@gmail.com',
+            user_name: nameValue,
+            user_num: numValue,
+            video_type: videoType,
+            user_cost: costList[isSelectCost],
+            user_bodyText: bodyText,
+        };
+        console.log(templateParams)
+    }
     return (
         <>
             <HeaderContainer>
@@ -93,7 +126,7 @@ const Contact = () => {
                         제작 예산 범위
                     </KeyText>
                     <SelectCost
-                        onClick={domainToggleDropdown}
+                        onClick={costToggleDropdown}
                         ref={dropdownRef}
                     >
                         {costList[isSelectCost]}
@@ -119,7 +152,14 @@ const Contact = () => {
                         value={bodyText}
                         onChange={(e) => setBodyText(e.target.value)} />
                 </AreaBox>
-                <Submit>전송</Submit>
+                <Submit
+                    $isFilled={isFilled}
+                    onClick={() => {
+                        sendEmail()
+                    }}
+                >
+                    전송
+                </Submit>
             </FormContainer>
             <Bottom/>
         </>
