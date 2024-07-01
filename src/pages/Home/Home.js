@@ -11,6 +11,7 @@ import {
 } from './style';
 
 import mainVideo from '../../assets/Home/mainVideo.mp4';
+import Photo from '../../components/Photo/Photo';
 
 function useWindowSize() {
 
@@ -54,7 +55,8 @@ const Home = () => {
           <source src={mainVideo} type="video/mp4" />
         </Video>
       </VideoContainer>
-      <Bottom/>
+      <Bottom />
+      <Photo></Photo>
     </>
   );
 };

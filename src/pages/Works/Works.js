@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import Header from '../../components/Header/Header';
 import NavBar from '../../components/NavBar/NavBar';
@@ -11,14 +12,39 @@ import {
     HeaderContainer,
     BigText,
     MenuContainer,
-    BodyContainer,
+    AnimatedDefaultContainer,
+    OnlyAnimatedContainer,
 } from './style';
 const Works = () => {
     const [selectedMenu, setSelectedMenu] = useState('Video');
 
     const handleMenuClick = (menu) => {
         setSelectedMenu(menu);
-        console.log(`Selected menu: ${menu}`);
+    };
+
+    const renderComponent = () => {
+        switch (selectedMenu) {
+            case 'Video':
+                return (
+                    <AnimatedDefaultContainer>
+                        <VideoBox />
+                    </AnimatedDefaultContainer>
+                );
+            case 'Broadcast':
+                return (
+                    <AnimatedDefaultContainer>
+                        <Broadcast />
+                    </AnimatedDefaultContainer>
+                );
+            case 'Photo':
+                return (
+                    <OnlyAnimatedContainer>
+                        <Photo />
+                    </OnlyAnimatedContainer>
+                );
+            default:
+                return null;
+        }
     };
 
     return (
@@ -32,12 +58,17 @@ const Works = () => {
             <MenuContainer>
                 <NavBar onMenuClick={handleMenuClick} />
             </MenuContainer>
-            <BodyContainer>
-                {selectedMenu === 'Video' && <VideoBox />}
-                {selectedMenu === 'Broadcast' && <Broadcast />}
-                {selectedMenu === 'Photo' && <Photo />}
-            </BodyContainer>
-            <Bottom/>
+
+            <TransitionGroup>
+                <CSSTransition
+                    key={selectedMenu}
+                    timeout={300}
+                    classNames="fade"
+                >
+                    {renderComponent()}
+                </CSSTransition>
+            </TransitionGroup>
+            <Bottom />
         </>
     );
 };

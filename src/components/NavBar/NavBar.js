@@ -42,7 +42,7 @@ const NavBar = ({ onMenuClick }) => {
     const [active, setActive] = useState('Video');
     const [hoverPosition, setHoverPosition] = useState(null);
     const [clickPosition, setClickPosition] = useState(0);
-    const [backgroundWidth, setBackgroundWidth] = useState(100);
+    const [backgroundWidth, setBackgroundWidth] = useState(95);
 
     const videoRef = useRef(null);
     const broadcastRef = useRef(null);

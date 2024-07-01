@@ -10,7 +10,8 @@ import {
     SnsBox,
     NewLine,
     LogoImgBox,
-    SnsImg,
+    InstagramImg,
+    YoutubeImg,
 } from './style';
 
 import logoImg from '../../assets/Home/logo.png'
@@ -47,10 +48,11 @@ const Bottom = () => {
                 </LogoImgBox>
 
                 <SnsBox>
-                    <SnsImg src={instagram} alt="instagram" onClick={() => {
+                    <InstagramImg
+                        onClick={() => {
                         window.open("https://www.youtube.com/channel/UCozVgv8Kn92pnhckwAHjGSQ")
                     }} />
-                    <SnsImg src={youtube} alt="youtube" style={{ width: "40px", height: "40px" }}
+                    <YoutubeImg src={youtube} alt="youtube"
                         onClick={() => {
                             window.open("https://www.youtube.com/channel/UCozVgv8Kn92pnhckwAHjGSQ")
                         }} />

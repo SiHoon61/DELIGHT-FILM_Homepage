@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
 export const HeaderContainer = styled.div`
     display: flex;
@@ -26,7 +26,29 @@ export const MeneBox = styled.div`
     background: #000;
 `
 
-export const BodyContainer = styled.div`
+export const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+`;
+
+export const fadeOut = keyframes`
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+`;
+
+export const AnimatedDefaultContainer = styled.div`
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
@@ -35,4 +57,20 @@ export const BodyContainer = styled.div`
     gap: 2%;
     padding: 0 20px;
     margin-bottom: 80px;
+    &.fade-enter {
+        animation: ${fadeIn} 300ms forwards;
+    }
+    &.fade-exit {
+        animation: ${fadeOut} 300ms forwards;
+    }
+`;
+
+export const OnlyAnimatedContainer = styled.div`
+    //padding: 0 20px;
+    &.fade-enter {
+        animation: ${fadeIn} 300ms forwards;
+    }
+    &.fade-exit {
+        animation: ${fadeOut} 300ms forwards;
+    }
 `

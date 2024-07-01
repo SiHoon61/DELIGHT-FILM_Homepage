@@ -1,6 +1,8 @@
 import React from 'react';
 
 import Header from '../../components/Header/Header';
+import Bottom from '../../components/Bottom/Bottom';
+
 import {
     HeaderContainer,
     BigText,
@@ -15,6 +17,7 @@ const About = () => {
                 </BigText>
                 <Header />
             </HeaderContainer>
+            //<Bottom/>
         </>
     );
 };
