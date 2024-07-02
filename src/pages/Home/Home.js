@@ -56,7 +56,6 @@ const Home = () => {
         </Video>
       </VideoContainer>
       <Bottom />
-      <Photo></Photo>
     </>
   );
 };

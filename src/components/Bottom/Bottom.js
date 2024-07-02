@@ -33,7 +33,7 @@ const Bottom = () => {
                                 Call
                             </Text>
                             <TextInfo>
-                                010-1234-5678
+                                010-5513-8358
                             </TextInfo>
                         </NewLine>
                         <NewLine>
@@ -41,7 +41,7 @@ const Bottom = () => {
                                 Email
                             </Text>
                             <TextInfo>
-                                abbcc123@gmail.com
+                                delightfilm0721@naver.com
                             </TextInfo>
                         </NewLine>
                     </InfoBox>
@@ -50,7 +50,7 @@ const Bottom = () => {
                 <SnsBox>
                     <InstagramImg
                         onClick={() => {
-                        window.open("https://www.youtube.com/channel/UCozVgv8Kn92pnhckwAHjGSQ")
+                            window.open("https://www.instagram.com/nasle0721/")
                     }} />
                     <YoutubeImg src={youtube} alt="youtube"
                         onClick={() => {
