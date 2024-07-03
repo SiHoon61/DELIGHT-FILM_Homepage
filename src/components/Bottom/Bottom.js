@@ -41,7 +41,7 @@ const Bottom = () => {
                                 Email
                             </Text>
                             <TextInfo>
-                                delightfilm0721@naver.com
+                                delightfilm0721@gmail.com
                             </TextInfo>
                         </NewLine>
                     </InfoBox>
