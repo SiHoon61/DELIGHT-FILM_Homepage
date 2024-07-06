@@ -1,5 +1,5 @@
 # Delight Film 홈페이지 제작
-<a href="blue-bs-homepage.vercel.app" target="_blank">okbbs.co.kr</a>
+<a href="blue-bs-homepage.vercel.app" target="_blank">Delight Film</a>
 
 ## :date: 제작 기간
 디자인: 24.06.04 ~ 24.06.10 <br>
