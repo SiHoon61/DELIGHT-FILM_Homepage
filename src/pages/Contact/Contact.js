@@ -70,14 +70,31 @@ const Contact = () => {
     //emailjs
     const sendEmail = () => {
         const templateParams = {
-            to_Email: 'abc@gmail.com',
+            to_Email: 'delightfilm0721@gmail.com',
             user_name: nameValue,
             user_num: numValue,
             video_type: videoType,
             user_cost: costList[isSelectCost],
             user_bodyText: bodyText,
         };
-        console.log(templateParams)
+        emailjs.send(`${process.env.REACT_APP_EMAILJS_SERVICE_ID}`, `${process.env.REACT_APP_EMAILJS_TEMPLATE_ID}`, templateParams, `${process.env.REACT_APP_EMAILJS_PUBLIC_KEY}`).then(
+            result => {
+                alert("문의사항이 접수되었습니다. 감사합니다.");
+                setNameValue('');
+                setEmailValue('');
+                setDomain('');
+                setIsSelectDomain(0);
+                setFirstNum('');
+                setMiddleNum('');
+                setLastNum('');
+                setBodyText('');
+                setIsChecked(false);
+            },
+            error => {
+                console.log(error.text);
+                alert("문의 접수에 실패했습니다.전화 주시면 감사드리겠습니다.");
+            },
+        );
     }
     return (
         <>
