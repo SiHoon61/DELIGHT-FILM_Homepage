@@ -25,10 +25,10 @@ const fadeOut = keyframes`
 const Modal = styled.div`
     background: rgba(0, 0, 0, 0.6);
     position: fixed;
-    left: 0;
     top: 0;
-    height: 100%;
+    left: 0;
     width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -36,24 +36,21 @@ const Modal = styled.div`
 `
 const Content = styled.div`
     position: relative;
-    width: 60%;
-    height: 65%;
+    width: 100%;
+    max-width: 1000px;
+    aspect-ratio: 16 / 9;
     display: flex;
     flex-direction: column;
     align-items: center;
     border-radius: 6px 6px 0px 0px;
-    background-color: #DBDBDB;
+    background-color: black;
     animation: ${props => props.$show ? fadeIn : fadeOut} 0.5s forwards;
-    /* @media (max-width: 1230px) {
-        width: 70%;
-        max-height: 60%;
+    @media (max-width: 1230px) {
+        margin: 0 20px;
     }
     @media (max-width: 600px) {
-        width: 80%;
-        padding: 40px 30px 50px 30px;
-        max-height: 65%;
-        margin-top: 50px;
-    } */
+        margin: 0 10px;
+    } 
 `
 
 const CloseButton = styled.img`
@@ -70,7 +67,7 @@ const ModalHeader = styled.div`
     width: 100%;
     height: 25px;
     border-radius: 6px 6px 0px 0px;
-    background-color: #DBDBDB;
+    background-color: #ADADAD;
 `
 
 const VideoContainer = styled.div`
@@ -95,19 +92,20 @@ const YoutubeModal = ({ show, onClose, srcState }) => {
         }
     };
     useEffect(() => {
-        document.body.style.cssText = `
-            position: fixed; 
-            top: -${window.scrollY}px;
-            overflow-y: scroll;
-            width: 100%;`;
+        if (show) {
+            const scrollY = window.scrollY;
+            document.body.style.cssText = `
+                position: fixed; 
+                top: -${scrollY}px;
+                overflow-y: scroll;
+                width: 100%;`;
 
-        return () => {
-            const scrollY = document.body.style.top;
-            document.body.style.cssText = '';
-            window.scrollTo(0, parseInt(scrollY || '0', 10) * -1);
-        };
-
-    }, []);
+            return () => {
+                document.body.style.cssText = '';
+                window.scrollTo(0, scrollY);
+            };
+        }
+    }, [show]);
 
    
     return (

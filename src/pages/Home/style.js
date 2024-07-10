@@ -4,14 +4,17 @@ export const Logo = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 300px;
+    margin-left: 6%;
 `
 
 export const LogoFont = styled.div`
-    font-size: 20px;
+    font-size: 22px;
     font-family: var(--font-sansMedium);
     color: white;
     white-space: nowrap;
+    @media (max-width: 600px) {
+        font-size: 18px;
+    }
 `
 
 export const HeaderContainer = styled.div`

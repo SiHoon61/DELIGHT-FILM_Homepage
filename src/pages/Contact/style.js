@@ -14,6 +14,14 @@ export const BigText = styled.div`
     font-size: 90px;
     font-family: var(--font-sansMedium);
     margin:60px 0 0 80px;
+    @media (max-width: 1000px){
+      font-size: 62px;
+      margin:20px 0 0 40px;
+    }
+    @media (max-width: 600px){
+      font-size: 48px;
+      margin:10px 0 0 20px;
+    }
 `
 
 export const FormContainer = styled.div`
@@ -22,7 +30,12 @@ export const FormContainer = styled.div`
     width: 60%;
     margin: 50px auto;
     flex-wrap: wrap;
-    
+    @media (max-width: 800px){
+         width: 80%;
+    }
+    @media (max-width: 600px){
+         width: 90%;
+    }
 `
 
 export const InputBox = styled.div`
@@ -30,6 +43,9 @@ export const InputBox = styled.div`
     flex-direction: column;
     margin-bottom: 40px;
     width: 47%;
+    @media (max-width: 800px){
+        width: 100%;
+    }
 `
 
 export const AreaBox = styled.div`

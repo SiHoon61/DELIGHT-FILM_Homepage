@@ -1,11 +1,15 @@
 import styled from 'styled-components';
+import whiteMenu from '../../assets/Home/whiteMenu.svg'
 
 export const MenuBar = styled.div`
-    width: 600px;
     height: 100px;
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-right: 6%;
+    @media (max-width: 1000px) {
+      height: 80px;
+    }
 `
 
 export const IndexUL = styled.ul`
@@ -14,6 +18,9 @@ export const IndexUL = styled.ul`
     align-items: center;
     list-style-type: none;
     padding: 0px;
+    @media (max-width: 1000px) {
+        display: none;
+    }
 `
 
 export const IndexLI = styled.li`
@@ -57,4 +64,20 @@ background-image: linear-gradient(to right, #FFD700, #FF8C00);
       opacity: 1;
     }
   }
+`
+
+export const WhiteMenu = styled.img.attrs({
+  src: whiteMenu,
+  alt: 'menu'
+})`
+    width: 35px;
+    margin-right: 30px;
+    display: none;
+    @media (max-width: 1000px) {
+        display: flex;
+    }
+    @media (max-width: 600px) {
+        width: 30px;
+        margin-right: 20px;
+    }
 `

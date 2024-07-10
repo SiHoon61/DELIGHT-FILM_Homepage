@@ -49,7 +49,7 @@ const Photo = () => {
     return (
 
         <ResponsiveMasonry
-            columnsCountBreakPoints={{ 350: 1, 750: 2, 900: 3 }}
+            columnsCountBreakPoints={{ 750: 2, 1000: 3 }}
         >
             <Masonry gutter="10px">
                 {images.map((image, index) => (

@@ -11,6 +11,14 @@ export const BigText = styled.div`
     font-size: 90px;
     font-family: var(--font-sansMedium);
     margin:60px 0 0 80px;
+    @media (max-width: 1000px){
+      font-size: 62px;
+      margin:20px 0 0 40px;
+    }
+    @media (max-width: 600px){
+      font-size: 48px;
+      margin:10px 0 0 20px;
+    }
 `
 
 export const MenuContainer = styled.div`
@@ -18,6 +26,12 @@ export const MenuContainer = styled.div`
     justify-content: center;
     align-items: center;
     margin-top: 40px;
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    top: -10px;
+    @media (max-width: 1000px){
+      margin-top: 20px;
+    }
 `
 
 export const MeneBox = styled.div`
@@ -62,6 +76,12 @@ export const AnimatedDefaultContainer = styled.div`
     }
     &.fade-exit {
         animation: ${fadeOut} 300ms forwards;
+    }
+    @media (max-width: 1000px){
+      padding: 0 10px;
+    }
+    @media (max-width: 600px){
+      padding: 0 5px;
     }
 `;
 

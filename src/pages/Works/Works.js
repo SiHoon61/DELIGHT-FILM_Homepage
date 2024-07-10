@@ -47,6 +47,12 @@ const Works = () => {
         }
     };
 
+    const scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
     return (
         <>
             <HeaderContainer>
@@ -55,19 +61,22 @@ const Works = () => {
                 </BigText>
                 <Header />
             </HeaderContainer>
-            <MenuContainer>
-                <NavBar onMenuClick={handleMenuClick} />
-            </MenuContainer>
-
-            <TransitionGroup>
-                <CSSTransition
-                    key={selectedMenu}
-                    timeout={300}
-                    classNames="fade"
-                >
-                    {renderComponent()}
-                </CSSTransition>
-            </TransitionGroup>
+            <div>
+                <MenuContainer onClick={scrollToTop}>
+                    <NavBar
+                        onMenuClick={handleMenuClick}        
+                    />
+                </MenuContainer>
+                <TransitionGroup>
+                    <CSSTransition
+                        key={selectedMenu}
+                        timeout={300}
+                        classNames="fade"
+                    >
+                        {renderComponent()}
+                    </CSSTransition>
+                </TransitionGroup>
+            </div>
             <Bottom />
         </>
     );

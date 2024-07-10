@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -6,8 +6,19 @@ import {
     IndexLI,
     IndexUL,
     GradientText,
+    WhiteMenu,
 } from './style';
+
+//modal
+import ModalPortal from '../../modal/ModalPortal';
+import MenuModal from './MenuModal';
+
 const Header = () => {
+    //modal
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
+
     //navigation
     const navigate = useNavigate();
     const goHome = () => {
@@ -31,18 +42,19 @@ const Header = () => {
                     </IndexLI>
                     <IndexLI onClick={goAbout}>
                         <GradientText data-text="About">About</GradientText>
-                        
                     </IndexLI >
                     <IndexLI onClick={goWorks}>
                         <GradientText data-text="Works">Works</GradientText>
-                        
                     </IndexLI>
                     <IndexLI onClick={goContact}>
                         <GradientText data-text="Contact">Contact</GradientText>
-                        
                     </IndexLI>
                 </IndexUL>
             </MenuBar>
+            <WhiteMenu onClick={openModal}></WhiteMenu>
+            <ModalPortal>
+                <MenuModal isOpen={isModalOpen} onClose={closeModal} />
+            </ModalPortal>
         </>
     );
 };

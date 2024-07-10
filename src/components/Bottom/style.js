@@ -11,6 +11,18 @@ export const Container = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
+    @media (max-width: 1000px) {
+        height: 120px;
+    }
+`
+
+export const LogoImgBox = styled.div`
+    display: flex;
+    align-items: center;
+    @media (max-width: 1000px) {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 `
 
 export const LogoBox = styled.div`
@@ -19,14 +31,20 @@ export const LogoBox = styled.div`
     color: white;
     align-items: center;
     width: 150px;
-    margin-left: 50px;
     white-space: nowrap;
+    margin-left: 40px;
+    @media (max-width: 1000px) {
+        display: none;
+    }
 `
 
 export const LogoImg = styled.img`
     height: 80px;
     width: 54px;
     margin-bottom: 10px;
+    @media (max-width: 1000px) {
+        display: none;
+    }
 `
 
 export const InfoBox = styled.div`
@@ -34,13 +52,19 @@ export const InfoBox = styled.div`
     display: flex;
     flex-direction: column;
     margin-left: 40px;
+    @media (max-width: 1000px) {
+        margin-left: 7%;
+    }
 `
 
 export const NewLine = styled.div`
     display: flex;
     margin-bottom: 10px;
     font-family: var(--font-sansMedium);
-
+    @media (max-width: 1000px) {
+        font-family: var(--font-sansRegular);
+        font-size: 14px;
+    }
 `
 
 export const Text = styled.div`
@@ -51,16 +75,11 @@ export const TextInfo = styled.div`
     white-space: nowrap;
 `
 
-export const LogoImgBox = styled.div`
-    display: flex;
-    align-items: center;
-`
-
 export const SnsBox = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 50px;
+    margin-right: 1%;
 `
 
 export const InstagramImg = styled.div`

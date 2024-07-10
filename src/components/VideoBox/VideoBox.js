@@ -22,7 +22,47 @@ const VideoBox = () => {
     const videoJson = [{
         title: "J.R.C_연주곡",
         src: "wWASxXZyOeQ"
-    },]
+    },
+        {
+            title: "J.R.C_연주곡",
+            src: "wWASxXZyOeQ"
+        },
+        {
+            title: "J.R.C_연주곡",
+            src: "wWASxXZyOeQ"
+        },
+        {
+            title: "J.R.C_연주곡",
+            src: "wWASxXZyOeQ"
+        },
+        {
+            title: "J.R.C_연주곡",
+            src: "wWASxXZyOeQ"
+        },
+        {
+            title: "J.R.C_연주곡",
+            src: "wWASxXZyOeQ"
+        },
+        {
+            title: "J.R.C_연주곡",
+            src: "wWASxXZyOeQ"
+        },
+        {
+            title: "J.R.C_연주곡",
+            src: "wWASxXZyOeQ"
+        },
+        {
+            title: "J.R.C_연주곡",
+            src: "wWASxXZyOeQ"
+        },
+        {
+            title: "J.R.C_연주곡",
+            src: "wWASxXZyOeQ"
+        },
+        {
+            title: "J.R.C_연주곡",
+            src: "wWASxXZyOeQ"
+        },]
     return (
         <>
             {videoJson.map((list, index) => (

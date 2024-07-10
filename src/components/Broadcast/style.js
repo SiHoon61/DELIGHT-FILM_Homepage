@@ -4,7 +4,16 @@ export const VideoContainer = styled.div`
     display: flex;
     flex-direction: column;
     width: 32%;
+    margin-bottom: 30px;
+    @media (max-width: 1000px){
+        width: 49%;
+        margin-bottom: 25px;
+    }
+    @media (max-width: 600px){
+        width: 100%;
+    }
 `
+
 
 export const Thumbnail = styled.img`
     width: 100%;
