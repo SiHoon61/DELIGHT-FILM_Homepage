@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import emailjs from '@emailjs/browser';
 
 import Header from '../../components/Header/Header';
 import Bottom from '../../components/Bottom/Bottom';
@@ -70,7 +71,7 @@ const Contact = () => {
     //emailjs
     const sendEmail = () => {
         const templateParams = {
-            to_Email: 'delightfilm0721@gmail.com',
+            to_Email: 'jhpodong@naver.com',
             user_name: nameValue,
             user_num: numValue,
             video_type: videoType,
@@ -81,14 +82,10 @@ const Contact = () => {
             result => {
                 alert("문의사항이 접수되었습니다. 감사합니다.");
                 setNameValue('');
-                setEmailValue('');
-                setDomain('');
-                setIsSelectDomain(0);
-                setFirstNum('');
-                setMiddleNum('');
-                setLastNum('');
+                setNumValue('');
+                setVideoType('');
+                setIsSelectCost(0);
                 setBodyText('');
-                setIsChecked(false);
             },
             error => {
                 console.log(error.text);

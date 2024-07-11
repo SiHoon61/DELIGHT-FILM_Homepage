@@ -53,7 +53,6 @@ export const AreaBox = styled.div`
     flex-direction: column;
     margin-bottom: 40px;
     width: 100%;
-
 `
 
 export const KeyText = styled.div`
@@ -118,6 +117,10 @@ export const CostBox = styled.div`
 
 export const CostOption = styled.div`
     margin: 5px 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `
 
 
