@@ -21,7 +21,7 @@ export const MainContainer = styled.div`
 
 export const AboutImg = styled.img`
     width: 400px;
-    margin-left: 50px;
+    margin-left: 70px;
 `
 
 export const AboutText = styled.div`
