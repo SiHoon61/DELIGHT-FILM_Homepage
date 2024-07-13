@@ -69,20 +69,12 @@ const VideoBox = () => {
             src: "2t1A4fi2TAc"
         },
         {
-            title: "010PAY 기프티콘 2",
-            src: "2t1A4fi2TAc"
-        },
-        {
             title: "또박케어",
             src: "9Ms8qrQFjHo"
         },
         {
             title: "더쎈카드",
             src: "rxuyAG0ZbDc"
-        },
-        {
-            title: "또박케어",
-            src: "9Ms8qrQFjHo"
         },
         {
             title: "드시모네 또박케어LAB 쇼츠",
