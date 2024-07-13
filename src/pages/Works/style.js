@@ -28,6 +28,7 @@ export const MenuContainer = styled.div`
     margin-top: 40px;
     position: -webkit-sticky; /* Safari */
     position: sticky;
+    z-index: 100;
     top: -10px;
     @media (max-width: 1000px){
       margin-top: 20px;

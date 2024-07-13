@@ -55,6 +55,7 @@ export const AboutText = styled.div`
         font-size: 14px;
         padding: 0 15px;
         height: auto;
+        line-height: 35px;
     }
 `
 

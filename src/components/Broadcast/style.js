@@ -17,6 +17,7 @@ export const VideoContainer = styled.div`
 
 export const Thumbnail = styled.img`
     width: 100%;
+    cursor: pointer;
 `
 
 export const InfoBox = styled.div`
