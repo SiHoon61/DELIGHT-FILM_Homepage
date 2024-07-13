@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import Header from '../../components/Header/Header';
@@ -15,8 +15,14 @@ import {
     AnimatedDefaultContainer,
     OnlyAnimatedContainer,
 } from './style';
+
 const Works = () => {
     const [selectedMenu, setSelectedMenu] = useState('Video');
+    const refs = {
+        Video: useRef(null),
+        Broadcast: useRef(null),
+        Photo: useRef(null),
+    };
 
     const handleMenuClick = (menu) => {
         setSelectedMenu(menu);
@@ -26,21 +32,42 @@ const Works = () => {
         switch (selectedMenu) {
             case 'Video':
                 return (
-                    <AnimatedDefaultContainer>
-                        <VideoBox />
-                    </AnimatedDefaultContainer>
+                    <CSSTransition
+                        key="video"
+                        timeout={300}
+                        classNames="fade"
+                        nodeRef={refs.Video}
+                    >
+                        <AnimatedDefaultContainer ref={refs.Video}>
+                            <VideoBox />
+                        </AnimatedDefaultContainer>
+                    </CSSTransition>
                 );
             case 'Broadcast':
                 return (
-                    <AnimatedDefaultContainer>
-                        <Broadcast />
-                    </AnimatedDefaultContainer>
+                    <CSSTransition
+                        key="broadcast"
+                        timeout={300}
+                        classNames="fade"
+                        nodeRef={refs.Broadcast}
+                    >
+                        <AnimatedDefaultContainer ref={refs.Broadcast}>
+                            <Broadcast />
+                        </AnimatedDefaultContainer>
+                    </CSSTransition>
                 );
             case 'Photo':
                 return (
-                    <OnlyAnimatedContainer>
-                        <Photo />
-                    </OnlyAnimatedContainer>
+                    <CSSTransition
+                        key="photo"
+                        timeout={300}
+                        classNames="fade"
+                        nodeRef={refs.Photo}
+                    >
+                        <OnlyAnimatedContainer ref={refs.Photo}>
+                            <Photo />
+                        </OnlyAnimatedContainer>
+                    </CSSTransition>
                 );
             default:
                 return null;
@@ -53,6 +80,7 @@ const Works = () => {
             behavior: 'smooth'
         });
     };
+
     return (
         <>
             <HeaderContainer>
@@ -64,17 +92,11 @@ const Works = () => {
             <div>
                 <MenuContainer onClick={scrollToTop}>
                     <NavBar
-                        onMenuClick={handleMenuClick}        
+                        onMenuClick={handleMenuClick}
                     />
                 </MenuContainer>
                 <TransitionGroup>
-                    <CSSTransition
-                        key={selectedMenu}
-                        timeout={300}
-                        classNames="fade"
-                    >
-                        {renderComponent()}
-                    </CSSTransition>
+                    {renderComponent()}
                 </TransitionGroup>
             </div>
             <Bottom />

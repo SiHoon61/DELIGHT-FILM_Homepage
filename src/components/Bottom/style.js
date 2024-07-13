@@ -87,10 +87,16 @@ export const InstagramImg = styled.div`
     height: 30px;
     margin-right: 20px;
     background-image: url(${instagram});
+    background-size: cover;
     cursor: pointer;
     transition: all 0.2s;
     &:hover{
         background-image: url(${instagramColor});  
+    }
+    @media (max-width: 700px) {
+        margin-right: 15px;
+        width: 20px;
+        height: 20px;
     }
 `
 
@@ -104,5 +110,9 @@ export const YoutubeImg = styled.div`
     transition: all 0.2s;
     &:hover{
         background-image: url(${youtubeColor});  
+    }
+    @media (max-width: 700px) {
+        width: 30px;
+        height: 30px;
     }
 `

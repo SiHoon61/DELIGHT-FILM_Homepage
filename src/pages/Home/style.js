@@ -24,6 +24,9 @@ export const HeaderContainer = styled.div`
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.40) 0%, rgba(0, 0, 0, 0.00) 100%);
     position: absolute;
     z-index: 10;
+    @media (max-width: 700px) {
+        position: static;
+    }
 `
 
 export const VideoContainer = styled.div`
@@ -31,6 +34,9 @@ export const VideoContainer = styled.div`
     width: 100%;
     height: ${props => props.$height}px;
     z-index: 0;
+    @media (max-width: 700px) {
+        height: auto;
+    }
 `;
 
 export const Video = styled.video`

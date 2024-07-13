@@ -15,8 +15,6 @@ import {
 } from './style';
 
 import logoImg from '../../assets/Home/logo.png'
-import youtube from '../../assets/Home/youtube.png'
-import instagram from '../../assets/Home/instagram.png'
 
 const Bottom = () => {
     return (
@@ -52,7 +50,7 @@ const Bottom = () => {
                         onClick={() => {
                             window.open("https://www.instagram.com/nasle0721/")
                     }} />
-                    <YoutubeImg src={youtube} alt="youtube"
+                    <YoutubeImg
                         onClick={() => {
                             window.open("https://www.youtube.com/channel/UCozVgv8Kn92pnhckwAHjGSQ")
                         }} />
