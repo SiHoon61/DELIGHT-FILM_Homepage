@@ -26,4 +26,7 @@ export const InfoBox = styled.div`
 export const Title = styled.div`
     font-size: 24px;
     font-family: var(--font-sansMedium);
+    @media (max-width: 600px){
+        font-size: 20px;
+    }
 `
