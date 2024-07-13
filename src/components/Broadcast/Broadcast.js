@@ -25,17 +25,13 @@ const Broadcast = () => {
             src: "UW7R-tUjTtc"
         },
         {
-            title: "2021 국토교통부 친환경 탄소중립 물류 컨퍼런스",
-            src: "HnMV9aEgC4Q"
-        },
-        {
             title: "2021 국토교통부 안전속도 5030 실천 선포식",
             src: "tO3hHm5ftUA"
         },
-        {
-            title: "2021 친환경 탄소중립 물류 컨퍼런스",
-            src: "HnMV9aEgC4Q"
-        },
+        // {
+        //     title: "2021 친환경 탄소중립 물류 컨퍼런스",
+        //     src: "HnMV9aEgC4Q"
+        // },
         {
             title: "2021 외교부 한국 OECD가입 25주년 기념 세미나",
             src: "tUPaHxhadb4"
