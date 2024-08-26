@@ -21,40 +21,8 @@ const VideoBox = () => {
     };
     const videoJson = [
         {
-            title: "2021 새만금전국장타대회",
-            src: "pbtGUsU_aR4"
-        },
-        {
-            title: "2021 한국과 OECD 25년의 동행",
-            src: "wxkzZ24VDVs"
-        },
-        {
-            title: "2022 인사혁신처 글로벌 공공 HR 컨퍼런스",
-            src: "ty4lVQFAngM"
-        },
-        {
-            title: "2022 골플루언서 챌린지",
-            src: "HPhfkGxZfHA"
-        },
-        {
-            title: "2022 새만금전국장타대회",
-            src: "eMfDu5oeUa8"
-        },
-        {
-            title: "2022 친환경 탄소중립 물류 컨퍼런스",
-            src: "RDFZ_wB-77s"
-        },
-        {
-            title: "2023 STEPI 루핑영상",
-            src: "OS3nNFYIlv4"
-        },
-        {
             title: "2024 한림연예예술고등학교 실용음악과 정기공연",
             src: "38ECmHJ1YjE"
-        },
-        {
-            title: "2024 온실가스 국제감축사업 설명회",
-            src: "h80fUnLa9mY"
         },
         {
             title: "운전자를 위한 생활 플러스 앱 휘슬",
@@ -71,6 +39,18 @@ const VideoBox = () => {
         {
             title: "또박케어",
             src: "9Ms8qrQFjHo"
+        },
+        {
+            title: "TWIN_단편영화",
+            src: "O_i4CMXxed0"
+        },
+        {
+            title: "동쪽으로_단편영화",
+            src: "1x0RbFqT8j0"
+        },
+        {
+            title: "여름날의 봄_단편영화",
+            src: "18AhualK5hI"
         },
         {
             title: "더쎈카드",
@@ -95,14 +75,6 @@ const VideoBox = () => {
         {
             title: "라케이브 홍보영상 2",
             src: "WRN-g6bqZKs"
-        },
-        {
-            title: "2024 STEPI GLOBAL SYMPOSIUM_Looping",
-            src: "-Urj3ned_xE"
-        },
-        {
-            title: "AI와 데이터 거버넌스 국제 컨퍼런스_Looping",
-            src: "4ec4yDCZkBA"
         },
         {
             title: "Bukseong Port_Insert",
@@ -265,17 +237,17 @@ const VideoBox = () => {
             src: "mwAjJ0npG60"
         },
         {
-            title: "TWIN_단편영화",
-            src: "O_i4CMXxed0"
+            title: "2021 새만금전국장타대회",
+            src: "pbtGUsU_aR4"
         },
         {
-            title: "동쪽으로_단편영화",
-            src: "1x0RbFqT8j0"
+            title: "2022 골플루언서 챌린지",
+            src: "HPhfkGxZfHA"
         },
         {
-            title: "여름날의 봄_단편영화",
-            src: "18AhualK5hI"
-        }
+            title: "2022 새만금전국장타대회",
+            src: "eMfDu5oeUa8"
+        },
     ]
     return (
         <>

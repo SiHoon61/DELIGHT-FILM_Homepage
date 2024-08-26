@@ -28,6 +28,34 @@ const Broadcast = () => {
             title: "2021 국토교통부 안전속도 5030 실천 선포식",
             src: "tO3hHm5ftUA"
         },
+        {
+            title: "2024 STEPI GLOBAL SYMPOSIUM_Looping",
+            src: "-Urj3ned_xE"
+        },
+        {
+            title: "AI와 데이터 거버넌스 국제 컨퍼런스_Looping",
+            src: "4ec4yDCZkBA"
+        },
+        {
+            title: "2021 한국과 OECD 25년의 동행",
+            src: "wxkzZ24VDVs"
+        },
+        {
+            title: "2022 인사혁신처 글로벌 공공 HR 컨퍼런스",
+            src: "ty4lVQFAngM"
+        },
+        {
+            title: "2022 친환경 탄소중립 물류 컨퍼런스",
+            src: "RDFZ_wB-77s"
+        },
+        {
+            title: "2023 STEPI 루핑영상",
+            src: "OS3nNFYIlv4"
+        },
+        {
+            title: "2024 온실가스 국제감축사업 설명회",
+            src: "h80fUnLa9mY"
+        },
         // {
         //     title: "2021 친환경 탄소중립 물류 컨퍼런스",
         //     src: "HnMV9aEgC4Q"
