@@ -1,9 +1,9 @@
 # Delight Film 홈페이지 제작
-<a href="https://delight-film-homepage.vercel.app/" target="_blank">Delight Film</a>
+<a href="https://delight-film.com/" target="_blank">Delight Film</a>
 
 ## :date: 제작 기간
 디자인: 24.06.04 ~ 24.06.10 <br>
-개발: 24.06.27 ~ 현재 진행중 <br>
+개발: 24.06.27 ~ 24.07.14 <br>
 
 ## :gear: 개발 환경
 * Front End  
