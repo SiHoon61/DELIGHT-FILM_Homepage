@@ -43,9 +43,9 @@ const Header = () => {
                     <IndexLI onClick={goAbout}>
                         <GradientText data-text="About">About</GradientText>
                     </IndexLI >
-                    // <IndexLI onClick={goWorks}>
-                    //     <GradientText data-text="Works">Works</GradientText>
-                    // </IndexLI>
+                     <IndexLI onClick={goWorks}>
+                         <GradientText data-text="Works"></GradientText>
+                     </IndexLI>
                     <IndexLI onClick={goContact}>
                         <GradientText data-text="Contact">Contact</GradientText>
                     </IndexLI>
