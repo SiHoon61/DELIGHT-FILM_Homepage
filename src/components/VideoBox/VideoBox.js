@@ -49,10 +49,6 @@ const VideoBox = () => {
             src: "1x0RbFqT8j0"
         },
         {
-            title: "여름날의 봄_단편영화",
-            src: "18AhualK5hI"
-        },
-        {
             title: "더쎈카드",
             src: "rxuyAG0ZbDc"
         },

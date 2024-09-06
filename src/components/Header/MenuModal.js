@@ -31,7 +31,9 @@ const MenuModal = ({ isOpen, onClose }) => {
     const goAbout = () => {
         navigate("/About");
     }
-
+    const goWorks = () => {
+        navigate("/Works");
+    }
     const goContact = () => {
         navigate("/Contact");
     }
@@ -52,6 +54,9 @@ const MenuModal = ({ isOpen, onClose }) => {
                         </MenuLi>
                         <MenuLi onClick={goAbout}>
                             <GradientText data-text="About">About</GradientText>
+                        </MenuLi>
+                        <MenuLi onClick={goWorks}>
+                            <GradientText data-text="Works">Works</GradientText>
                         </MenuLi>
                         <MenuLi onClick={goContact}>
                             <GradientText data-text="Contact">Contact</GradientText>

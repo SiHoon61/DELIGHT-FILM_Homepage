@@ -27,7 +27,9 @@ const Header = () => {
     const goAbout = () => {
         navigate("/About");
     }
-
+    const goWorks = () => {
+        navigate("/Works");
+    }
     const goContact = () => {
         navigate("/Contact");
     }
@@ -40,6 +42,9 @@ const Header = () => {
                     </IndexLI>
                     <IndexLI onClick={goAbout}>
                         <GradientText data-text="About">About</GradientText>
+                    </IndexLI >
+                    <IndexLI onClick={goWorks}>
+                        <GradientText data-text="Works">Works</GradientText>
                     </IndexLI >
                     <IndexLI onClick={goContact}>
                         <GradientText data-text="Contact">Contact</GradientText>
