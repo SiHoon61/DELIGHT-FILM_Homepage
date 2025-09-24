@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import { VideoContainer, Thumbnail, InfoBox, Title } from "./style";
 
-import broadcastList from "../../broadcastList.json";
+import broadcastList from "../../workList.json";
 import ModalPortal from "../../modal/ModalPortal";
 import YoutubeModal from "../../modal/YoutubeModal";
 const Broadcast = () => {

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import { VideoContainer, Thumbnail, InfoBox, Title } from "./style";
 
-import videoList from "../../videoList.json";
+import videoList from "../../workList.json";
 import ModalPortal from "../../modal/ModalPortal";
 import YoutubeModal from "../../modal/YoutubeModal";
 const VideoBox = () => {
