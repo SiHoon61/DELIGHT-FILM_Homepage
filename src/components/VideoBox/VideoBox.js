@@ -3,12 +3,13 @@ import React, { useState } from "react";
 import { VideoContainer, Thumbnail, InfoBox, Title } from "./style";
 
 import videoList from "../../workList.json";
+import spareVideoList from "../../spareWorkList.json";
 import ModalPortal from "../../modal/ModalPortal";
 import YoutubeModal from "../../modal/YoutubeModal";
 const VideoBox = () => {
   const [modalState, setModalState] = useState(false);
   const [srcState, setSrcState] = useState("");
-  const { videoJson } = videoList;
+  const videoJson = videoList?.videoJson || spareVideoList?.videoJson || [];
   const handleOpenModal = (props) => {
     setSrcState(props);
     setModalState(true);

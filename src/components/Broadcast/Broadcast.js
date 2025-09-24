@@ -3,12 +3,14 @@ import React, { useState } from "react";
 import { VideoContainer, Thumbnail, InfoBox, Title } from "./style";
 
 import broadcastList from "../../workList.json";
+import spareBroadcastList from "../../spareWorkList.json";
 import ModalPortal from "../../modal/ModalPortal";
 import YoutubeModal from "../../modal/YoutubeModal";
 const Broadcast = () => {
   const [modalState, setModalState] = useState(false);
   const [srcState, setSrcState] = useState("");
-  const { broadcastJson } = broadcastList;
+  const broadcastJson =
+    broadcastList?.broadcastJson || spareBroadcastList?.broadcastJson || [];
   const handleOpenModal = (props) => {
     setSrcState(props);
     setModalState(true);
