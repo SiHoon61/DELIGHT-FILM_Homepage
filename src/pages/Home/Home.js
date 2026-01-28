@@ -1,20 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
-import Header from '../../components/Header/Header';
-import Bottom from '../../components/Bottom/Bottom';
+import Header from "../../components/Header/Header";
+import Bottom from "../../components/Bottom/Bottom";
 import {
   HeaderContainer,
   Logo,
   LogoFont,
   Video,
   VideoContainer,
-} from './style';
+} from "./style";
 
-import mainVideo from '../../assets/Home/mainVideo.mp4';
-import Photo from '../../components/Photo/Photo';
+import mainVideo from "../../assets/Home/mainVideo.mp4";
 
 function useWindowSize() {
-
   const [windowSize, setWindowSize] = useState({
     width: undefined,
     height: undefined,
@@ -37,7 +35,6 @@ function useWindowSize() {
 
   return windowSize;
 }
-
 
 const Home = () => {
   const size = useWindowSize();
