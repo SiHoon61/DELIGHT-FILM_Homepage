@@ -31,7 +31,7 @@ const Bottom = () => {
                                 Call
                             </Text>
                             <TextInfo>
-                                010-5513-8358
+                                010-4278-2470
                             </TextInfo>
                         </NewLine>
                         <NewLine>
