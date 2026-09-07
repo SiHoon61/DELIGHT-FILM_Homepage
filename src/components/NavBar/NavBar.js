@@ -38,10 +38,17 @@ const NavLink = styled.div`
     @media (max-width: 700px) {
         margin: 0;
         padding: 8px 10px;
+        box-sizing: border-box;
+        border: 1px solid transparent;
         border-radius: 22px;
         color: ${({ $active }) => ($active ? '#000' : '#9D9D9D')};
         background: ${({ $active }) =>
-            ($active ? 'linear-gradient(to right, #FFD700, #FF8C00)' : '#202025')};
+            ($active
+                ? `linear-gradient(#eeeeec, #eeeeec) padding-box,
+                   linear-gradient(to right, #FFD700, #FF8C00) border-box`
+                : '#202025')};
+        box-shadow: ${({ $active }) =>
+            ($active ? '0 3px 12px rgba(255, 166, 0, 0.16)' : 'none')};
         font-size: 13px;
 
         &:hover {
@@ -56,8 +63,15 @@ const Background = styled.div`
     left: ${({ $position }) => $position}px;
     width: ${({ $width }) => $width}px;
     height: 40px;
+    box-sizing: border-box;
+    border: 2px solid transparent;
     border-radius: 30px;
-    background: linear-gradient(to right, #FFD700, #FF8C00);
+    background:
+        linear-gradient(#eeeeec, #eeeeec) padding-box,
+        linear-gradient(to right, #FFD700, #FF8C00) border-box;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.08),
+        0 4px 14px rgba(255, 166, 0, 0.16);
     opacity: ${({ $ready }) => ($ready ? 1 : 0)};
     transform: translateY(-50%);
     transition: left 0.3s ease, width 0.3s ease, opacity 0.15s ease;
