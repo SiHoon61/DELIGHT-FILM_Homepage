@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 import Header from "../../components/Header/Header";
 import Bottom from "../../components/Bottom/Bottom";
@@ -42,7 +43,7 @@ const Home = () => {
   return (
     <>
       <HeaderContainer>
-        <Logo>
+        <Logo as={Link} to="/" aria-label="홈으로 이동">
           <LogoFont>D E L I G H T &nbsp; F I L M</LogoFont>
         </Logo>
         <Header />

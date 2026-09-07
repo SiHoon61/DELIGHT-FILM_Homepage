@@ -27,6 +27,7 @@ const MenuModal = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
     const goHome = () => {
         navigate("/");
+        onClose();
     }
     const goAbout = () => {
         navigate("/About");
@@ -41,7 +42,7 @@ const MenuModal = ({ isOpen, onClose }) => {
         <>
             <MenuContainer $isOpen={isOpen}>
                 <ModalHeader>
-                    <Logo>
+                    <Logo type="button" onClick={goHome} aria-label="홈으로 이동">
                         <LogoFont>D E L I G H T &nbsp; F I L M</LogoFont>
                     </Logo>
                     <CloseButton src={close} alt='close' onClick={onClose} />
@@ -95,11 +96,15 @@ const ModalHeader = styled.div`
     height: 80px;
 `
 
-const Logo = styled.div`
+const Logo = styled.button`
     display: flex;
     align-items: center;
     justify-content: center;
     margin-left: 6%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
 `
 
 const LogoFont = styled.div`

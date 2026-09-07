@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 import {
     Container,
@@ -10,7 +11,6 @@ import {
     SnsBox,
     NewLine,
     LogoImgBox,
-    KakaoImg,
     InstagramImg,
     YoutubeImg,
 } from './style';
@@ -22,7 +22,7 @@ const Bottom = () => {
         <>
             <Container>
                 <LogoImgBox>
-                    <LogoBox>
+                    <LogoBox as={Link} to="/" aria-label="홈으로 이동">
                         <LogoImg src={logoImg} alt="logo" />
                         D E L I G H T &nbsp; F I L M
                     </LogoBox>
@@ -47,12 +47,6 @@ const Bottom = () => {
                 </LogoImgBox>
 
                 <SnsBox>
-                    <KakaoImg
-                        href="http://pf.kakao.com/_xgCxkUn/chat"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="카카오톡 상담 열기"
-                    />
                     <InstagramImg
                         href="https://www.instagram.com/nasle0721/"
                         target="_blank"

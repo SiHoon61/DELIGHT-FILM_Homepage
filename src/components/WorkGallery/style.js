@@ -26,7 +26,8 @@ export const GalleryGrid = styled.div`
   @media (max-width: 700px) {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 9px;
+    padding: 12px 0 36px;
   }
 `;
 
@@ -45,6 +46,7 @@ export const Card = styled.article`
   text-align: left;
   cursor: pointer;
   isolation: isolate;
+  transition: transform 360ms cubic-bezier(0.2, 0.75, 0.25, 1), opacity 280ms ease, border-color 280ms ease, box-shadow 280ms ease;
 
   &::after {
     content: "";
@@ -77,12 +79,29 @@ export const Card = styled.article`
   }
 
   @media (max-width: 700px) {
-    width: 100%;
+    width: calc(100% - 18px);
+    margin: 0 auto;
     aspect-ratio: ${({ $mobileLayout }) =>
       $mobileLayout === "portrait" ? "4 / 5" : "3 / 1"};
     min-height: 0;
-    border-width: 0 0 1px;
-    border-radius: 0;
+    scroll-margin-block: 34vh;
+    border-width: 1px;
+    border-radius: 8px;
+    opacity: ${({ $mobileActive }) => $mobileActive ? 1 : .74};
+    transform: scale(${({ $mobileActive }) => $mobileActive ? 1 : .94});
+    transform-origin: center;
+    z-index: ${({ $mobileActive }) => $mobileActive ? 3 : 1};
+    box-shadow: ${({ $mobileActive }) => $mobileActive ? "0 14px 32px rgba(0, 0, 0, .42)" : "none"};
+    touch-action: manipulation;
+
+    ${({ $mobileActive }) => $mobileActive && `
+      border-color: rgba(255, 255, 255, .45);
+      img { transform: scale(1.045); }
+    `}
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
   }
 `;
 

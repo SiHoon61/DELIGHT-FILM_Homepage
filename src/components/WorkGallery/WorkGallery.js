@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import ModalPortal from "../../modal/ModalPortal";
 import YoutubeModal from "../../modal/YoutubeModal";
@@ -33,6 +33,58 @@ const REFERENCE_SUBTITLES = {
 
 const WorkGallery = ({ items = [], typeLabel }) => {
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [activeMobileIndex, setActiveMobileIndex] = useState(0);
+  const cardRefs = useRef([]);
+
+  useEffect(() => {
+    const mobileQuery = window.matchMedia("(max-width: 700px)");
+    let animationFrame;
+
+    const updateCenteredCard = () => {
+      if (!mobileQuery.matches) return;
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(() => {
+        const viewportCenter = window.innerHeight / 2;
+        let closestIndex = 0;
+        let closestDistance = Number.POSITIVE_INFINITY;
+
+        cardRefs.current.forEach((card, index) => {
+          if (!card) return;
+          const rect = card.getBoundingClientRect();
+          const cardCenter = rect.top + rect.height / 2;
+          const distance = Math.abs(viewportCenter - cardCenter);
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestIndex = index;
+          }
+        });
+
+        setActiveMobileIndex((current) => current === closestIndex ? current : closestIndex);
+      });
+    };
+
+    updateCenteredCard();
+    window.addEventListener("scroll", updateCenteredCard, { passive: true });
+    window.addEventListener("resize", updateCenteredCard);
+    mobileQuery.addEventListener?.("change", updateCenteredCard);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener("scroll", updateCenteredCard);
+      window.removeEventListener("resize", updateCenteredCard);
+      mobileQuery.removeEventListener?.("change", updateCenteredCard);
+    };
+  }, [items]);
+
+  const handleCardClick = (event, item, index) => {
+    const isMobile = window.matchMedia("(max-width: 700px)").matches;
+    if (isMobile && activeMobileIndex !== index) {
+      setActiveMobileIndex(index);
+      event.currentTarget.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    setSelectedVideo(item.src);
+  };
 
   return (
     <>
@@ -50,10 +102,13 @@ const WorkGallery = ({ items = [], typeLabel }) => {
               as="button"
               type="button"
               key={`${item.src}-${index}`}
+              ref={(node) => { cardRefs.current[index] = node; }}
               $desktopLayout={desktopLayout}
               $mobileLayout={mobileLayout}
+              $mobileActive={activeMobileIndex === index}
               $order={order}
-              onClick={() => setSelectedVideo(item.src)}
+              onClick={(event) => handleCardClick(event, item, index)}
+              onFocus={() => setActiveMobileIndex(index)}
               aria-label={`${item.title} 영상 재생`}
             >
               <CardImage

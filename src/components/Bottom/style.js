@@ -4,8 +4,6 @@ import youtube from '../../assets/Home/youtube.png'
 import youtubeColor from '../../assets/Home/youtubeColor.png'
 import instagram from '../../assets/Home/instagram.png'
 import instagramColor from '../../assets/Home/instagramColor.png'
-import kakao from '../../assets/Home/kakao.svg'
-import kakaoColor from '../../assets/Home/kakaoColor.svg'
 
 export const Container = styled.div`
     width: 100%;
@@ -35,6 +33,8 @@ export const LogoBox = styled.div`
     width: 150px;
     white-space: nowrap;
     margin-left: 40px;
+    text-decoration: none;
+    cursor: pointer;
     @media (max-width: 1000px) {
         display: none;
     }
@@ -82,33 +82,6 @@ export const SnsBox = styled.div`
     align-items: center;
     justify-content: center;
     margin-right: 1%;
-`
-
-export const KakaoImg = styled.a`
-    display: block;
-    width: 36px;
-    height: 36px;
-    margin-right: 16px;
-    background-image: url(${kakao});
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-    text-decoration: none;
-    cursor: pointer;
-    transition: transform 0.2s;
-
-    &:hover,
-    &:focus-visible {
-        background-image: url(${kakaoColor});
-        transform: translateY(-2px);
-        outline: none;
-    }
-
-    @media (max-width: 700px) {
-        width: 24px;
-        height: 24px;
-        margin-right: 14px;
-    }
 `
 
 export const InstagramImg = styled.a`

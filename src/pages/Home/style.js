@@ -5,6 +5,8 @@ export const Logo = styled.div`
     align-items: center;
     justify-content: center;
     margin-left: 6%;
+    text-decoration: none;
+    cursor: pointer;
 `
 
 export const LogoFont = styled.div`
