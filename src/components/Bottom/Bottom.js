@@ -10,6 +10,7 @@ import {
     SnsBox,
     NewLine,
     LogoImgBox,
+    KakaoImg,
     InstagramImg,
     YoutubeImg,
 } from './style';
@@ -46,6 +47,12 @@ const Bottom = () => {
                 </LogoImgBox>
 
                 <SnsBox>
+                    <KakaoImg
+                        href="http://pf.kakao.com/_xgCxkUn/chat"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="카카오톡 상담 열기"
+                    />
                     <InstagramImg
                         href="https://www.instagram.com/nasle0721/"
                         target="_blank"
