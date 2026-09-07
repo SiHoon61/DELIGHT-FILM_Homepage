@@ -48,7 +48,10 @@ const Home = () => {
         <Header />
       </HeaderContainer>
       <VideoContainer $height={size.height}>
-        <Video muted autoPlay loop playsInline>
+        <Video $desktop muted autoPlay loop playsInline>
+          <source src={mainVideo} type="video/mp4" />
+        </Video>
+        <Video $mobile muted autoPlay loop playsInline>
           <source src={mainVideo} type="video/mp4" />
         </Video>
       </VideoContainer>

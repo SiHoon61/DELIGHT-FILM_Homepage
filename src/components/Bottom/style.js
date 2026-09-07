@@ -4,6 +4,8 @@ import youtube from '../../assets/Home/youtube.png'
 import youtubeColor from '../../assets/Home/youtubeColor.png'
 import instagram from '../../assets/Home/instagram.png'
 import instagramColor from '../../assets/Home/instagramColor.png'
+import kakao from '../../assets/Home/kakao.svg'
+import kakaoColor from '../../assets/Home/kakaoColor.svg'
 
 export const Container = styled.div`
     width: 100%;
@@ -83,28 +85,21 @@ export const SnsBox = styled.div`
 `
 
 export const KakaoImg = styled.a`
-    display: grid;
-    width: 34px;
-    height: 34px;
-    margin-right: 18px;
-    place-items: center;
-    border-radius: 50%;
-    background: #f9e000;
-    color: #241f13;
+    display: block;
+    width: 36px;
+    height: 36px;
+    margin-right: 16px;
+    background-image: url(${kakao});
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
     text-decoration: none;
     cursor: pointer;
-    transition: transform 0.2s, filter 0.2s;
-
-    span {
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 8px;
-        font-weight: 800;
-        letter-spacing: -0.04em;
-    }
+    transition: transform 0.2s;
 
     &:hover,
     &:focus-visible {
-        filter: brightness(1.08);
+        background-image: url(${kakaoColor});
         transform: translateY(-2px);
         outline: none;
     }
@@ -113,10 +108,6 @@ export const KakaoImg = styled.a`
         width: 24px;
         height: 24px;
         margin-right: 14px;
-
-        span {
-            font-size: 6px;
-        }
     }
 `
 

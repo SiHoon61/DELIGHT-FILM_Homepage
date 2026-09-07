@@ -35,12 +35,18 @@ export const VideoContainer = styled.div`
     height: ${props => props.$height}px;
     z-index: 0;
     @media (max-width: 700px) {
-        height: auto;
+        height: calc(100svh - 68px);
+        min-height: 560px;
     }
 `;
 
 export const Video = styled.video`
+    display: ${props => props.$mobile ? 'none' : 'block'};
     width: 100%;
     height: 100%;
     object-fit: cover;
+
+    @media (max-width: 700px) {
+        display: ${props => props.$desktop ? 'none' : 'block'};
+    }
 `;

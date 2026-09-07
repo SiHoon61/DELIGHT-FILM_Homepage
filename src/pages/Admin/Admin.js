@@ -27,11 +27,15 @@ import {
   CategoryGrid,
   CategoryItem,
   CategoryList,
+  CropPreview,
+  CropPreviewImage,
   Content,
   ContentHeader,
   ControlButton,
   DeviceButton,
   DeviceSwitch,
+  DimensionButton,
+  DimensionControl,
   EmptyState,
   Field,
   FileInput,
@@ -43,10 +47,14 @@ import {
   GridCardInfo,
   HelpText,
   HomeVideo,
+  HomeVideoGrid,
   IconButton,
   Input,
   LayoutCanvas,
   LayoutHeader,
+  LayoutInspector,
+  LayoutPanel,
+  LayoutSelection,
   Main,
   ManagementGrid,
   ManagementPanel,
@@ -56,6 +64,7 @@ import {
   MetricValue,
   MobileHeader,
   MobileNav,
+  MobileOrderNote,
   Nav,
   NavButton,
   PageDescription,
@@ -69,12 +78,14 @@ import {
   PreviewFrame,
   PreviewImage,
   PreviewPlaceholder,
+  RangeControl,
+  ResolutionNote,
   RowActions,
   SearchInput,
   Select,
   Sidebar,
   SiteLink,
-  SizeSelect,
+  SizeBadge,
   StatusDot,
   Table,
   TableBody,
@@ -92,6 +103,8 @@ import {
   Topbar,
   TopbarActions,
   UploadButton,
+  VideoSlot,
+  VideoSlotHeader,
   VideoIdentity,
 } from "./style";
 
@@ -115,11 +128,20 @@ const initialShortsItems = createShortsCatalog(
 
 const INITIAL_WORKS = [...initialVideoItems, ...initialShortsItems];
 
-const LAYOUT_SEED = initialVideoItems.slice(0, 7).map((item, index) => ({
+const createLayoutItem = (item, index) => ({
   ...item,
-  columns: index === 0 || index < 3 ? 2 : 1,
+  columns: index === 0 ? 2 : index < 3 ? 2 : 1,
   rows: index === 0 ? 2 : 1,
-}));
+  crop: {
+    desktop: { x: 50, y: 50, zoom: 100 },
+    mobile: { x: 50, y: 50, zoom: 100 },
+  },
+});
+
+const LAYOUT_SEED = [
+  ...initialVideoItems.map(createLayoutItem),
+  ...initialShortsItems.map(createLayoutItem),
+];
 
 const INITIAL_PHOTOS = photoSources.map((src, index) => ({
   id: `photo-${index}`,
@@ -127,13 +149,6 @@ const INITIAL_PHOTOS = photoSources.map((src, index) => ({
   name: src.split("/").pop(),
   status: "published",
 }));
-
-const SIZE_OPTIONS = [4, 3, 2, 1].flatMap((columns) =>
-  [1, 2, 3, 4].map((rows) => ({
-    value: `${columns}x${rows}`,
-    label: `${columns}×${rows}`,
-  }))
-);
 
 const NAV_ITEMS = [
   { id: "content", label: "콘텐츠", index: "01" },
@@ -177,12 +192,19 @@ const Admin = () => {
   const [works, setWorks] = useState(INITIAL_WORKS);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [device, setDevice] = useState("desktop");
+  const [layoutSection, setLayoutSection] = useState("video");
+  const [layoutCategory, setLayoutCategory] = useState("All");
   const [layoutItems, setLayoutItems] = useState(LAYOUT_SEED);
-  const [dragIndex, setDragIndex] = useState(null);
+  const [selectedLayoutId, setSelectedLayoutId] = useState(LAYOUT_SEED[0]?.id);
+  const [draggedLayoutId, setDraggedLayoutId] = useState(null);
+  const [isLayoutEditorOpen, setIsLayoutEditorOpen] = useState(false);
+  const [layoutDraft, setLayoutDraft] = useState(null);
   const [photos, setPhotos] = useState(INITIAL_PHOTOS);
   const [photoDragIndex, setPhotoDragIndex] = useState(null);
-  const [homeVideoPreview, setHomeVideoPreview] = useState(mainVideo);
-  const [homeVideoName, setHomeVideoName] = useState("mainVideo.mp4");
+  const [homeVideos, setHomeVideos] = useState({
+    desktop: { src: mainVideo, name: "mainVideo.mp4" },
+    mobile: { src: mainVideo, name: "모바일 영상 미등록 · PC 영상 사용 중" },
+  });
   const [aboutImagePreview, setAboutImagePreview] = useState(aboutImage);
   const [aboutHeadline, setAboutHeadline] = useState("안녕하세요, 딜라이트 필름의 김주환 입니다.");
   const [aboutBody, setAboutBody] = useState(
@@ -229,6 +251,24 @@ const Admin = () => {
     shorts: works.filter((item) => item.section === "shorts").length,
     photo: photos.length,
   };
+  const layoutCategories = [
+    "All",
+    ...(layoutSection === "shorts" ? shortsCategories : videoCategories),
+  ].filter((category, index, categories) =>
+    categories.indexOf(category) === index &&
+    (category === "All" || layoutItems.some((item) =>
+      item.section === layoutSection && item.category === category
+    ))
+  );
+  const visibleLayoutItems = layoutItems.filter((item) =>
+    item.section === layoutSection &&
+    (layoutCategory === "All" || item.category === layoutCategory)
+  );
+  const selectedLayoutItem = visibleLayoutItems.find((item) => item.id === selectedLayoutId) || visibleLayoutItems[0];
+  const layoutDraftCategories = layoutDraft?.section === "shorts"
+    ? shortsCategories
+    : videoCategories;
+  const activeCropDraft = layoutDraft?.crop?.[device] || { x: 50, y: 50, zoom: 100 };
 
   const notify = (message) => {
     setToast(message);
@@ -293,22 +333,113 @@ const Admin = () => {
     notify(`${value} 카테고리를 추가했습니다.`);
   };
 
-  const reorderLayout = (dropIndex) => {
-    if (dragIndex === null || dragIndex === dropIndex) return;
+  const reorderLayout = (dropId) => {
+    if (!draggedLayoutId || draggedLayoutId === dropId) return;
     setLayoutItems((current) => {
       const next = [...current];
+      const dragIndex = next.findIndex((item) => item.id === draggedLayoutId);
+      const dropIndex = next.findIndex((item) => item.id === dropId);
+      if (dragIndex < 0 || dropIndex < 0) return current;
       const [moved] = next.splice(dragIndex, 1);
       next.splice(dropIndex, 0, moved);
       return next;
     });
-    setDragIndex(null);
+    setDraggedLayoutId(null);
   };
 
-  const setLayoutSize = (id, value) => {
-    const [columns, rows] = value.split("x").map(Number);
+  const setLayoutDimension = (id, dimension, value) => {
     setLayoutItems((current) => current.map((item) =>
-      item.id === id ? { ...item, columns, rows } : item
+      item.id === id ? { ...item, [dimension]: value } : item
     ));
+  };
+
+  const changeLayoutSection = (nextSection) => {
+    setLayoutSection(nextSection);
+    setLayoutCategory("All");
+    const firstItem = layoutItems.find((item) => item.section === nextSection);
+    setSelectedLayoutId(firstItem?.id);
+  };
+
+  const changeLayoutCategory = (nextCategory) => {
+    setLayoutCategory(nextCategory);
+    const firstItem = layoutItems.find((item) =>
+      item.section === layoutSection &&
+      (nextCategory === "All" || item.category === nextCategory)
+    );
+    setSelectedLayoutId(firstItem?.id);
+  };
+
+  const openLayoutEditor = (item) => {
+    const crop = item.crop || {
+      desktop: { x: 50, y: 50, zoom: 100 },
+      mobile: { x: 50, y: 50, zoom: 100 },
+    };
+    setLayoutDraft({
+      id: item.id,
+      title: item.title,
+      subtitle: item.subtitle || "",
+      section: item.section,
+      category: item.category,
+      crop: {
+        desktop: { ...crop.desktop },
+        mobile: { ...crop.mobile },
+      },
+    });
+    setIsLayoutEditorOpen(true);
+  };
+
+  const updateLayoutDraft = (field, value) => {
+    setLayoutDraft((current) => {
+      if (!current) return current;
+      if (field === "section") {
+        const categories = value === "shorts" ? shortsCategories : videoCategories;
+        return { ...current, section: value, category: categories[0] || "" };
+      }
+      return { ...current, [field]: value };
+    });
+  };
+
+  const updateCropDraft = (field, value) => {
+    setLayoutDraft((current) => current ? ({
+      ...current,
+      crop: {
+        ...current.crop,
+        [device]: {
+          ...current.crop[device],
+          [field]: Number(value),
+        },
+      },
+    }) : current);
+  };
+
+  const resetCropDraft = () => {
+    setLayoutDraft((current) => current ? ({
+      ...current,
+      crop: {
+        ...current.crop,
+        [device]: { x: 50, y: 50, zoom: 100 },
+      },
+    }) : current);
+  };
+
+  const saveLayoutDetails = (event) => {
+    event.preventDefault();
+    if (!layoutDraft?.title.trim()) return;
+    setLayoutItems((current) => current.map((item) =>
+      item.id === layoutDraft.id
+        ? { ...item, ...layoutDraft, title: layoutDraft.title.trim(), subtitle: layoutDraft.subtitle.trim() }
+        : item
+    ));
+    setWorks((current) => current.map((item) =>
+      item.id === layoutDraft.id
+        ? { ...item, title: layoutDraft.title.trim(), subtitle: layoutDraft.subtitle.trim(), section: layoutDraft.section, category: layoutDraft.category }
+        : item
+    ));
+    setLayoutSection(layoutDraft.section);
+    setLayoutCategory("All");
+    setSelectedLayoutId(layoutDraft.id);
+    setIsLayoutEditorOpen(false);
+    notify("카드 상세 설정을 임시저장했습니다.");
   };
 
   const addPhotos = (event) => {
@@ -344,12 +475,14 @@ const Admin = () => {
     ));
   };
 
-  const replaceHomeVideo = (event) => {
+  const replaceHomeVideo = (event, target) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    setHomeVideoPreview(URL.createObjectURL(file));
-    setHomeVideoName(file.name);
-    notify("메인 영상 미리보기를 교체했습니다.");
+    setHomeVideos((current) => ({
+      ...current,
+      [target]: { src: URL.createObjectURL(file), name: file.name },
+    }));
+    notify(`${target === "desktop" ? "PC" : "모바일"} 메인 영상 미리보기를 교체했습니다.`);
     event.target.value = "";
   };
 
@@ -530,49 +663,108 @@ const Admin = () => {
         </div>
         <ActionButton type="button" onClick={() => notify("배치 변경사항을 임시저장했습니다.")}>변경사항 저장</ActionButton>
       </ContentHeader>
-      <Panel>
+      <LayoutPanel>
         <LayoutHeader>
-          <div>
-            <strong>Video · All</strong>
-            <span>카드를 드래그해 배치 순서를 변경하세요.</span>
-          </div>
+          <Tabs aria-label="배치 콘텐츠 유형">
+            {[["video", "Video"], ["shorts", "Shorts"]].map(([key, label]) => (
+              <Tab type="button" key={key} $active={layoutSection === key} onClick={() => changeLayoutSection(key)}>{label}</Tab>
+            ))}
+          </Tabs>
+          <Select
+            aria-label="배치 카테고리"
+            value={layoutCategory}
+            onChange={(event) => changeLayoutCategory(event.target.value)}
+          >
+            {layoutCategories.map((category) => <option key={category}>{category}</option>)}
+          </Select>
           <DeviceSwitch>
             <DeviceButton type="button" $active={device === "desktop"} onClick={() => setDevice("desktop")}>PC</DeviceButton>
             <DeviceButton type="button" $active={device === "mobile"} onClick={() => setDevice("mobile")}>Mobile</DeviceButton>
           </DeviceSwitch>
         </LayoutHeader>
-        <LayoutCanvas $device={device}>
-          {layoutItems.map((item, index) => (
+        {selectedLayoutItem && (
+          <LayoutInspector>
+            <LayoutSelection>
+              <Thumbnail
+                src={`https://img.youtube.com/vi/${selectedLayoutItem.src}/mqdefault.jpg`}
+                alt=""
+                style={{ objectPosition: `${selectedLayoutItem.crop?.[device]?.x || 50}% ${selectedLayoutItem.crop?.[device]?.y || 50}%` }}
+              />
+              <div>
+                <span>{layoutSection === "shorts" ? "Shorts" : "Video"} · {layoutCategory}</span>
+                <strong>{selectedLayoutItem.title}</strong>
+                <small>{device === "desktop" ? `${selectedLayoutItem.columns}×${selectedLayoutItem.rows}` : "모바일 노출 순서 편집"}</small>
+              </div>
+            </LayoutSelection>
+            {device === "desktop" ? (
+              <>
+                <DimensionControl>
+                  <span>가로</span>
+                  <ButtonGroup>
+                    {[1, 2, 3, 4].map((value) => (
+                      <DimensionButton
+                        type="button"
+                        key={value}
+                        $active={selectedLayoutItem.columns === value}
+                        onClick={() => setLayoutDimension(selectedLayoutItem.id, "columns", value)}
+                      >{value}</DimensionButton>
+                    ))}
+                  </ButtonGroup>
+                </DimensionControl>
+                <DimensionControl>
+                  <span>세로</span>
+                  <ButtonGroup>
+                    {[1, 2, 3, 4].map((value) => (
+                      <DimensionButton
+                        type="button"
+                        key={value}
+                        $active={selectedLayoutItem.rows === value}
+                        onClick={() => setLayoutDimension(selectedLayoutItem.id, "rows", value)}
+                      >{value}</DimensionButton>
+                    ))}
+                  </ButtonGroup>
+                </DimensionControl>
+              </>
+            ) : (
+              <MobileOrderNote>모바일은 카드 순서와 썸네일 위치만 관리합니다.</MobileOrderNote>
+            )}
+            <GhostButton type="button" onClick={() => openLayoutEditor(selectedLayoutItem)}>세부 편집</GhostButton>
+          </LayoutInspector>
+        )}
+        <LayoutCanvas $device={device} $section={layoutSection}>
+          {visibleLayoutItems.map((item, index) => {
+            const crop = item.crop?.[device] || { x: 50, y: 50, zoom: 100 };
+            return (
             <GridCard
               key={item.id}
               draggable
-              onDragStart={() => setDragIndex(index)}
+              onDragStart={() => setDraggedLayoutId(item.id)}
+              onDragEnd={() => setDraggedLayoutId(null)}
               onDragOver={(event) => event.preventDefault()}
-              onDrop={() => reorderLayout(index)}
+              onDrop={() => reorderLayout(item.id)}
+              onClick={() => setSelectedLayoutId(item.id)}
               $columns={device === "mobile" ? 1 : item.columns}
               $rows={device === "mobile" ? 1 : item.rows}
+              $device={device}
+              $section={layoutSection}
+              $selected={selectedLayoutItem.id === item.id}
             >
-              <GridCardImage src={`https://img.youtube.com/vi/${item.src}/mqdefault.jpg`} alt="" />
+              <GridCardImage
+                src={`https://img.youtube.com/vi/${item.src}/mqdefault.jpg`}
+                alt=""
+                $cropX={crop.x}
+                $cropY={crop.y}
+                $zoom={crop.zoom}
+              />
+              {device === "desktop" && <SizeBadge>{item.columns}×{item.rows}</SizeBadge>}
               <GridCardInfo>
                 <span>{String(index + 1).padStart(2, "0")} · {item.category}</span>
                 <strong>{item.title}</strong>
               </GridCardInfo>
-              {device === "desktop" && (
-                <SizeSelect
-                  className="size-control"
-                  value={`${item.columns}x${item.rows}`}
-                  onChange={(event) => setLayoutSize(item.id, event.target.value)}
-                  aria-label={`${item.title} 블록 크기`}
-                >
-                  {SIZE_OPTIONS.map((size) => (
-                    <option key={size.value} value={size.value}>{size.label}</option>
-                  ))}
-                </SizeSelect>
-              )}
             </GridCard>
-          ))}
+          )})}
         </LayoutCanvas>
-      </Panel>
+      </LayoutPanel>
     </>
   );
 
@@ -625,26 +817,48 @@ const Admin = () => {
         </div>
         <ActionButton type="button" onClick={() => notify("메인 영상 변경사항을 임시저장했습니다.")}>변경사항 저장</ActionButton>
       </ContentHeader>
-      <ManagementGrid>
-        <AssetPanel>
-          <HomeVideo src={homeVideoPreview} muted autoPlay loop playsInline controls />
-        </AssetPanel>
-        <ManagementPanel>
-          <Badge $status="published"><StatusDot />현재 사용 중</Badge>
-          <PageTitle as="h2">홈 배경 영상</PageTitle>
-          <PageDescription>MP4 파일을 선택하면 공개 전 모습을 바로 확인할 수 있습니다.</PageDescription>
+      <HomeVideoGrid>
+        <VideoSlot>
+          <VideoSlotHeader>
+            <div><Badge $status="published"><StatusDot />PC</Badge><strong>가로형 메인 영상</strong></div>
+            <span>16:9</span>
+          </VideoSlotHeader>
+          <HomeVideo src={homeVideos.desktop.src} muted autoPlay loop playsInline controls />
+          <ResolutionNote>
+            <strong>권장 해상도 1920 × 1080</strong>
+            <span>MP4(H.264) · 16:9 · 화면 중앙에 주요 피사체 배치</span>
+          </ResolutionNote>
           <Field>
             <FormLabel>현재 파일</FormLabel>
-            <Input value={homeVideoName} readOnly />
+            <Input value={homeVideos.desktop.name} readOnly />
           </Field>
           <UploadButton as="label">
-            영상 파일 교체
-            <FileInput type="file" accept="video/mp4,video/webm" onChange={replaceHomeVideo} />
+            PC 영상 교체
+            <FileInput type="file" accept="video/mp4,video/webm" onChange={(event) => replaceHomeVideo(event, "desktop")} />
           </UploadButton>
-          <HelpText>권장 형식 MP4 · 화면을 꽉 채우는 가로 영상</HelpText>
-          <SiteLink href="/" target="_blank" rel="noreferrer">메인 페이지에서 확인 ↗</SiteLink>
-        </ManagementPanel>
-      </ManagementGrid>
+        </VideoSlot>
+
+        <VideoSlot $mobile>
+          <VideoSlotHeader>
+            <div><Badge><StatusDot />Mobile</Badge><strong>세로형 메인 영상</strong></div>
+            <span>9:16</span>
+          </VideoSlotHeader>
+          <HomeVideo $mobile src={homeVideos.mobile.src} muted autoPlay loop playsInline controls />
+          <ResolutionNote>
+            <strong>권장 해상도 1080 × 1920</strong>
+            <span>MP4(H.264) · 9:16 · 모바일 화면 중앙 기준으로 편집</span>
+          </ResolutionNote>
+          <Field>
+            <FormLabel>현재 파일</FormLabel>
+            <Input value={homeVideos.mobile.name} readOnly />
+          </Field>
+          <UploadButton as="label">
+            모바일 영상 교체
+            <FileInput type="file" accept="video/mp4,video/webm" onChange={(event) => replaceHomeVideo(event, "mobile")} />
+          </UploadButton>
+        </VideoSlot>
+      </HomeVideoGrid>
+      <SiteLink href="/" target="_blank" rel="noreferrer">메인 페이지에서 확인 ↗</SiteLink>
     </>
   );
 
@@ -810,6 +1024,82 @@ const Admin = () => {
             <AsideFooter>
               <GhostButton type="button" onClick={() => setIsEditorOpen(false)}>취소</GhostButton>
               <ActionButton type="submit">저장하기</ActionButton>
+            </AsideFooter>
+          </form>
+        </Aside>
+      )}
+
+      {isLayoutEditorOpen && layoutDraft && (
+        <Aside role="dialog" aria-modal="true" aria-labelledby="layout-editor-title">
+          <AsideHeader>
+            <div>
+              <PageTitle as="h2" id="layout-editor-title">카드 세부 편집</PageTitle>
+              <PageDescription>{device === "desktop" ? "PC" : "Mobile"} 화면에 표시될 정보와 썸네일을 조정합니다.</PageDescription>
+            </div>
+            <IconButton type="button" onClick={() => setIsLayoutEditorOpen(false)} aria-label="닫기">×</IconButton>
+          </AsideHeader>
+          <form onSubmit={saveLayoutDetails}>
+            <FormGrid as="div">
+              <CropPreview
+                $device={device}
+                $section={layoutDraft.section}
+                $columns={selectedLayoutItem?.columns || 1}
+                $rows={selectedLayoutItem?.rows || 1}
+              >
+                <CropPreviewImage
+                  src={`https://img.youtube.com/vi/${selectedLayoutItem?.src}/maxresdefault.jpg`}
+                  alt="썸네일 크롭 미리보기"
+                  $cropX={activeCropDraft.x}
+                  $cropY={activeCropDraft.y}
+                  $zoom={activeCropDraft.zoom}
+                  onError={(event) => {
+                    event.currentTarget.src = `https://img.youtube.com/vi/${selectedLayoutItem?.src}/hqdefault.jpg`;
+                  }}
+                />
+                <span>{device === "desktop" ? `${selectedLayoutItem?.columns}×${selectedLayoutItem?.rows}` : layoutDraft.section === "shorts" ? "Mobile · 9:16" : "Mobile · 3:1"}</span>
+              </CropPreview>
+
+              <RangeControl>
+                <label htmlFor="crop-zoom">크기 <strong>{activeCropDraft.zoom}%</strong></label>
+                <input id="crop-zoom" type="range" min="100" max="200" step="5" value={activeCropDraft.zoom} onChange={(event) => updateCropDraft("zoom", event.target.value)} />
+              </RangeControl>
+              <RangeControl>
+                <label htmlFor="crop-x">가로 위치 <strong>{activeCropDraft.x}%</strong></label>
+                <input id="crop-x" type="range" min="0" max="100" value={activeCropDraft.x} onChange={(event) => updateCropDraft("x", event.target.value)} />
+              </RangeControl>
+              <RangeControl>
+                <label htmlFor="crop-y">세로 위치 <strong>{activeCropDraft.y}%</strong></label>
+                <input id="crop-y" type="range" min="0" max="100" value={activeCropDraft.y} onChange={(event) => updateCropDraft("y", event.target.value)} />
+              </RangeControl>
+              <GhostButton type="button" onClick={resetCropDraft}>썸네일 위치 초기화</GhostButton>
+
+              <Field>
+                <FormLabel htmlFor="layout-title">제목</FormLabel>
+                <Input id="layout-title" value={layoutDraft.title} onChange={(event) => updateLayoutDraft("title", event.target.value)} />
+              </Field>
+              <Field>
+                <FormLabel htmlFor="layout-subtitle">서브타이틀</FormLabel>
+                <TextArea id="layout-subtitle" rows="3" value={layoutDraft.subtitle} onChange={(event) => updateLayoutDraft("subtitle", event.target.value)} placeholder="선택 입력" />
+              </Field>
+              <FormGrid as="div" $columns="2">
+                <Field>
+                  <FormLabel htmlFor="layout-section">구분</FormLabel>
+                  <Select id="layout-section" value={layoutDraft.section} onChange={(event) => updateLayoutDraft("section", event.target.value)}>
+                    <option value="video">Video</option>
+                    <option value="shorts">Shorts</option>
+                  </Select>
+                </Field>
+                <Field>
+                  <FormLabel htmlFor="layout-category">카테고리</FormLabel>
+                  <Select id="layout-category" value={layoutDraft.category} onChange={(event) => updateLayoutDraft("category", event.target.value)}>
+                    {layoutDraftCategories.map((category) => <option key={category}>{category}</option>)}
+                  </Select>
+                </Field>
+              </FormGrid>
+            </FormGrid>
+            <AsideFooter>
+              <GhostButton type="button" onClick={() => setIsLayoutEditorOpen(false)}>취소</GhostButton>
+              <ActionButton type="submit">카드 설정 저장</ActionButton>
             </AsideFooter>
           </form>
         </Aside>

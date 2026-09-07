@@ -52,9 +52,7 @@ const Bottom = () => {
                         target="_blank"
                         rel="noreferrer"
                         aria-label="카카오톡 상담 열기"
-                    >
-                        <span>TALK</span>
-                    </KakaoImg>
+                    />
                     <InstagramImg
                         href="https://www.instagram.com/nasle0721/"
                         target="_blank"

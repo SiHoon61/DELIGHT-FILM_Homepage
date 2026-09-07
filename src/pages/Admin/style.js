@@ -294,6 +294,13 @@ export const Panel = styled.section`
   background: rgba(255,255,255,.025);
 `;
 
+export const LayoutPanel = styled.section`
+  overflow: visible;
+  border: 1px solid ${border};
+  border-radius: 14px;
+  background: rgba(255,255,255,.025);
+`;
+
 export const Toolbar = styled.div`
   display: flex;
   align-items: center;
@@ -586,6 +593,14 @@ export const LayoutHeader = styled.div`
   strong, span { display: block; }
   strong { font-size: 14px; }
   span { margin-top: 5px; color: ${muted}; font-size: 11px; }
+  ${Select} { width: min(220px, 30vw); }
+
+  @media (max-width: 700px) {
+    align-items: stretch;
+    flex-wrap: wrap;
+    ${Tabs} { flex: 1; }
+    ${Select} { width: 100%; order: 3; }
+  }
 `;
 
 export const DeviceSwitch = styled.div`
@@ -607,17 +622,99 @@ export const DeviceButton = styled.button`
   cursor: pointer;
 `;
 
+export const LayoutInspector = styled.div`
+  position: sticky;
+  top: 0;
+  z-index: 45;
+  display: grid;
+  grid-template-columns: minmax(230px, 1fr) auto auto auto;
+  align-items: center;
+  gap: 24px;
+  padding: 14px 20px;
+  border-top: 1px solid rgba(216,255,101,.2);
+  border-bottom: 1px solid rgba(216,255,101,.2);
+  background: rgba(17, 19, 17, .98);
+  box-shadow: 0 14px 30px rgba(0,0,0,.34);
+  backdrop-filter: blur(16px);
+
+  @media (max-width: 1220px) {
+    grid-template-columns: 1fr 1fr;
+    > :first-child { grid-column: 1 / -1; }
+  }
+
+  @media (max-width: 860px) { top: 58px; }
+`;
+
+export const LayoutSelection = styled.div`
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+
+  ${Thumbnail} { width: 76px; }
+  > div { min-width: 0; }
+  span, strong, small { display: block; }
+  span { margin-bottom: 4px; color: ${muted}; font-size: 10px; }
+  strong { overflow: hidden; color: #fff; font-size: 13px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+  small { margin-top: 5px; color: var(--admin-accent); font-size: 11px; }
+`;
+
+export const DimensionControl = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  > span { min-width: 28px; color: ${muted}; font-size: 11px; }
+`;
+
+export const DimensionButton = styled.button`
+  display: grid;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid ${({ $active }) => $active ? "var(--admin-accent)" : border};
+  border-radius: 7px;
+  background: ${({ $active }) => $active ? "var(--admin-accent)" : "#111313"};
+  color: ${({ $active }) => $active ? "#10110d" : "rgba(255,255,255,.65)"};
+  cursor: pointer;
+`;
+
+export const MobileOrderNote = styled.p`
+  margin: 0;
+  color: ${muted};
+  font-size: 11px;
+  line-height: 1.5;
+`;
+
 export const LayoutCanvas = styled.div`
   display: grid;
-  grid-template-columns: ${({ $device }) => $device === "mobile" ? "minmax(260px, 390px)" : "repeat(4, minmax(0, 1fr))"};
-  grid-auto-rows: ${({ $device }) => $device === "mobile" ? "106px" : "clamp(155px, 15vw, 220px)"};
+  grid-template-columns: ${({ $device, $section }) => {
+    if ($device !== "mobile") return "repeat(4, minmax(0, 1fr))";
+    return $section === "shorts"
+      ? "repeat(2, minmax(0, 180px))"
+      : "minmax(260px, 390px)";
+  }};
+  grid-auto-flow: dense;
+  grid-auto-rows: ${({ $device, $section }) =>
+    $device === "mobile" && $section === "shorts"
+      ? "auto"
+      : $device === "mobile" ? "106px" : "clamp(82px, 8vw, 116px)"};
   justify-content: center;
   gap: 10px;
+  min-width: 0;
   padding: clamp(14px, 2.5vw, 28px);
   background-image: radial-gradient(rgba(255,255,255,.08) .7px, transparent .7px);
   background-size: 14px 14px;
-  @media (max-width: 1150px) and (min-width: 861px) { grid-template-columns: ${({ $device }) => $device === "mobile" ? "minmax(260px, 390px)" : "repeat(2, minmax(0, 1fr))"}; }
-  @media (max-width: 700px) { grid-template-columns: 1fr; grid-auto-rows: 112px; }
+  @media (max-width: 700px) {
+    grid-template-columns: ${({ $device, $section }) =>
+      $device === "mobile" && $section === "shorts"
+        ? "repeat(2, minmax(0, 1fr))"
+        : $device === "mobile" ? "1fr" : "repeat(4, minmax(0, 1fr))"};
+    grid-auto-rows: ${({ $device, $section }) =>
+      $device === "mobile" && $section === "shorts"
+        ? "auto"
+        : $device === "mobile" ? "112px" : "82px"};
+  }
 `;
 
 export const GridCard = styled.article`
@@ -628,39 +725,44 @@ export const GridCard = styled.article`
   min-height: 0;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,.2);
+  border-color: ${({ $selected }) => $selected ? "var(--admin-accent)" : "rgba(255,255,255,.2)"};
+  box-shadow: ${({ $selected }) => $selected ? "0 0 0 2px rgba(216,255,101,.14)" : "none"};
   border-radius: 9px;
   background: #151717;
   cursor: grab;
+  ${({ $device, $section }) => $device === "mobile" && $section === "shorts" && `
+    aspect-ratio: 9 / 16;
+  `}
   &:active { cursor: grabbing; }
-  &:hover .size-control,
-  &:focus-within .size-control { opacity: 1; }
-  .size-control {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    z-index: 3;
-    padding: 4px;
-    border-radius: 8px;
-    background: rgba(7, 8, 8, .8);
-    opacity: 0;
-    transition: opacity 150ms ease;
-  }
-  @media (max-width: 700px) { grid-column: span 1; grid-row: span 1; }
+  @media (max-width: 700px) { grid-column: span 1; grid-row: auto; }
 `;
 
-export const SizeSelect = styled.select`
-  min-height: 32px;
-  padding: 0 28px 0 10px;
-  border: 1px solid rgba(255,255,255,.28);
+export const SizeBadge = styled.span`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  display: grid;
+  min-width: 38px;
+  height: 26px;
+  padding: 0 8px;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.24);
   border-radius: 7px;
-  outline: none;
-  background: rgba(7,8,8,.92);
+  background: rgba(7,8,8,.78);
   color: #fff;
-  font-size: 11px;
-  cursor: pointer;
+  font-size: 10px;
 `;
 
-export const GridCardImage = styled.img`width: 100%; height: 100%; object-fit: cover; opacity: .72;`;
+export const GridCardImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: ${({ $cropX, $cropY }) => `${$cropX}% ${$cropY}%`};
+  opacity: .72;
+  transform: ${({ $zoom }) => `scale(${$zoom / 100})`};
+  transform-origin: ${({ $cropX, $cropY }) => `${$cropX}% ${$cropY}%`};
+`;
 export const GridCardInfo = styled.div`
   position: absolute;
   inset: auto 0 0;
@@ -670,6 +772,52 @@ export const GridCardInfo = styled.div`
   span { margin-bottom: 4px; color: rgba(255,255,255,.6); font-size: 9px; text-transform: uppercase; }
   strong { font-size: 12px; font-weight: 500; }
   .size-control { opacity: 0; }
+`;
+
+export const CropPreview = styled.div`
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  aspect-ratio: ${({ $device, $section, $columns, $rows }) => {
+    if ($device === "mobile") return $section === "shorts" ? "9 / 16" : "3 / 1";
+    return `${Math.max(1, $columns)} / ${Math.max(1, $rows)}`;
+  }};
+  max-height: 430px;
+  border: 1px solid rgba(216,255,101,.32);
+  border-radius: 10px;
+  background: #070808;
+
+  > span {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 2;
+    padding: 6px 9px;
+    border-radius: 6px;
+    background: rgba(0,0,0,.7);
+    color: #fff;
+    font-size: 10px;
+  }
+`;
+
+export const CropPreviewImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: ${({ $cropX, $cropY }) => `${$cropX}% ${$cropY}%`};
+  transform: ${({ $zoom }) => `scale(${$zoom / 100})`};
+  transform-origin: ${({ $cropX, $cropY }) => `${$cropX}% ${$cropY}%`};
+`;
+
+export const RangeControl = styled.div`
+  display: grid;
+  grid-template-columns: 115px 1fr;
+  align-items: center;
+  gap: 12px;
+
+  label { color: ${muted}; font-size: 12px; }
+  label strong { float: right; color: #fff; font-weight: 500; }
+  input { width: 100%; accent-color: var(--admin-accent); }
 `;
 
 export const Toast = styled.div`
@@ -782,10 +930,56 @@ export const ManagementPanel = styled.section`
 
 export const HomeVideo = styled.video`
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: ${({ $mobile }) => $mobile ? "9 / 16" : "16 / 9"};
+  max-height: ${({ $mobile }) => $mobile ? "520px" : "none"};
   border-radius: 9px;
   background: #000;
   object-fit: cover;
+`;
+
+export const HomeVideoGrid = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, .55fr);
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 18px;
+
+  @media (max-width: 1050px) { grid-template-columns: 1fr; }
+`;
+
+export const VideoSlot = styled.section`
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid ${border};
+  border-radius: 14px;
+  background: rgba(255,255,255,.025);
+
+  ${({ $mobile }) => $mobile && `
+    ${HomeVideo} { width: min(100%, 292px); justify-self: center; }
+  `}
+`;
+
+export const VideoSlotHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  > div { display: flex; align-items: center; gap: 10px; }
+  strong { font-size: 14px; font-weight: 500; }
+  > span { color: var(--admin-accent); font-size: 12px; }
+`;
+
+export const ResolutionNote = styled.div`
+  padding: 14px;
+  border: 1px solid rgba(216,255,101,.16);
+  border-radius: 9px;
+  background: rgba(216,255,101,.04);
+
+  strong, span { display: block; }
+  strong { color: #fff; font-size: 13px; font-weight: 500; }
+  span { margin-top: 5px; color: ${muted}; font-size: 11px; line-height: 1.5; }
 `;
 
 export const AssetPreview = styled.img`
