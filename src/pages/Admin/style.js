@@ -108,8 +108,8 @@ export const MobileNav = styled.nav`
     position: sticky;
     top: 0;
     z-index: 30;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
+    overflow-x: auto;
     gap: 4px;
     padding: 8px 12px;
     border-bottom: 1px solid ${border};
@@ -118,6 +118,7 @@ export const MobileNav = styled.nav`
 
     ${NavButton} {
       display: flex;
+      min-width: max-content;
       min-height: 42px;
       justify-content: center;
       gap: 7px;
@@ -212,6 +213,40 @@ export const GhostButton = styled.button`
   background: transparent;
   color: #fff;
   &:hover { background: rgba(255,255,255,.07); }
+`;
+
+export const SiteLink = styled.a`
+  ${buttonBase};
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(216,255,101,.3);
+  background: rgba(216,255,101,.06);
+  color: var(--admin-accent);
+  text-decoration: none;
+  &:hover { background: rgba(216,255,101,.12); }
+`;
+
+export const UploadButton = styled.button`
+  ${buttonBase};
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid var(--admin-accent);
+  background: var(--admin-accent);
+  color: #10110d;
+  font-family: var(--font-sansMedium);
+  span { font-size: 18px; }
+  &:hover { background: #e5ff9a; }
+`;
+
+export const FileInput = styled.input`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
 `;
 
 export const MetricRow = styled.div`
@@ -322,6 +357,14 @@ export const TextArea = styled.textarea`
   ${fieldStyle};
   min-height: 92px;
   padding-top: 11px;
+  resize: vertical;
+`;
+
+export const TextEditor = styled.textarea`
+  ${fieldStyle};
+  min-height: 320px;
+  padding: 15px;
+  line-height: 1.75;
   resize: vertical;
 `;
 
@@ -579,8 +622,8 @@ export const LayoutCanvas = styled.div`
 
 export const GridCard = styled.article`
   position: relative;
-  grid-column: ${({ $size }) => $size === "standard" || $size === "mobile" ? "span 1" : "span 2"};
-  grid-row: ${({ $size }) => $size === "featured" ? "span 2" : "span 1"};
+  grid-column: span ${({ $columns }) => $columns};
+  grid-row: span ${({ $rows }) => $rows};
   min-width: 0;
   min-height: 0;
   overflow: hidden;
@@ -603,6 +646,18 @@ export const GridCard = styled.article`
     transition: opacity 150ms ease;
   }
   @media (max-width: 700px) { grid-column: span 1; grid-row: span 1; }
+`;
+
+export const SizeSelect = styled.select`
+  min-height: 32px;
+  padding: 0 28px 0 10px;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 7px;
+  outline: none;
+  background: rgba(7,8,8,.92);
+  color: #fff;
+  font-size: 11px;
+  cursor: pointer;
 `;
 
 export const GridCardImage = styled.img`width: 100%; height: 100%; object-fit: cover; opacity: .72;`;
@@ -629,4 +684,114 @@ export const Toast = styled.div`
   color: #eaffae;
   box-shadow: 0 16px 45px rgba(0,0,0,.35);
   font-size: 13px;
+`;
+
+export const PhotoToolbar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 20px;
+  border-bottom: 1px solid ${border};
+
+  > div { display: flex; align-items: baseline; gap: 9px; }
+  strong { font-family: var(--font-sansMedium); font-size: 24px; }
+  span, p { color: ${muted}; font-size: 12px; }
+  p { margin: 0; }
+`;
+
+export const PhotoGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  padding: 20px;
+  @media (max-width: 1200px) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  @media (max-width: 720px) { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 12px; }
+`;
+
+export const PhotoCard = styled.article`
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  border: 1px solid ${border};
+  border-radius: 8px;
+  background: #161818;
+  cursor: grab;
+  &:active { cursor: grabbing; }
+`;
+
+export const PhotoImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+export const PhotoOverlay = styled.div`
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 9px 9px;
+  background: linear-gradient(transparent, rgba(0,0,0,.82));
+  color: rgba(255,255,255,.72);
+  font-size: 10px;
+
+  button {
+    min-height: 26px;
+    padding: 0 8px;
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 6px;
+    background: rgba(0,0,0,.42);
+    color: #fff;
+    font-size: 10px;
+    cursor: pointer;
+  }
+`;
+
+export const ManagementGrid = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, .65fr);
+  gap: 18px;
+  align-items: start;
+  @media (max-width: 1050px) { grid-template-columns: 1fr; }
+`;
+
+export const AssetPanel = styled.section`
+  display: grid;
+  gap: 16px;
+  overflow: hidden;
+  padding: 18px;
+  border: 1px solid ${border};
+  border-radius: 14px;
+  background: rgba(255,255,255,.025);
+`;
+
+export const ManagementPanel = styled.section`
+  display: grid;
+  gap: 22px;
+  padding: clamp(20px, 3vw, 32px);
+  border: 1px solid ${border};
+  border-radius: 14px;
+  background: rgba(255,255,255,.025);
+
+  ${PageTitle} { font-size: clamp(24px, 2.4vw, 34px); }
+  ${SiteLink}, ${UploadButton} { width: fit-content; }
+`;
+
+export const HomeVideo = styled.video`
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 9px;
+  background: #000;
+  object-fit: cover;
+`;
+
+export const AssetPreview = styled.img`
+  width: 100%;
+  max-height: 620px;
+  border-radius: 9px;
+  background: #080909;
+  object-fit: contain;
 `;

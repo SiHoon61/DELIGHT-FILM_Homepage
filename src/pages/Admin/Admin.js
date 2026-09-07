@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from "react";
 
 import workList from "../../workList.json";
+import mainVideo from "../../assets/Home/mainVideo.mp4";
+import aboutImage from "../../assets/About/aboutImg.svg";
+import { images as photoSources } from "../../components/Photo/Photo";
 import {
   createShortsCatalog,
   createVideoCatalog,
@@ -14,6 +17,8 @@ import {
   AsideFooter,
   AsideHeader,
   Badge,
+  AssetPanel,
+  AssetPreview,
   Brand,
   BrandMark,
   ButtonGroup,
@@ -29,6 +34,7 @@ import {
   DeviceSwitch,
   EmptyState,
   Field,
+  FileInput,
   FormGrid,
   FormLabel,
   GhostButton,
@@ -36,11 +42,14 @@ import {
   GridCardImage,
   GridCardInfo,
   HelpText,
+  HomeVideo,
   IconButton,
   Input,
   LayoutCanvas,
   LayoutHeader,
   Main,
+  ManagementGrid,
+  ManagementPanel,
   Metric,
   MetricLabel,
   MetricRow,
@@ -52,6 +61,11 @@ import {
   PageDescription,
   PageTitle,
   Panel,
+  PhotoCard,
+  PhotoGrid,
+  PhotoImage,
+  PhotoOverlay,
+  PhotoToolbar,
   PreviewFrame,
   PreviewImage,
   PreviewPlaceholder,
@@ -59,6 +73,8 @@ import {
   SearchInput,
   Select,
   Sidebar,
+  SiteLink,
+  SizeSelect,
   StatusDot,
   Table,
   TableBody,
@@ -69,15 +85,15 @@ import {
   Tab,
   Tabs,
   TextArea,
+  TextEditor,
   Thumbnail,
   Toast,
   Toolbar,
   Topbar,
   TopbarActions,
+  UploadButton,
   VideoIdentity,
 } from "./style";
-
-const PHOTO_COUNT = 89;
 
 const initialVideoItems = createVideoCatalog(
   workList.videoJson || [],
@@ -101,13 +117,31 @@ const INITIAL_WORKS = [...initialVideoItems, ...initialShortsItems];
 
 const LAYOUT_SEED = initialVideoItems.slice(0, 7).map((item, index) => ({
   ...item,
-  size: index === 0 ? "featured" : index < 3 ? "wide" : "standard",
+  columns: index === 0 || index < 3 ? 2 : 1,
+  rows: index === 0 ? 2 : 1,
 }));
+
+const INITIAL_PHOTOS = photoSources.map((src, index) => ({
+  id: `photo-${index}`,
+  src,
+  name: src.split("/").pop(),
+  status: "published",
+}));
+
+const SIZE_OPTIONS = [4, 3, 2, 1].flatMap((columns) =>
+  [1, 2, 3, 4].map((rows) => ({
+    value: `${columns}x${rows}`,
+    label: `${columns}×${rows}`,
+  }))
+);
 
 const NAV_ITEMS = [
   { id: "content", label: "콘텐츠", index: "01" },
   { id: "categories", label: "카테고리", index: "02" },
   { id: "layout", label: "화면 배치", index: "03" },
+  { id: "photos", label: "Photo 관리", index: "04" },
+  { id: "home", label: "메인 영상", index: "05" },
+  { id: "about", label: "About 관리", index: "06" },
 ];
 
 const SECTION_LABELS = {
@@ -145,6 +179,15 @@ const Admin = () => {
   const [device, setDevice] = useState("desktop");
   const [layoutItems, setLayoutItems] = useState(LAYOUT_SEED);
   const [dragIndex, setDragIndex] = useState(null);
+  const [photos, setPhotos] = useState(INITIAL_PHOTOS);
+  const [photoDragIndex, setPhotoDragIndex] = useState(null);
+  const [homeVideoPreview, setHomeVideoPreview] = useState(mainVideo);
+  const [homeVideoName, setHomeVideoName] = useState("mainVideo.mp4");
+  const [aboutImagePreview, setAboutImagePreview] = useState(aboutImage);
+  const [aboutHeadline, setAboutHeadline] = useState("안녕하세요, 딜라이트 필름의 김주환 입니다.");
+  const [aboutBody, setAboutBody] = useState(
+    "딜라이트 필름은 분야를 가리지 않고, 다양한 영상을 제작하는 영상 제작 프로덕션입니다.\n\n콘서트, 이벤트, 세미나 등의 라이브 중계부터 드론 촬영, 유튜브 예능, TVCF제작, 홈쇼핑 제작, 웹드라마와 단편영화 촬영까지 장르를 넘나드는 다양한 프로젝트를 진행하고 있습니다.\n\n딜라이트 필름은 고객과의 소통을 가장 중시하며, 항상 기대 이상의 결과를 만들어내기 위해 최선을 다하고 있습니다.\n\n감사합니다."
+  );
   const [toast, setToast] = useState("");
   const [videoCategories, setVideoCategories] = useState(
     VIDEO_CATEGORIES.filter((category) => category !== "All")
@@ -184,7 +227,7 @@ const Admin = () => {
   const counts = {
     video: works.filter((item) => item.section === "video").length,
     shorts: works.filter((item) => item.section === "shorts").length,
-    photo: PHOTO_COUNT,
+    photo: photos.length,
   };
 
   const notify = (message) => {
@@ -261,10 +304,61 @@ const Admin = () => {
     setDragIndex(null);
   };
 
-  const setLayoutSize = (id, size) => {
+  const setLayoutSize = (id, value) => {
+    const [columns, rows] = value.split("x").map(Number);
     setLayoutItems((current) => current.map((item) =>
-      item.id === id ? { ...item, size } : item
+      item.id === id ? { ...item, columns, rows } : item
     ));
+  };
+
+  const addPhotos = (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+    const additions = files.map((file, index) => ({
+      id: `preview-photo-${Date.now()}-${index}`,
+      src: URL.createObjectURL(file),
+      name: file.name,
+      status: "draft",
+    }));
+    setPhotos((current) => [...additions, ...current]);
+    notify(`${files.length}장의 사진을 임시 목록에 추가했습니다.`);
+    event.target.value = "";
+  };
+
+  const reorderPhotos = (dropIndex) => {
+    if (photoDragIndex === null || photoDragIndex === dropIndex) return;
+    setPhotos((current) => {
+      const next = [...current];
+      const [moved] = next.splice(photoDragIndex, 1);
+      next.splice(dropIndex, 0, moved);
+      return next;
+    });
+    setPhotoDragIndex(null);
+  };
+
+  const togglePhotoStatus = (id) => {
+    setPhotos((current) => current.map((photo) =>
+      photo.id === id
+        ? { ...photo, status: photo.status === "published" ? "hidden" : "published" }
+        : photo
+    ));
+  };
+
+  const replaceHomeVideo = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setHomeVideoPreview(URL.createObjectURL(file));
+    setHomeVideoName(file.name);
+    notify("메인 영상 미리보기를 교체했습니다.");
+    event.target.value = "";
+  };
+
+  const replaceAboutImage = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setAboutImagePreview(URL.createObjectURL(file));
+    notify("About 사진 미리보기를 교체했습니다.");
+    event.target.value = "";
   };
 
   const renderContent = () => (
@@ -323,8 +417,9 @@ const Admin = () => {
 
         {section === "photo" ? (
           <EmptyState>
-            <strong>사진 관리는 다음 연결 단계에서 열립니다.</strong>
-            <span>현재 등록된 사진 {PHOTO_COUNT}장은 그대로 유지됩니다.</span>
+            <strong>Photo 전용 관리 화면에서 수정할 수 있습니다.</strong>
+            <span>현재 등록된 사진은 {photos.length}장입니다.</span>
+            <ActionButton type="button" onClick={() => setActiveView("photos")}>Photo 관리로 이동</ActionButton>
           </EmptyState>
         ) : (
           <Table>
@@ -454,7 +549,8 @@ const Admin = () => {
               onDragStart={() => setDragIndex(index)}
               onDragOver={(event) => event.preventDefault()}
               onDrop={() => reorderLayout(index)}
-              $size={device === "mobile" ? "mobile" : item.size}
+              $columns={device === "mobile" ? 1 : item.columns}
+              $rows={device === "mobile" ? 1 : item.rows}
             >
               <GridCardImage src={`https://img.youtube.com/vi/${item.src}/mqdefault.jpg`} alt="" />
               <GridCardInfo>
@@ -462,18 +558,16 @@ const Admin = () => {
                 <strong>{item.title}</strong>
               </GridCardInfo>
               {device === "desktop" && (
-                <ButtonGroup className="size-control">
-                  {["standard", "wide", "featured"].map((size) => (
-                    <ControlButton
-                      type="button"
-                      key={size}
-                      $active={item.size === size}
-                      onClick={() => setLayoutSize(item.id, size)}
-                    >
-                      {size === "standard" ? "1×1" : size === "wide" ? "2×1" : "2×2"}
-                    </ControlButton>
+                <SizeSelect
+                  className="size-control"
+                  value={`${item.columns}x${item.rows}`}
+                  onChange={(event) => setLayoutSize(item.id, event.target.value)}
+                  aria-label={`${item.title} 블록 크기`}
+                >
+                  {SIZE_OPTIONS.map((size) => (
+                    <option key={size.value} value={size.value}>{size.label}</option>
                   ))}
-                </ButtonGroup>
+                </SizeSelect>
               )}
             </GridCard>
           ))}
@@ -482,11 +576,115 @@ const Admin = () => {
     </>
   );
 
+  const renderPhotos = () => (
+    <>
+      <ContentHeader>
+        <div>
+          <PageTitle>Photo 관리</PageTitle>
+          <PageDescription>사진을 추가하고 드래그하여 노출 순서를 변경합니다.</PageDescription>
+        </div>
+        <UploadButton as="label">
+          <span>＋</span> 사진 추가
+          <FileInput type="file" accept="image/*" multiple onChange={addPhotos} />
+        </UploadButton>
+      </ContentHeader>
+      <Panel>
+        <PhotoToolbar>
+          <div><strong>{photos.length}</strong><span>전체 사진</span></div>
+          <p>상태 버튼을 눌러 공개 여부를 변경할 수 있습니다.</p>
+        </PhotoToolbar>
+        <PhotoGrid>
+          {photos.map((photo, index) => (
+            <PhotoCard
+              key={photo.id}
+              draggable
+              onDragStart={() => setPhotoDragIndex(index)}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={() => reorderPhotos(index)}
+            >
+              <PhotoImage src={photo.src} alt="" />
+              <PhotoOverlay>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <button type="button" onClick={() => togglePhotoStatus(photo.id)}>
+                  {photo.status === "published" ? "공개" : photo.status === "draft" ? "임시" : "숨김"}
+                </button>
+              </PhotoOverlay>
+            </PhotoCard>
+          ))}
+        </PhotoGrid>
+      </Panel>
+    </>
+  );
+
+  const renderHome = () => (
+    <>
+      <ContentHeader>
+        <div>
+          <PageTitle>메인 영상</PageTitle>
+          <PageDescription>홈 첫 화면에서 자동 재생되는 영상을 교체합니다.</PageDescription>
+        </div>
+        <ActionButton type="button" onClick={() => notify("메인 영상 변경사항을 임시저장했습니다.")}>변경사항 저장</ActionButton>
+      </ContentHeader>
+      <ManagementGrid>
+        <AssetPanel>
+          <HomeVideo src={homeVideoPreview} muted autoPlay loop playsInline controls />
+        </AssetPanel>
+        <ManagementPanel>
+          <Badge $status="published"><StatusDot />현재 사용 중</Badge>
+          <PageTitle as="h2">홈 배경 영상</PageTitle>
+          <PageDescription>MP4 파일을 선택하면 공개 전 모습을 바로 확인할 수 있습니다.</PageDescription>
+          <Field>
+            <FormLabel>현재 파일</FormLabel>
+            <Input value={homeVideoName} readOnly />
+          </Field>
+          <UploadButton as="label">
+            영상 파일 교체
+            <FileInput type="file" accept="video/mp4,video/webm" onChange={replaceHomeVideo} />
+          </UploadButton>
+          <HelpText>권장 형식 MP4 · 화면을 꽉 채우는 가로 영상</HelpText>
+          <SiteLink href="/" target="_blank" rel="noreferrer">메인 페이지에서 확인 ↗</SiteLink>
+        </ManagementPanel>
+      </ManagementGrid>
+    </>
+  );
+
+  const renderAbout = () => (
+    <>
+      <ContentHeader>
+        <div>
+          <PageTitle>About 관리</PageTitle>
+          <PageDescription>소개 문구와 대표 사진을 한 화면에서 수정합니다.</PageDescription>
+        </div>
+        <ActionButton type="button" onClick={() => notify("About 변경사항을 임시저장했습니다.")}>변경사항 저장</ActionButton>
+      </ContentHeader>
+      <ManagementGrid>
+        <AssetPanel>
+          <AssetPreview src={aboutImagePreview} alt="About 대표 미리보기" />
+          <UploadButton as="label">
+            대표 사진 교체
+            <FileInput type="file" accept="image/*" onChange={replaceAboutImage} />
+          </UploadButton>
+        </AssetPanel>
+        <ManagementPanel>
+          <Field>
+            <FormLabel htmlFor="about-headline">첫 문장</FormLabel>
+            <Input id="about-headline" value={aboutHeadline} onChange={(event) => setAboutHeadline(event.target.value)} />
+          </Field>
+          <Field>
+            <FormLabel htmlFor="about-body">소개 내용</FormLabel>
+            <TextEditor id="about-body" rows="15" value={aboutBody} onChange={(event) => setAboutBody(event.target.value)} />
+          </Field>
+          <SiteLink href="/About" target="_blank" rel="noreferrer">About 페이지에서 확인 ↗</SiteLink>
+        </ManagementPanel>
+      </ManagementGrid>
+    </>
+  );
+
   return (
     <AdminShell>
       <MobileHeader>
         <Brand><BrandMark>D</BrandMark><span>DELIGHT FILM</span></Brand>
-        <Badge><StatusDot />Design preview</Badge>
+        <SiteLink href="/" target="_blank" rel="noreferrer">본 사이트 ↗</SiteLink>
       </MobileHeader>
       <MobileNav aria-label="모바일 관리 메뉴">
         {NAV_ITEMS.map((item) => (
@@ -529,7 +727,7 @@ const Admin = () => {
             <span>데이터 연결 전</span>
           </div>
           <TopbarActions>
-            <GhostButton type="button" onClick={() => window.open("/Works", "_blank")}>사이트 보기 ↗</GhostButton>
+            <SiteLink href="/" target="_blank" rel="noreferrer">본 사이트 바로가기 ↗</SiteLink>
             <div className="profile">DF</div>
           </TopbarActions>
         </Topbar>
@@ -537,6 +735,9 @@ const Admin = () => {
           {activeView === "content" && renderContent()}
           {activeView === "categories" && renderCategories()}
           {activeView === "layout" && renderLayout()}
+          {activeView === "photos" && renderPhotos()}
+          {activeView === "home" && renderHome()}
+          {activeView === "about" && renderAbout()}
         </Content>
       </Main>
 

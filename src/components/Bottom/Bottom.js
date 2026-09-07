@@ -10,6 +10,7 @@ import {
     SnsBox,
     NewLine,
     LogoImgBox,
+    KakaoImg,
     InstagramImg,
     YoutubeImg,
 } from './style';
@@ -46,14 +47,26 @@ const Bottom = () => {
                 </LogoImgBox>
 
                 <SnsBox>
+                    <KakaoImg
+                        href="http://pf.kakao.com/_xgCxkUn/chat"
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="카카오톡 상담 열기"
+                    >
+                        <span>TALK</span>
+                    </KakaoImg>
                     <InstagramImg
-                        onClick={() => {
-                            window.open("https://www.instagram.com/nasle0721/")
-                    }} />
+                        href="https://www.instagram.com/nasle0721/"
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="딜라이트 필름 인스타그램 열기"
+                    />
                     <YoutubeImg
-                        onClick={() => {
-                            window.open("https://www.youtube.com/channel/UCozVgv8Kn92pnhckwAHjGSQ")
-                        }} />
+                        href="https://www.youtube.com/channel/UCozVgv8Kn92pnhckwAHjGSQ"
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="딜라이트 필름 유튜브 열기"
+                    />
                 </SnsBox>
             </Container>
         </>

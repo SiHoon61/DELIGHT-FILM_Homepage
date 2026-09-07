@@ -82,7 +82,46 @@ export const SnsBox = styled.div`
     margin-right: 1%;
 `
 
-export const InstagramImg = styled.div`
+export const KakaoImg = styled.a`
+    display: grid;
+    width: 34px;
+    height: 34px;
+    margin-right: 18px;
+    place-items: center;
+    border-radius: 50%;
+    background: #f9e000;
+    color: #241f13;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s, filter 0.2s;
+
+    span {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 8px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+    }
+
+    &:hover,
+    &:focus-visible {
+        filter: brightness(1.08);
+        transform: translateY(-2px);
+        outline: none;
+    }
+
+    @media (max-width: 700px) {
+        width: 24px;
+        height: 24px;
+        margin-right: 14px;
+
+        span {
+            font-size: 6px;
+        }
+    }
+`
+
+export const InstagramImg = styled.a`
+    display: block;
     width: 30px;
     height: 30px;
     margin-right: 20px;
@@ -100,7 +139,8 @@ export const InstagramImg = styled.div`
     }
 `
 
-export const YoutubeImg = styled.div`
+export const YoutubeImg = styled.a`
+    display: block;
     width: 40px;
     height: 40px;
     margin-right: 20px;

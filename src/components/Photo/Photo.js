@@ -4,7 +4,7 @@ import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 
-const images = [
+export const images = [
     '/Works/Photo/JSP05036.png',
     '/Works/Photo/JSP03870.png',
     '/Works/Photo/JSP04684.png',
