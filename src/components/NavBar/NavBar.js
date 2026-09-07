@@ -40,7 +40,8 @@ const NavLink = styled.div`
         padding: 8px 10px;
         border-radius: 22px;
         color: ${({ $active }) => ($active ? '#000' : '#9D9D9D')};
-        background: ${({ $active }) => ($active ? '#eee' : '#202025')};
+        background: ${({ $active }) =>
+            ($active ? 'linear-gradient(to right, #FFD700, #FF8C00)' : '#202025')};
         font-size: 13px;
 
         &:hover {
@@ -56,7 +57,7 @@ const Background = styled.div`
     width: ${({ $width }) => $width}px;
     height: 40px;
     border-radius: 30px;
-    background: #eee;
+    background: linear-gradient(to right, #FFD700, #FF8C00);
     opacity: ${({ $ready }) => ($ready ? 1 : 0)};
     transform: translateY(-50%);
     transition: left 0.3s ease, width 0.3s ease, opacity 0.15s ease;
