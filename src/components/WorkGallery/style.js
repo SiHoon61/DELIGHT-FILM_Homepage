@@ -26,7 +26,7 @@ export const GalleryGrid = styled.div`
   @media (max-width: 700px) {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 0;
   }
 `;
 
@@ -79,8 +79,10 @@ export const Card = styled.article`
   @media (max-width: 700px) {
     width: 100%;
     aspect-ratio: ${({ $mobileLayout }) =>
-      $mobileLayout === "portrait" ? "4 / 5" : "16 / 10"};
+      $mobileLayout === "portrait" ? "4 / 5" : "3 / 1"};
     min-height: 0;
+    border-width: 0 0 1px;
+    border-radius: 0;
   }
 `;
 
@@ -108,7 +110,15 @@ export const CardOverlay = styled.div`
   );
 
   @media (max-width: 700px) {
-    padding: 20px;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 14px 78px 14px 16px;
+    background: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.9) 0%,
+      rgba(0, 0, 0, 0.66) 38%,
+      rgba(0, 0, 0, 0.08) 100%
+    );
   }
 `;
 
@@ -122,6 +132,12 @@ export const CardMeta = styled.span`
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.75);
+
+  @media (max-width: 700px) {
+    gap: 7px;
+    margin-bottom: 5px;
+    font-size: 9px;
+  }
 `;
 
 export const CardNumber = styled.span`
@@ -133,6 +149,13 @@ export const CardNumber = styled.span`
     margin: 0 10px 3px 0;
     background: currentColor;
   }
+
+  @media (max-width: 700px) {
+    &::before {
+      width: 14px;
+      margin-right: 7px;
+    }
+  }
 `;
 
 export const CardTitle = styled.h2`
@@ -143,11 +166,35 @@ export const CardTitle = styled.h2`
   font-size: clamp(17px, 1.55vw, 27px);
   font-weight: 500;
   line-height: 1.35;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 
   @media (max-width: 700px) {
-    font-size: 19px;
+    max-width: 220px;
+    font-size: 15px;
+    line-height: 1.3;
+  }
+`;
+
+export const CardSubtitle = styled.p`
+  display: -webkit-box;
+  max-width: calc(100% - 66px);
+  margin: 7px 0 0;
+  overflow: hidden;
+  font-family: var(--font-sansRegular);
+  font-size: clamp(13px, 1vw, 16px);
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.68);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+
+  @media (max-width: 700px) {
+    max-width: 210px;
+    margin-top: 4px;
+    font-size: 11px;
+    line-height: 1.35;
+    -webkit-line-clamp: 1;
   }
 `;
 
@@ -165,10 +212,11 @@ export const PlayButton = styled.span`
   backdrop-filter: blur(4px);
 
   @media (max-width: 700px) {
-    right: 18px;
-    bottom: 18px;
-    width: 44px;
-    height: 44px;
+    right: 14px;
+    bottom: 14px;
+    width: 30px;
+    height: 30px;
+    border-width: 1px;
   }
 `;
 
@@ -179,6 +227,12 @@ export const PlayIcon = styled.span`
   border-top: 7px solid transparent;
   border-bottom: 7px solid transparent;
   border-left: 11px solid #fff;
+
+  @media (max-width: 700px) {
+    border-top-width: 5px;
+    border-bottom-width: 5px;
+    border-left-width: 8px;
+  }
 `;
 
 export const ScreenReaderText = styled.span`

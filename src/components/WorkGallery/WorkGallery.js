@@ -8,6 +8,7 @@ import {
   CardMeta,
   CardNumber,
   CardOverlay,
+  CardSubtitle,
   CardTitle,
   GalleryGrid,
   PlayButton,
@@ -19,6 +20,16 @@ import {
 // 각 항목에 layout.desktop / layout.mobile / layout.order 값이 생기면
 // 기본값 대신 관리자 설정을 바로 사용합니다.
 const DEFAULT_DESKTOP_LAYOUT = ["featured", "wide", "wide"];
+
+// 기존 JSON에 subtitle이 추가되면 그 값을 우선 사용합니다.
+// 아래 값은 현재 레퍼런스를 확인하기 위한 임시 표시 문구입니다.
+const REFERENCE_SUBTITLES = {
+  "ve1Wm9f-X68": "낯선 시작이, 특별한 이야기가 되는 순간.",
+  jcxnomGbMLI: "사랑이 만드는 힘.",
+  ulp_oEwCXHQ: "그날의 웃음들.",
+  fbRPtoAUsiQ: "AI가 만드는 새로운 가능성.",
+  Rfr9dOzMkoI: "사람 중심의 혁신, AX의 시대.",
+};
 
 const WorkGallery = ({ items = [], typeLabel }) => {
   const [selectedVideo, setSelectedVideo] = useState(null);
@@ -32,6 +43,7 @@ const WorkGallery = ({ items = [], typeLabel }) => {
           const mobileLayout = item.layout?.mobile || "standard";
           const order = item.layout?.order ?? index;
           const number = String(index + 1).padStart(2, "0");
+          const subtitle = item.subtitle || REFERENCE_SUBTITLES[item.src];
 
           return (
             <Card
@@ -58,6 +70,7 @@ const WorkGallery = ({ items = [], typeLabel }) => {
                   <CardNumber>{number}</CardNumber>
                 </CardMeta>
                 <CardTitle>{item.title}</CardTitle>
+                {subtitle && <CardSubtitle>{subtitle}</CardSubtitle>}
                 <PlayButton aria-hidden="true">
                   <PlayIcon />
                 </PlayButton>

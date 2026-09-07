@@ -6,6 +6,11 @@ export const HeaderContainer = styled.div`
     justify-content: space-between;
 `
 
+export const TitleBlock = styled.div`
+    display: flex;
+    flex-direction: column;
+`
+
 export const BigText = styled.div`
     color: white;
     font-size: 90px;
@@ -21,6 +26,21 @@ export const BigText = styled.div`
     }
 `
 
+export const TitleSubtitle = styled.p`
+    display: none;
+    margin: 0 0 0 22px;
+    color: rgba(255, 255, 255, 0.42);
+    font-family: var(--font-sansMedium);
+    font-size: 9px;
+    line-height: 1.45;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+
+    @media (max-width: 700px){
+      display: block;
+    }
+`
+
 export const MenuContainer = styled.div`
     display: flex;
     justify-content: center;
@@ -30,8 +50,36 @@ export const MenuContainer = styled.div`
     position: sticky;
     z-index: 100;
     top: -10px;
+    background: #000;
     @media (max-width: 1000px){
       margin-top: 20px;
+    }
+    @media (max-width: 700px){
+      justify-content: flex-start;
+      margin-top: 10px;
+      top: 0;
+    }
+`
+
+export const WorkCount = styled.div`
+    display: none;
+
+    @media (max-width: 700px){
+      position: absolute;
+      right: 16px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      color: rgba(255, 255, 255, 0.52);
+      font-family: var(--font-sansMedium);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+
+      strong {
+        color: #fff;
+        font-weight: 500;
+      }
     }
 `
 

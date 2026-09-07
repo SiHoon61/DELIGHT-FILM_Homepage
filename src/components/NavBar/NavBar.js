@@ -10,6 +10,12 @@ const Nav = styled.nav`
     border-radius: 30px;
     border: 2px solid #FFF;
     background: #343434;
+    @media (max-width: 700px) {
+        gap: 6px;
+        margin: 14px 8px;
+        border: 0;
+        background: transparent;
+    }
 `;
 
 const NavLink = styled.div`
@@ -24,6 +30,13 @@ const NavLink = styled.div`
     &:hover{
         color: black;
     }
+    @media (max-width: 700px) {
+        margin: 0;
+        padding: 8px 14px;
+        border-radius: 22px;
+        background: #202025;
+        font-size: 14px;
+    }
 `;
 
 const Background = styled.div`
@@ -36,6 +49,9 @@ const Background = styled.div`
     background-color: #eee;
     border-radius: 30px;
     transition: left 0.3s, width 0.3s;
+    @media (max-width: 700px) {
+        height: 34px;
+    }
 `;
 
 const NavBar = ({ onMenuClick }) => {

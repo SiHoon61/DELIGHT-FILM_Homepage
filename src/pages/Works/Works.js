@@ -7,11 +7,15 @@ import VideoBox from '../../components/VideoBox/VideoBox';
 import Broadcast from '../../components/Broadcast/Broadcast';
 import Photo from '../../components/Photo/Photo';
 import Bottom from '../../components/Bottom/Bottom';
+import workList from '../../workList.json';
 
 import {
     HeaderContainer,
     BigText,
+    TitleBlock,
+    TitleSubtitle,
     MenuContainer,
+    WorkCount,
     AnimatedDefaultContainer,
     OnlyAnimatedContainer,
 } from './style';
@@ -81,12 +85,21 @@ const Works = () => {
         });
     };
 
+    const itemCount = selectedMenu === 'Video'
+        ? workList?.videoJson?.length
+        : workList?.broadcastJson?.length;
+
     return (
         <>
             <HeaderContainer>
-                <BigText>
-                    Works
-                </BigText>
+                <TitleBlock>
+                    <BigText>
+                        Works
+                    </BigText>
+                    <TitleSubtitle>
+                        Stories we capture.<br />People we remember.
+                    </TitleSubtitle>
+                </TitleBlock>
                 <Header />
             </HeaderContainer>
             <div>
@@ -94,6 +107,9 @@ const Works = () => {
                     <NavBar
                         onMenuClick={handleMenuClick}
                     />
+                    {selectedMenu !== 'Photo' && (
+                        <WorkCount>All <strong>{itemCount}</strong></WorkCount>
+                    )}
                 </MenuContainer>
                 <TransitionGroup>
                     {renderComponent()}
