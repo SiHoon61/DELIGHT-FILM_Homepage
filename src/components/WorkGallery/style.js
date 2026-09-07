@@ -102,7 +102,8 @@ export const CardOverlay = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: clamp(18px, 2.15vw, 36px);
+  padding: ${({ $desktopLayout }) =>
+    $desktopLayout === "standard" ? "18px" : "clamp(18px, 2.15vw, 36px)"};
   background: linear-gradient(
     180deg,
     rgba(0, 0, 0, 0.04) 24%,
@@ -133,6 +134,14 @@ export const CardMeta = styled.span`
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.75);
 
+  ${({ $desktopLayout }) =>
+    $desktopLayout === "standard" &&
+    `
+      gap: 8px;
+      margin-bottom: 7px;
+      font-size: 10px;
+    `}
+
   @media (max-width: 700px) {
     gap: 7px;
     margin-bottom: 5px;
@@ -159,16 +168,21 @@ export const CardNumber = styled.span`
 `;
 
 export const CardTitle = styled.h2`
-  max-width: calc(100% - 66px);
+  max-width: ${({ $desktopLayout }) =>
+    $desktopLayout === "standard" ? "calc(100% - 48px)" : "calc(100% - 66px)"};
   margin: 0;
   overflow: hidden;
   font-family: var(--font-sansMedium);
-  font-size: clamp(17px, 1.55vw, 27px);
+  font-size: ${({ $desktopLayout }) =>
+    $desktopLayout === "standard"
+      ? "clamp(16px, 1.2vw, 20px)"
+      : "clamp(17px, 1.55vw, 27px)"};
   font-weight: 500;
   line-height: 1.35;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: ${({ $desktopLayout }) =>
+    $desktopLayout === "standard" ? 3 : 2};
 
   @media (max-width: 700px) {
     max-width: 220px;
@@ -179,11 +193,13 @@ export const CardTitle = styled.h2`
 
 export const CardSubtitle = styled.p`
   display: -webkit-box;
-  max-width: calc(100% - 66px);
+  max-width: ${({ $desktopLayout }) =>
+    $desktopLayout === "standard" ? "calc(100% - 48px)" : "calc(100% - 66px)"};
   margin: 7px 0 0;
   overflow: hidden;
   font-family: var(--font-sansRegular);
-  font-size: clamp(13px, 1vw, 16px);
+  font-size: ${({ $desktopLayout }) =>
+    $desktopLayout === "standard" ? "13px" : "clamp(13px, 1vw, 16px)"};
   line-height: 1.45;
   color: rgba(255, 255, 255, 0.68);
   -webkit-box-orient: vertical;
@@ -200,11 +216,15 @@ export const CardSubtitle = styled.p`
 
 export const PlayButton = styled.span`
   position: absolute;
-  right: clamp(18px, 2vw, 32px);
-  bottom: clamp(18px, 2vw, 32px);
+  right: ${({ $desktopLayout }) =>
+    $desktopLayout === "standard" ? "16px" : "clamp(18px, 2vw, 32px)"};
+  bottom: ${({ $desktopLayout }) =>
+    $desktopLayout === "standard" ? "16px" : "clamp(18px, 2vw, 32px)"};
   display: grid;
-  width: clamp(42px, 3.5vw, 56px);
-  height: clamp(42px, 3.5vw, 56px);
+  width: ${({ $desktopLayout }) =>
+    $desktopLayout === "standard" ? "38px" : "clamp(42px, 3.5vw, 56px)"};
+  height: ${({ $desktopLayout }) =>
+    $desktopLayout === "standard" ? "38px" : "clamp(42px, 3.5vw, 56px)"};
   place-items: center;
   border: 2px solid rgba(255, 255, 255, 0.9);
   border-radius: 50%;

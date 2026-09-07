@@ -64,14 +64,18 @@ const WorkGallery = ({ items = [], typeLabel }) => {
                   event.currentTarget.src = `https://img.youtube.com/vi/${item.src}/hqdefault.jpg`;
                 }}
               />
-              <CardOverlay>
-                <CardMeta>
+              <CardOverlay $desktopLayout={desktopLayout}>
+                <CardMeta $desktopLayout={desktopLayout}>
                   {index === 0 ? "Featured" : typeLabel}
                   <CardNumber>{number}</CardNumber>
                 </CardMeta>
-                <CardTitle>{item.title}</CardTitle>
-                {subtitle && <CardSubtitle>{subtitle}</CardSubtitle>}
-                <PlayButton aria-hidden="true">
+                <CardTitle $desktopLayout={desktopLayout}>{item.title}</CardTitle>
+                {subtitle && (
+                  <CardSubtitle $desktopLayout={desktopLayout}>
+                    {subtitle}
+                  </CardSubtitle>
+                )}
+                <PlayButton $desktopLayout={desktopLayout} aria-hidden="true">
                   <PlayIcon />
                 </PlayButton>
               </CardOverlay>
