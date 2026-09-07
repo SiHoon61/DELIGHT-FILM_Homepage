@@ -16,7 +16,6 @@ import {
   ContactField,
   ContactFields,
   FormError,
-  KakaoQuickLink,
   PanelProgress,
   PanelProgressBar,
   SendButton,
@@ -24,8 +23,6 @@ import {
   StepTitle,
   SuccessState,
 } from './style';
-
-const KAKAO_CHAT_URL = 'http://pf.kakao.com/_xgCxkUn/chat';
 
 const SURVEY_STEPS = [
   {
@@ -198,7 +195,6 @@ const ChatSupport = () => {
         <ChatLauncher type="button" onClick={() => setIsOpen((current) => !current)} aria-expanded={isOpen} aria-controls="realtime-consultation">
           실시간 상담
         </ChatLauncher>
-        <KakaoQuickLink href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer" aria-label="카카오톡 상담 열기" />
       </ChatComposer>
     </ChatRoot>
   );

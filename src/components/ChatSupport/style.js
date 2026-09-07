@@ -1,8 +1,5 @@
 import styled, { keyframes } from 'styled-components';
 
-import kakao from '../../assets/Home/kakao.svg';
-import kakaoColor from '../../assets/Home/kakaoColor.svg';
-
 const panelIn = keyframes`
   from { opacity: 0; transform: translateY(10px) scale(.985); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -27,7 +24,6 @@ export const ChatRoot = styled.div`
 export const ChatComposer = styled.div`
   display: flex;
   align-items: center;
-  gap: 9px;
 `;
 
 export const ChatLauncher = styled.button`
@@ -60,36 +56,6 @@ export const ChatLauncher = styled.button`
     min-height: 44px;
     padding: 0 15px;
     font-size: 13px;
-  }
-`;
-
-export const KakaoQuickLink = styled.a`
-  display: block;
-  width: 54px;
-  height: 54px;
-  flex: 0 0 auto;
-  border: 1px solid rgba(255, 255, 255, .32);
-  border-radius: 50%;
-  background-color: #0b0b0b;
-  background-image: url(${kakao});
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 36px;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, .42);
-  transition: border-color .2s, background-image .2s, transform .2s;
-
-  &:hover,
-  &:focus-visible {
-    border-color: #fee500;
-    background-image: url(${kakaoColor});
-    outline: none;
-    transform: translateY(-2px);
-  }
-
-  @media (max-width: 700px) {
-    width: 48px;
-    height: 48px;
-    background-size: 31px;
   }
 `;
 
