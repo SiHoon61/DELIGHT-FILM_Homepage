@@ -5,15 +5,15 @@ import Header from '../../components/Header/Header';
 import NavBar from '../../components/NavBar/NavBar';
 import VideoBox from '../../components/VideoBox/VideoBox';
 import Broadcast from '../../components/Broadcast/Broadcast';
+import Shorts from '../../components/Shorts/Shorts';
 import Photo from '../../components/Photo/Photo';
 import Bottom from '../../components/Bottom/Bottom';
 import workList from '../../workList.json';
+import { excludeShorts, selectShorts } from '../../data/workSections';
 
 import {
     HeaderContainer,
     BigText,
-    TitleBlock,
-    TitleSubtitle,
     MenuContainer,
     WorkCount,
     AnimatedDefaultContainer,
@@ -25,6 +25,7 @@ const Works = () => {
     const refs = {
         Video: useRef(null),
         Broadcast: useRef(null),
+        Shorts: useRef(null),
         Photo: useRef(null),
     };
 
@@ -60,6 +61,19 @@ const Works = () => {
                         </AnimatedDefaultContainer>
                     </CSSTransition>
                 );
+            case 'Shorts':
+                return (
+                    <CSSTransition
+                        key="shorts"
+                        timeout={300}
+                        classNames="fade"
+                        nodeRef={refs.Shorts}
+                    >
+                        <AnimatedDefaultContainer ref={refs.Shorts}>
+                            <Shorts />
+                        </AnimatedDefaultContainer>
+                    </CSSTransition>
+                );
             case 'Photo':
                 return (
                     <CSSTransition
@@ -85,26 +99,28 @@ const Works = () => {
         });
     };
 
-    const itemCount = selectedMenu === 'Video'
-        ? workList?.videoJson?.length
-        : workList?.broadcastJson?.length;
+    const sectionCounts = {
+        Video: excludeShorts(workList?.videoJson || []).length,
+        Broadcast: excludeShorts(workList?.broadcastJson || []).length,
+        Shorts: selectShorts(
+            workList?.videoJson || [],
+            workList?.broadcastJson || []
+        ).length,
+    };
+    const itemCount = sectionCounts[selectedMenu];
 
     return (
         <>
             <HeaderContainer>
-                <TitleBlock>
-                    <BigText>
-                        Works
-                    </BigText>
-                    <TitleSubtitle>
-                        Stories we capture.<br />People we remember.
-                    </TitleSubtitle>
-                </TitleBlock>
+                <BigText>
+                    Works
+                </BigText>
                 <Header />
             </HeaderContainer>
             <div>
                 <MenuContainer onClick={scrollToTop}>
                     <NavBar
+                        active={selectedMenu}
                         onMenuClick={handleMenuClick}
                     />
                     {selectedMenu !== 'Photo' && (

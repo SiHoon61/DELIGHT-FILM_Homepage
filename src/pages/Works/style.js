@@ -6,11 +6,6 @@ export const HeaderContainer = styled.div`
     justify-content: space-between;
 `
 
-export const TitleBlock = styled.div`
-    display: flex;
-    flex-direction: column;
-`
-
 export const BigText = styled.div`
     color: white;
     font-size: 90px;
@@ -23,21 +18,6 @@ export const BigText = styled.div`
     @media (max-width: 600px){
       font-size: 48px;
       margin:10px 0 0 20px;
-    }
-`
-
-export const TitleSubtitle = styled.p`
-    display: none;
-    margin: 0 0 0 22px;
-    color: rgba(255, 255, 255, 0.42);
-    font-family: var(--font-sansMedium);
-    font-size: 9px;
-    line-height: 1.45;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-
-    @media (max-width: 700px){
-      display: block;
     }
 `
 

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 const Nav = styled.nav`
@@ -11,7 +11,7 @@ const Nav = styled.nav`
     border: 2px solid #FFF;
     background: #343434;
     @media (max-width: 700px) {
-        gap: 6px;
+        gap: 4px;
         margin: 14px 8px;
         border: 0;
         background: transparent;
@@ -26,114 +26,51 @@ const NavLink = styled.div`
     cursor: pointer;
     position: relative;
     color: ${({ $active }) => ($active ? '#000' : '#9D9D9D')};
-    transition: color 0.4s;
+    border-radius: 30px;
+    background: ${({ $active }) => ($active ? '#eee' : 'transparent')};
+    transition: color 0.3s, background-color 0.3s;
     &:hover{
-        color: black;
+        color: ${({ $active }) => ($active ? '#000' : '#fff')};
     }
     @media (max-width: 700px) {
         margin: 0;
-        padding: 8px 14px;
+        padding: 8px 10px;
         border-radius: 22px;
-        background: #202025;
-        font-size: 14px;
+        background: ${({ $active }) => ($active ? '#eee' : '#202025')};
+        font-size: 13px;
     }
 `;
 
-const Background = styled.div`
-    position: absolute;
-    top: 50%;
-    left: ${({ $position }) => $position}px;
-    transform: translateY(-50%);
-    width: ${({ width }) => width}px;
-    height: 40px;
-    background-color: #eee;
-    border-radius: 30px;
-    transition: left 0.3s, width 0.3s;
-    @media (max-width: 700px) {
-        height: 34px;
-    }
-`;
-
-const NavBar = ({ onMenuClick }) => {
-    const [active, setActive] = useState('Video');
-    const [hoverPosition, setHoverPosition] = useState(null);
-    const [clickPosition, setClickPosition] = useState(0);
-    const [backgroundWidth, setBackgroundWidth] = useState(95);
-
-    const videoRef = useRef(null);
-    const broadcastRef = useRef(null);
-    const photoRef = useRef(null);
-
-    useEffect(() => {
-        const initialRef = videoRef.current;
-        setClickPosition(initialRef.offsetLeft);
-        setBackgroundWidth(initialRef.offsetWidth);
-    }, []);
-
-    const handleMouseEnter = (position, ref) => {
-        setHoverPosition(position);
-        setBackgroundWidth(ref.current.offsetWidth);
-    };
-
-    const handleMouseLeave = () => {
-        setHoverPosition(null);
-        const activeRef = getActiveRef();
-        setBackgroundWidth(activeRef.current.offsetWidth);
-    };
-
-    const handleClick = (position, name, ref) => {
-        setClickPosition(position);
-        setActive(name);
-        setBackgroundWidth(ref.current.offsetWidth);
+const NavBar = ({ active, onMenuClick }) => {
+    const handleClick = (name) => {
         if (onMenuClick) {
             onMenuClick(name);
         }
     };
 
-    const getPosition = () => {
-        return hoverPosition !== null ? hoverPosition : clickPosition;
-    };
-
-    const getActiveRef = () => {
-        switch (active) {
-            case 'Video':
-                return videoRef;
-            case 'Broadcast':
-                return broadcastRef;
-            case 'Photo':
-                return photoRef;
-            default:
-                return videoRef;
-        }
-    };
-
     return (
         <Nav>
-            <Background $position={getPosition()} width={backgroundWidth} />
             <NavLink
                 $active={active === 'Video'}
-                ref={videoRef}
-                onClick={() => handleClick(videoRef.current.offsetLeft, 'Video', videoRef)}
-                onMouseEnter={() => handleMouseEnter(videoRef.current.offsetLeft, videoRef, 'Video')}
-                onMouseLeave={handleMouseLeave}
+                onClick={() => handleClick('Video')}
             >
                 Video
             </NavLink>
             <NavLink
                 $active={active === 'Broadcast'}
-                ref={broadcastRef}
-                onClick={() => handleClick(broadcastRef.current.offsetLeft, 'Broadcast', broadcastRef)}
-                onMouseEnter={() => handleMouseEnter(broadcastRef.current.offsetLeft, broadcastRef, 'Broadcast')}
-                onMouseLeave={handleMouseLeave}
+                onClick={() => handleClick('Broadcast')}
             >
                 Broadcast
             </NavLink>
             <NavLink
+                $active={active === 'Shorts'}
+                onClick={() => handleClick('Shorts')}
+            >
+                Shorts
+            </NavLink>
+            <NavLink
                 $active={active === 'Photo'}
-                ref={photoRef}
-                onClick={() => handleClick(photoRef.current.offsetLeft, 'Photo', photoRef)}
-                onMouseEnter={() => handleMouseEnter(photoRef.current.offsetLeft, photoRef, 'Photo')}
-                onMouseLeave={handleMouseLeave}
+                onClick={() => handleClick('Photo')}
             >
                 Photo
             </NavLink>
