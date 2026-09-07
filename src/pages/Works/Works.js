@@ -4,12 +4,11 @@ import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import Header from '../../components/Header/Header';
 import NavBar from '../../components/NavBar/NavBar';
 import VideoBox from '../../components/VideoBox/VideoBox';
-import Broadcast from '../../components/Broadcast/Broadcast';
 import Shorts from '../../components/Shorts/Shorts';
 import Photo from '../../components/Photo/Photo';
 import Bottom from '../../components/Bottom/Bottom';
 import workList from '../../workList.json';
-import { excludeShorts, selectShorts } from '../../data/workSections';
+import { createShortsCatalog, createVideoCatalog } from '../../data/workSections';
 
 import {
     HeaderContainer,
@@ -24,7 +23,6 @@ const Works = () => {
     const [selectedMenu, setSelectedMenu] = useState('Video');
     const refs = {
         Video: useRef(null),
-        Broadcast: useRef(null),
         Shorts: useRef(null),
         Photo: useRef(null),
     };
@@ -45,19 +43,6 @@ const Works = () => {
                     >
                         <AnimatedDefaultContainer ref={refs.Video}>
                             <VideoBox />
-                        </AnimatedDefaultContainer>
-                    </CSSTransition>
-                );
-            case 'Broadcast':
-                return (
-                    <CSSTransition
-                        key="broadcast"
-                        timeout={300}
-                        classNames="fade"
-                        nodeRef={refs.Broadcast}
-                    >
-                        <AnimatedDefaultContainer ref={refs.Broadcast}>
-                            <Broadcast />
                         </AnimatedDefaultContainer>
                     </CSSTransition>
                 );
@@ -100,9 +85,11 @@ const Works = () => {
     };
 
     const sectionCounts = {
-        Video: excludeShorts(workList?.videoJson || []).length,
-        Broadcast: excludeShorts(workList?.broadcastJson || []).length,
-        Shorts: selectShorts(
+        Video: createVideoCatalog(
+            workList?.videoJson || [],
+            workList?.broadcastJson || []
+        ).length,
+        Shorts: createShortsCatalog(
             workList?.videoJson || [],
             workList?.broadcastJson || []
         ).length,

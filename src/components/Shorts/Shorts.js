@@ -2,7 +2,11 @@ import React, { useState } from "react";
 
 import videoList from "../../workList.json";
 import spareVideoList from "../../spareWorkList.json";
-import { selectShorts } from "../../data/workSections";
+import {
+  createShortsCatalog,
+  SHORTS_CATEGORIES,
+} from "../../data/workSections";
+import CategoryAccordion from "../CategoryAccordion/CategoryAccordion";
 import ModalPortal from "../../modal/ModalPortal";
 import YoutubeModal from "../../modal/YoutubeModal";
 import {
@@ -19,13 +23,30 @@ import {
 
 const Shorts = () => {
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const source = videoList || spareVideoList || {};
-  const shorts = selectShorts(source.videoJson || [], source.broadcastJson || []);
+  const shortsCatalog = createShortsCatalog(
+    source.videoJson || [],
+    source.broadcastJson || []
+  );
+  const categories = SHORTS_CATEGORIES.filter(
+    (category) =>
+      category === "All" || shortsCatalog.some((item) => item.category === category)
+  );
+  const visibleItems = selectedCategory === "All"
+    ? shortsCatalog
+    : shortsCatalog.filter((item) => item.category === selectedCategory);
 
   return (
     <>
+      <CategoryAccordion
+        categories={categories}
+        selected={selectedCategory}
+        onSelect={setSelectedCategory}
+        items={shortsCatalog}
+      />
       <Grid>
-        {shorts.map((item) => (
+        {visibleItems.map((item) => (
           <Card
             as="button"
             type="button"

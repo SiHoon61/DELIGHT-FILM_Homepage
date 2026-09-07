@@ -66,7 +66,7 @@ const WorkGallery = ({ items = [], typeLabel }) => {
               />
               <CardOverlay $desktopLayout={desktopLayout}>
                 <CardMeta $desktopLayout={desktopLayout}>
-                  {index === 0 ? "Featured" : typeLabel}
+                  {index === 0 ? "Featured" : item.category || typeLabel}
                   <CardNumber>{number}</CardNumber>
                 </CardMeta>
                 <CardTitle $desktopLayout={desktopLayout}>{item.title}</CardTitle>

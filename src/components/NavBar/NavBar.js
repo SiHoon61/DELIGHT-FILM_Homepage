@@ -57,12 +57,6 @@ const NavBar = ({ active, onMenuClick }) => {
                 Video
             </NavLink>
             <NavLink
-                $active={active === 'Broadcast'}
-                onClick={() => handleClick('Broadcast')}
-            >
-                Broadcast
-            </NavLink>
-            <NavLink
                 $active={active === 'Shorts'}
                 onClick={() => handleClick('Shorts')}
             >
