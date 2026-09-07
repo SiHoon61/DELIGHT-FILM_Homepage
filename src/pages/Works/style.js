@@ -64,13 +64,9 @@ export const fadeOut = keyframes`
 `;
 
 export const AnimatedDefaultContainer = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: center;
+    display: block;
     color: white;
-    gap: 2%;
-    padding: 0 20px;
+    padding: 0 clamp(20px, 3vw, 52px);
     margin-bottom: 80px;
     &.fade-enter {
         animation: ${fadeIn} 300ms forwards;
@@ -79,10 +75,10 @@ export const AnimatedDefaultContainer = styled.div`
         animation: ${fadeOut} 300ms forwards;
     }
     @media (max-width: 1000px){
-      padding: 0 10px;
+      padding: 0 20px;
     }
     @media (max-width: 600px){
-      padding: 0 5px;
+      padding: 0 14px;
     }
 `;
 
