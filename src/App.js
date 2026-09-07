@@ -9,6 +9,7 @@ import Works from './pages/Works/Works'
 import About from './pages/About/About';
 import Contact from './pages/Contact/Contact';
 import Admin from './pages/Admin/Admin';
+import ChatSupport from './components/ChatSupport/ChatSupport';
 
 import {
   GlobalStyle,
@@ -17,6 +18,8 @@ import {
 
 function App() {
   const location = useLocation();
+  const isAdminRoute = location.pathname.toLowerCase().startsWith('/admin');
+
   return (
     <>
       <GlobalStyle />
@@ -38,6 +41,7 @@ function App() {
 
         </CSSTransition>
       </TransitionGroup>
+      {!isAdminRoute && <ChatSupport />}
     </>
   );
 }
