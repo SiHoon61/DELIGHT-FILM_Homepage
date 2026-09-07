@@ -71,9 +71,9 @@ export const ChatPanel = styled.section`
   animation: ${panelIn} .2s ease-out both;
 
   @media (max-width: 700px) {
-    width: calc(100vw - 28px);
-    height: min(610px, calc(100svh - 82px));
-    min-height: 430px;
+    width: min(360px, calc(100vw - 40px));
+    height: min(520px, calc(100svh - 112px));
+    min-height: min(400px, calc(100svh - 112px));
     border-radius: 15px;
   }
 
@@ -93,6 +93,13 @@ export const ChatPanelHeader = styled.header`
   > div { display: flex; align-items: center; gap: 10px; }
   > div > span { width: 7px; height: 7px; border-radius: 50%; background: #fee500; }
   strong { font-family: var(--font-sansMedium); font-size: 17px; font-weight: 500; }
+
+  @media (max-width: 700px) {
+    height: 58px;
+    padding: 0 16px;
+
+    strong { font-size: 15px; }
+  }
 `;
 
 export const ChatCloseButton = styled.button`
@@ -121,6 +128,11 @@ export const ChatBody = styled.div`
   padding: 25px 22px 74px;
   background: #f5f5f3;
   color: #171717;
+
+  @media (max-width: 700px) {
+    height: calc(100% - 58px);
+    padding: 20px 17px 62px;
+  }
 `;
 
 export const PanelProgress = styled.div`
@@ -160,6 +172,11 @@ export const StepTitle = styled.h2`
   font-weight: 500;
   line-height: 1.45;
   letter-spacing: -.035em;
+
+  @media (max-width: 700px) {
+    margin-bottom: 17px;
+    font-size: 19px;
+  }
 `;
 
 export const AnswerGrid = styled.div`
@@ -186,6 +203,12 @@ export const AnswerButton = styled.button`
   span { color: #999; }
   &:hover,
   &:focus-visible { border-color: #171717; background: #fafae9; outline: none; transform: translateX(2px); }
+
+  @media (max-width: 700px) {
+    min-height: 48px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
 `;
 
 export const ContactFields = styled.div`
