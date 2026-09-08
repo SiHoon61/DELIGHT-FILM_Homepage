@@ -97,6 +97,15 @@ import {
   PreviewCompare,
   PreviewImage,
   PreviewPlaceholder,
+  PreviewControls,
+  PreviewPageButton,
+  PreviewPageTabs,
+  PreviewPresetButton,
+  PreviewPresetGrid,
+  PreviewPresetSize,
+  PreviewStage,
+  PreviewStageHeader,
+  PreviewViewport,
   RangeControl,
   ResolutionNote,
   RowActions,
@@ -177,6 +186,23 @@ const NAV_ITEMS = [
   { id: "photos", label: "Photo 관리", index: "04" },
   { id: "home", label: "메인 영상", index: "05" },
   { id: "about", label: "About 관리", index: "06" },
+  { id: "preview", label: "반응형 미리보기", index: "07" },
+];
+
+const PREVIEW_PAGES = [
+  { path: "/", label: "Home" },
+  { path: "/Works", label: "Works" },
+  { path: "/About", label: "About" },
+  { path: "/Contact", label: "Contact" },
+];
+
+const VIEWPORT_PRESETS = [
+  { id: "desktop-1920", label: "Desktop Full HD", width: 1920, height: 1080, kind: "desktop" },
+  { id: "desktop-1440", label: "Desktop Standard", width: 1440, height: 900, kind: "desktop" },
+  { id: "laptop-1366", label: "Laptop", width: 1366, height: 768, kind: "desktop" },
+  { id: "mobile-430", label: "Mobile Large", width: 430, height: 932, kind: "mobile" },
+  { id: "mobile-390", label: "Mobile Default", width: 390, height: 844, kind: "mobile" },
+  { id: "mobile-375", label: "Mobile Compact", width: 375, height: 812, kind: "mobile" },
 ];
 
 const SECTION_LABELS = {
@@ -391,6 +417,10 @@ const Admin = () => {
   });
   const [shouldFetchMetadata, setShouldFetchMetadata] = useState(false);
   const metadataRequestRef = useRef(0);
+  const [previewPage, setPreviewPage] = useState("/Works");
+  const [previewPresetId, setPreviewPresetId] = useState("desktop-1920");
+  const [previewStageWidth, setPreviewStageWidth] = useState(0);
+  const previewStageRef = useRef(null);
 
   const parsedVideoId = extractYouTubeId(draft.sourceUrl);
   const currentCategories = draft.section === "shorts"
@@ -445,6 +475,20 @@ const Admin = () => {
   useEffect(() => {
     setCategoryFilter("all");
   }, [section]);
+
+  useEffect(() => {
+    if (activeView !== "preview" || !previewStageRef.current) return undefined;
+    const stage = previewStageRef.current;
+    const measure = () => setPreviewStageWidth(stage.clientWidth);
+    measure();
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", measure);
+      return () => window.removeEventListener("resize", measure);
+    }
+    const observer = new ResizeObserver(measure);
+    observer.observe(stage);
+    return () => observer.disconnect();
+  }, [activeView]);
 
   useEffect(() => {
     if (!isEditorOpen || !shouldFetchMetadata || !parsedVideoId) return undefined;
@@ -966,6 +1010,87 @@ const Admin = () => {
     setAboutImagePreview(URL.createObjectURL(file));
     notify("About 사진 미리보기를 교체했습니다.");
     event.target.value = "";
+  };
+
+  const renderPreview = () => {
+    const preset = VIEWPORT_PRESETS.find((item) => item.id === previewPresetId) || VIEWPORT_PRESETS[0];
+    const stageInnerWidth = previewStageWidth > 0
+      ? Math.max(280, previewStageWidth - 40)
+      : Math.min(980, preset.width);
+    const scale = Math.min(1, stageInnerWidth / preset.width);
+    const frameWidth = Math.round(preset.width * scale);
+    const frameHeight = Math.round(preset.height * scale);
+
+    return (
+      <>
+        <ContentHeader>
+          <div>
+            <PageTitle>반응형 미리보기</PageTitle>
+            <PageDescription>실제 페이지를 다양한 화면 크기로 확인합니다. 프리셋을 바꾸면 같은 페이지가 즉시 다시 렌더링됩니다.</PageDescription>
+          </div>
+        </ContentHeader>
+
+        <PreviewControls>
+          <div>
+            <FormLabel>확인할 페이지</FormLabel>
+            <PreviewPageTabs aria-label="미리보기 페이지 선택">
+              {PREVIEW_PAGES.map((page) => (
+                <PreviewPageButton
+                  type="button"
+                  key={page.path}
+                  $active={previewPage === page.path}
+                  onClick={() => setPreviewPage(page.path)}
+                >
+                  {page.label}
+                </PreviewPageButton>
+              ))}
+            </PreviewPageTabs>
+          </div>
+          <div>
+            <FormLabel>화면 프리셋</FormLabel>
+            <PreviewPresetGrid aria-label="화면 해상도 프리셋">
+              {VIEWPORT_PRESETS.map((item) => (
+                <PreviewPresetButton
+                  type="button"
+                  key={item.id}
+                  $active={previewPresetId === item.id}
+                  onClick={() => setPreviewPresetId(item.id)}
+                >
+                  <span>{item.label}</span>
+                  <PreviewPresetSize $active={previewPresetId === item.id}>{item.width} × {item.height}</PreviewPresetSize>
+                </PreviewPresetButton>
+              ))}
+            </PreviewPresetGrid>
+          </div>
+        </PreviewControls>
+
+        <PreviewStage ref={previewStageRef}>
+          <PreviewStageHeader>
+            <div>
+              <strong>{PREVIEW_PAGES.find((page) => page.path === previewPage)?.label} · {preset.label}</strong>
+              <span>{preset.width} × {preset.height}px · 미리보기 배율 {Math.round(scale * 100)}%</span>
+            </div>
+            <SiteLink href={`${previewPage}?preview=${preset.id}`} target="_blank" rel="noreferrer">새 탭에서 열기 ↗</SiteLink>
+          </PreviewStageHeader>
+          <PreviewViewport>
+            <div style={{ width: frameWidth, height: frameHeight }}>
+              <iframe
+                title={`${previewPage} ${preset.width}x${preset.height} 미리보기`}
+                src={`${previewPage}?preview=${preset.id}`}
+                style={{
+                  display: "block",
+                  width: preset.width,
+                  height: preset.height,
+                  border: 0,
+                  transform: `scale(${scale})`,
+                  transformOrigin: "top left",
+                }}
+              />
+            </div>
+          </PreviewViewport>
+        </PreviewStage>
+      </>
+    );
   };
 
   const renderContent = () => (
@@ -1552,6 +1677,7 @@ const Admin = () => {
           {activeView === "photos" && renderPhotos()}
           {activeView === "home" && renderHome()}
           {activeView === "about" && renderAbout()}
+          {activeView === "preview" && renderPreview()}
         </Content>
       </Main>
 

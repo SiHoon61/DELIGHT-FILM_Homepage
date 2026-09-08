@@ -665,6 +665,104 @@ export const PreviewCompare = styled.div`
   @media (max-width: 520px) { grid-template-columns: 1fr; }
 `;
 
+export const PreviewControls = styled.section`
+  display: grid;
+  gap: 20px;
+  margin-bottom: 18px;
+  padding: 18px 20px;
+  border: 1px solid ${border};
+  border-radius: 14px;
+  background: rgba(255,255,255,.025);
+
+  > div { display: grid; gap: 9px; }
+`;
+
+export const PreviewPageTabs = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+`;
+
+export const PreviewPageButton = styled.button`
+  min-height: 36px;
+  padding: 0 15px;
+  border: 1px solid ${({ $active }) => $active ? "rgba(216,255,101,.62)" : border};
+  border-radius: 8px;
+  background: ${({ $active }) => $active ? "rgba(216,255,101,.12)" : "#111313"};
+  color: ${({ $active }) => $active ? "var(--admin-accent)" : "rgba(255,255,255,.68)"};
+  cursor: pointer;
+  &:hover, &:focus-visible { border-color: rgba(216,255,101,.6); color: #fff; outline: none; }
+`;
+
+export const PreviewPresetGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  @media (max-width: 700px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: 460px) { grid-template-columns: 1fr; }
+`;
+
+export const PreviewPresetButton = styled.button`
+  display: grid;
+  gap: 5px;
+  min-height: 57px;
+  padding: 10px 12px;
+  border: 1px solid ${({ $active }) => $active ? "rgba(216,255,101,.62)" : border};
+  border-radius: 8px;
+  background: ${({ $active }) => $active ? "rgba(216,255,101,.08)" : "#111313"};
+  color: ${({ $active }) => $active ? "#fff" : "rgba(255,255,255,.68)"};
+  text-align: left;
+  cursor: pointer;
+  span { font-size: 12px; }
+  &:hover, &:focus-visible { border-color: rgba(216,255,101,.6); outline: none; }
+`;
+
+export const PreviewPresetSize = styled.small`
+  color: ${({ $active }) => $active ? "var(--admin-accent)" : muted};
+  font-size: 10px;
+`;
+
+export const PreviewStage = styled.section`
+  overflow: hidden;
+  border: 1px solid ${border};
+  border-radius: 14px;
+  background: #080909;
+`;
+
+export const PreviewStageHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid ${border};
+  strong, span { display: block; }
+  strong { color: #fff; font-size: 14px; font-weight: 500; }
+  span { margin-top: 5px; color: ${muted}; font-size: 11px; }
+  ${SiteLink} { flex: 0 0 auto; }
+  @media (max-width: 560px) { align-items: stretch; flex-direction: column; }
+`;
+
+export const PreviewViewport = styled.div`
+  display: flex;
+  min-height: 430px;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: auto;
+  padding: 20px;
+  background:
+    linear-gradient(135deg, rgba(216,255,101,.04), transparent 38%),
+    #101212;
+  > div {
+    flex: 0 0 auto;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 8px;
+    background: #000;
+    box-shadow: 0 20px 55px rgba(0,0,0,.45);
+  }
+`;
+
 export const PreviewCard = styled.article`
   position: relative;
   overflow: hidden;
