@@ -90,8 +90,11 @@ const ChatSupport = () => {
       const socialRect = socialLinks.getBoundingClientRect();
       const gap = 16;
       const restingBottom = window.innerWidth <= 700 ? 16 : 26;
-      const isDocked = socialRect.top <= window.innerHeight - restingBottom + gap;
       const socialTop = socialRect.top + window.scrollY;
+      const hasFooterBelowFold = socialTop > window.innerHeight;
+      const isDocked =
+        hasFooterBelowFold &&
+        socialRect.top <= window.innerHeight - restingBottom + gap;
       const rootHeight = chatRootRef.current?.offsetHeight || (window.innerWidth <= 700 ? 44 : 50);
       const top = Math.max(
         0,
