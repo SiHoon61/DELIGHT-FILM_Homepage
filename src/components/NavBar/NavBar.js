@@ -54,7 +54,7 @@ const NavLink = styled.div`
             left: 28%;
             height: 2px;
             border-radius: 99px;
-            background: linear-gradient(to right, #FFD700, #FF8C00);
+            background: #FEE500;
             opacity: ${({ $active }) => ($active ? 1 : 0)};
         }
 
@@ -87,7 +87,7 @@ const Background = styled.div`
         left: 24%;
         height: 2px;
         border-radius: 99px;
-        background: linear-gradient(to right, #FFD700, #FF8C00);
+        background: #FEE500;
     }
 
     @media (prefers-reduced-motion: reduce) {
