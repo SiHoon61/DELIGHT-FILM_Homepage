@@ -1193,30 +1193,27 @@ export const PhotoToolbar = styled.div`
 `;
 
 export const PhotoGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 10px;
-  padding: 20px;
-  @media (max-width: 1200px) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  @media (max-width: 720px) { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 12px; }
+  padding: 10px;
 `;
 
 export const PhotoCard = styled.article`
   position: relative;
   min-width: 0;
   overflow: hidden;
-  aspect-ratio: 4 / 5;
-  border: 1px solid ${border};
-  border-radius: 8px;
   background: #161818;
   cursor: grab;
+  outline: none;
   &:active { cursor: grabbing; }
+
+  &:hover .photo-admin-overlay,
+  &:focus-within .photo-admin-overlay,
+  &:focus .photo-admin-overlay { opacity: 1; }
 `;
 
 export const PhotoImage = styled.img`
+  display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
 `;
 
 export const PhotoOverlay = styled.div`
@@ -1229,6 +1226,8 @@ export const PhotoOverlay = styled.div`
   background: linear-gradient(transparent, rgba(0,0,0,.82));
   color: rgba(255,255,255,.72);
   font-size: 10px;
+  opacity: 0;
+  transition: opacity 160ms ease;
 
   button {
     min-height: 26px;
@@ -1240,6 +1239,8 @@ export const PhotoOverlay = styled.div`
     font-size: 10px;
     cursor: pointer;
   }
+
+  @media (hover: none) { opacity: 1; }
 `;
 
 export const ManagementGrid = styled.div`

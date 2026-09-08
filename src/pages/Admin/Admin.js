@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 
 import workList from "../../workList.json";
 import mainVideo from "../../assets/Home/mainVideo.mp4";
@@ -1508,26 +1509,32 @@ const Admin = () => {
       <Panel>
         <PhotoToolbar>
           <div><strong>{photos.length}</strong><span>전체 사진</span></div>
-          <p>상태 버튼을 눌러 공개 여부를 변경할 수 있습니다.</p>
+          <p>실제 Photo 탭과 동일한 반응형 배치입니다. 사진에 마우스를 올리면 관리 버튼이 표시됩니다.</p>
         </PhotoToolbar>
         <PhotoGrid>
-          {photos.map((photo, index) => (
-            <PhotoCard
-              key={photo.id}
-              draggable
-              onDragStart={() => setPhotoDragIndex(index)}
-              onDragOver={(event) => event.preventDefault()}
-              onDrop={() => reorderPhotos(index)}
-            >
-              <PhotoImage src={photo.src} alt="" />
-              <PhotoOverlay>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <button type="button" onClick={() => togglePhotoStatus(photo.id)}>
-                  {photo.status === "published" ? "공개" : photo.status === "draft" ? "임시" : "숨김"}
-                </button>
-              </PhotoOverlay>
-            </PhotoCard>
-          ))}
+          <ResponsiveMasonry columnsCountBreakPoints={{ 750: 2, 1000: 3 }}>
+            <Masonry gutter="10px">
+              {photos.map((photo, index) => (
+                <PhotoCard
+                  key={photo.id}
+                  draggable
+                  tabIndex="0"
+                  onDragStart={() => setPhotoDragIndex(index)}
+                  onDragEnd={() => setPhotoDragIndex(null)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={() => reorderPhotos(index)}
+                >
+                  <PhotoImage src={photo.src} alt={photo.name || `Photo ${index + 1}`} />
+                  <PhotoOverlay className="photo-admin-overlay">
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <button type="button" onClick={() => togglePhotoStatus(photo.id)}>
+                      {photo.status === "published" ? "공개" : photo.status === "draft" ? "임시" : "숨김"}
+                    </button>
+                  </PhotoOverlay>
+                </PhotoCard>
+              ))}
+            </Masonry>
+          </ResponsiveMasonry>
         </PhotoGrid>
       </Panel>
     </>
