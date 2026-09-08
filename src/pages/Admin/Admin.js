@@ -335,6 +335,7 @@ const Admin = () => {
   const [section, setSection] = useState("video");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [contentSort, setContentSort] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [selectedWorkIds, setSelectedWorkIds] = useState([]);
@@ -397,7 +398,7 @@ const Admin = () => {
 
   const filteredWorks = useMemo(() => {
     if (section === "photo") return [];
-    return works.filter((item) => {
+    const matches = works.filter((item) => {
       const matchesSection = item.section === section;
       const matchesStatus = statusFilter === "all" || item.status === statusFilter;
       const keyword = search.trim().toLowerCase();
@@ -406,7 +407,29 @@ const Admin = () => {
         (item.subtitle || "").toLowerCase().includes(keyword);
       return matchesSection && matchesStatus && matchesSearch;
     });
-  }, [section, search, statusFilter, works]);
+    if (contentSort === "default") return matches;
+
+    const categoryOrder = new Map(
+      (section === "shorts" ? shortsCategories : videoCategories)
+        .map((category, index) => [category, index])
+    );
+    return matches
+      .map((item, index) => ({ item, index }))
+      .sort((left, right) => {
+        if (contentSort === "category") {
+          const categoryDifference =
+            (categoryOrder.get(left.item.category) ?? Number.MAX_SAFE_INTEGER) -
+            (categoryOrder.get(right.item.category) ?? Number.MAX_SAFE_INTEGER);
+          if (categoryDifference !== 0) return categoryDifference;
+        }
+        if (contentSort === "title" || contentSort === "category") {
+          const titleDifference = left.item.title.localeCompare(right.item.title, "ko");
+          if (titleDifference !== 0) return titleDifference;
+        }
+        return left.index - right.index;
+      })
+      .map(({ item }) => item);
+  }, [contentSort, section, search, shortsCategories, statusFilter, videoCategories, works]);
 
   const totalPages = pageSize === "all"
     ? 1
@@ -431,7 +454,7 @@ const Admin = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [section, search, statusFilter, pageSize]);
+  }, [contentSort, section, search, statusFilter, pageSize]);
 
   useEffect(() => {
     setSelectedWorkIds([]);
@@ -977,6 +1000,15 @@ const Admin = () => {
             ))}
           </Tabs>
           <ButtonGroup>
+            <Select
+              aria-label="콘텐츠 정렬"
+              value={contentSort}
+              onChange={(event) => setContentSort(event.target.value)}
+            >
+              <option value="default">기본 순서</option>
+              <option value="category">카테고리별</option>
+              <option value="title">제목순</option>
+            </Select>
             <Select
               aria-label="공개 상태 필터"
               value={statusFilter}
