@@ -87,29 +87,45 @@ export const SnsBox = styled.div`
 `
 
 export const KakaoImg = styled.a`
+    position: relative;
     display: block;
     width: 36px;
     height: 36px;
-    margin-right: 16px;
+    margin-right: 20px;
     background-image: url(${kakao});
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
     text-decoration: none;
     cursor: pointer;
-    transition: transform 0.2s;
+
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: url(${kakaoColor});
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
 
     &:hover,
     &:focus-visible {
-        background-image: url(${kakaoColor});
-        transform: translateY(-2px);
         outline: none;
+    }
+
+    &:hover::after,
+    &:focus-visible::after {
+        opacity: 1;
     }
 
     @media (max-width: 700px) {
         width: 24px;
         height: 24px;
-        margin-right: 14px;
+        margin-right: 15px;
     }
 `
 
