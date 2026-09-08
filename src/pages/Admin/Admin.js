@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import workList from "../../workList.json";
 import mainVideo from "../../assets/Home/mainVideo.mp4";
@@ -21,6 +21,9 @@ import {
   AssetPreview,
   Brand,
   BrandMark,
+  BulkActionBar,
+  BulkApplyButton,
+  BulkSelection,
   ButtonGroup,
   CategoryCard,
   CategoryCount,
@@ -37,6 +40,9 @@ import {
   DimensionButton,
   DimensionControl,
   EmptyState,
+  EditorPreviewPanel,
+  EditorPreviewTitle,
+  EditorWorkspace,
   Field,
   FileInput,
   FormGrid,
@@ -62,6 +68,8 @@ import {
   MetricLabel,
   MetricRow,
   MetricValue,
+  MetadataNotice,
+  MetadataSummary,
   MobileHeader,
   MobileNav,
   MobileOrderNote,
@@ -69,6 +77,10 @@ import {
   NavButton,
   PageDescription,
   PageTitle,
+  PaginationBar,
+  PaginationButton,
+  PaginationInfo,
+  PaginationPages,
   Panel,
   PhotoCard,
   PhotoGrid,
@@ -76,12 +88,19 @@ import {
   PhotoOverlay,
   PhotoToolbar,
   PreviewFrame,
+  PreviewCard,
+  PreviewCardImage,
+  PreviewCardInfo,
+  PreviewCardMeta,
+  PreviewCardPlay,
+  PreviewCompare,
   PreviewImage,
   PreviewPlaceholder,
   RangeControl,
   ResolutionNote,
   RowActions,
   SearchInput,
+  SelectionCheckbox,
   Select,
   Sidebar,
   SiteLink,
@@ -165,6 +184,133 @@ const SECTION_LABELS = {
   photo: "Photo",
 };
 
+const DEFAULT_PAGE_SIZE = 9;
+
+let youtubeIframeApiPromise;
+
+const loadYouTubeIframeApi = () => {
+  if (window.YT?.Player) return Promise.resolve(window.YT);
+  if (youtubeIframeApiPromise) return youtubeIframeApiPromise;
+
+  youtubeIframeApiPromise = new Promise((resolve, reject) => {
+    const timeout = window.setTimeout(() => reject(new Error("YouTube Player API timeout")), 8000);
+    const previousReadyHandler = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      window.clearTimeout(timeout);
+      if (typeof previousReadyHandler === "function") previousReadyHandler();
+      resolve(window.YT);
+    };
+
+    if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+      const script = document.createElement("script");
+      script.src = "https://www.youtube.com/iframe_api";
+      script.async = true;
+      script.onerror = () => {
+        window.clearTimeout(timeout);
+        youtubeIframeApiPromise = undefined;
+        reject(new Error("YouTube Player API load failed"));
+      };
+      document.head.appendChild(script);
+    }
+  });
+
+  return youtubeIframeApiPromise;
+};
+
+const formatDuration = (seconds) => {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "";
+  const rounded = Math.round(seconds);
+  const hours = Math.floor(rounded / 3600);
+  const minutes = Math.floor((rounded % 3600) / 60);
+  const remainingSeconds = rounded % 60;
+  return hours > 0
+    ? `${hours}:${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`
+    : `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
+};
+
+const readYouTubeDuration = async (videoId) => {
+  const YouTube = await loadYouTubeIframeApi();
+
+  return new Promise((resolve, reject) => {
+    const host = document.createElement("div");
+    const playerTarget = document.createElement("div");
+    host.setAttribute("aria-hidden", "true");
+    host.style.cssText = "position:fixed;left:-9999px;top:-9999px;width:200px;height:200px;opacity:.001;pointer-events:none;";
+    host.appendChild(playerTarget);
+    document.body.appendChild(host);
+
+    let player;
+    let interval;
+    let settled = false;
+    const cleanup = () => {
+      window.clearInterval(interval);
+      try { player?.destroy(); } catch {}
+      host.remove();
+    };
+    const finish = (value, error) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      if (error) reject(error);
+      else resolve(value);
+    };
+    const timeout = window.setTimeout(() => finish("", new Error("영상 재생시간을 확인하지 못했습니다.")), 7000);
+
+    player = new YouTube.Player(playerTarget, {
+      width: 200,
+      height: 200,
+      videoId,
+      playerVars: {
+        autoplay: 0,
+        controls: 0,
+        playsinline: 1,
+        origin: window.location.origin,
+      },
+      events: {
+        onReady: (event) => {
+          let attempts = 0;
+          const readDuration = () => {
+            attempts += 1;
+            const duration = event.target.getDuration();
+            if (duration > 0) {
+              window.clearTimeout(timeout);
+              finish(formatDuration(duration));
+            } else if (attempts === 2) {
+              event.target.mute();
+              event.target.playVideo();
+            } else if (attempts > 12) {
+              window.clearTimeout(timeout);
+              finish("");
+            }
+          };
+          readDuration();
+          interval = window.setInterval(readDuration, 400);
+        },
+        onError: () => {
+          window.clearTimeout(timeout);
+          finish("", new Error("YouTube 영상을 불러올 수 없습니다."));
+        },
+      },
+    });
+  });
+};
+
+const fetchYouTubeMetadata = async (videoId, signal) => {
+  const canonicalUrl = `https://www.youtube.com/watch?v=${videoId}`;
+  const response = await fetch(
+    `https://www.youtube.com/oembed?url=${encodeURIComponent(canonicalUrl)}&format=json`,
+    { signal }
+  );
+  if (!response.ok) throw new Error("YouTube 영상 정보를 불러올 수 없습니다.");
+  const data = await response.json();
+  const duration = await readYouTubeDuration(videoId).catch(() => "");
+  return {
+    title: data.title || "",
+    thumbnail: data.thumbnail_url || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+    duration,
+  };
+};
+
 const extractYouTubeId = (value) => {
   if (!value) return "";
   const trimmed = value.trim();
@@ -189,6 +335,11 @@ const Admin = () => {
   const [section, setSection] = useState("video");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [selectedWorkIds, setSelectedWorkIds] = useState([]);
+  const [bulkCategory, setBulkCategory] = useState("");
+  const [bulkStatus, setBulkStatus] = useState("");
   const [works, setWorks] = useState(INITIAL_WORKS);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingWorkId, setEditingWorkId] = useState(null);
@@ -231,6 +382,13 @@ const Admin = () => {
     status: "draft",
   });
   const [formError, setFormError] = useState("");
+  const [metadataState, setMetadataState] = useState({
+    status: "idle",
+    message: "",
+    thumbnail: "",
+  });
+  const [shouldFetchMetadata, setShouldFetchMetadata] = useState(false);
+  const metadataRequestRef = useRef(0);
 
   const parsedVideoId = extractYouTubeId(draft.sourceUrl);
   const currentCategories = draft.section === "shorts"
@@ -249,6 +407,96 @@ const Admin = () => {
       return matchesSection && matchesStatus && matchesSearch;
     });
   }, [section, search, statusFilter, works]);
+
+  const totalPages = pageSize === "all"
+    ? 1
+    : Math.max(1, Math.ceil(filteredWorks.length / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const pageStart = pageSize === "all" ? 0 : (safeCurrentPage - 1) * pageSize;
+  const paginatedWorks = pageSize === "all"
+    ? filteredWorks
+    : filteredWorks.slice(pageStart, pageStart + pageSize);
+  const paginatedWorkIds = paginatedWorks.map((item) => item.id);
+  const allPageItemsSelected = paginatedWorkIds.length > 0 &&
+    paginatedWorkIds.every((id) => selectedWorkIds.includes(id));
+  const bulkCategories = section === "shorts" ? shortsCategories : videoCategories;
+
+  const visiblePageNumbers = useMemo(() => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, index) => index + 1);
+    }
+    const start = Math.min(Math.max(safeCurrentPage - 2, 1), totalPages - 4);
+    return Array.from({ length: 5 }, (_, index) => start + index);
+  }, [safeCurrentPage, totalPages]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [section, search, statusFilter, pageSize]);
+
+  useEffect(() => {
+    setSelectedWorkIds([]);
+    setBulkCategory("");
+    setBulkStatus("");
+  }, [section, search, statusFilter]);
+
+  useEffect(() => {
+    if (!isEditorOpen || !shouldFetchMetadata || !parsedVideoId) return undefined;
+
+    const duplicate = works.find((item) =>
+      item.src === parsedVideoId && item.id !== editingWorkId
+    );
+    if (duplicate) {
+      setMetadataState({
+        status: "duplicate",
+        message: `이미 등록된 영상입니다: ${duplicate.title}`,
+        thumbnail: `https://img.youtube.com/vi/${parsedVideoId}/mqdefault.jpg`,
+      });
+      setFormError("같은 YouTube 영상은 중복 등록할 수 없습니다.");
+      return undefined;
+    }
+
+    const requestId = metadataRequestRef.current + 1;
+    metadataRequestRef.current = requestId;
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setMetadataState({
+        status: "loading",
+        message: "YouTube 정보를 불러오는 중입니다.",
+        thumbnail: `https://img.youtube.com/vi/${parsedVideoId}/mqdefault.jpg`,
+      });
+      setFormError("");
+
+      try {
+        const metadata = await fetchYouTubeMetadata(parsedVideoId, controller.signal);
+        if (metadataRequestRef.current !== requestId) return;
+        setDraft((current) => ({
+          ...current,
+          title: metadata.title || current.title,
+          duration: metadata.duration,
+        }));
+        setMetadataState({
+          status: "success",
+          message: metadata.duration
+            ? "제목·썸네일·재생시간을 자동 입력했습니다."
+            : "제목과 썸네일을 입력했습니다. 재생시간은 직접 확인해주세요.",
+          thumbnail: metadata.thumbnail,
+        });
+        setShouldFetchMetadata(false);
+      } catch (error) {
+        if (error.name === "AbortError" || metadataRequestRef.current !== requestId) return;
+        setMetadataState({
+          status: "error",
+          message: error.message || "YouTube 정보를 불러오지 못했습니다.",
+          thumbnail: `https://img.youtube.com/vi/${parsedVideoId}/mqdefault.jpg`,
+        });
+      }
+    }, 450);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [editingWorkId, isEditorOpen, parsedVideoId, shouldFetchMetadata, works]);
 
   const counts = {
     video: works.filter((item) => item.section === "video").length,
@@ -279,6 +527,50 @@ const Admin = () => {
     window.setTimeout(() => setToast(""), 2200);
   };
 
+  const toggleWorkSelection = (id) => {
+    setSelectedWorkIds((current) =>
+      current.includes(id)
+        ? current.filter((selectedId) => selectedId !== id)
+        : [...current, id]
+    );
+  };
+
+  const toggleCurrentPageSelection = () => {
+    setSelectedWorkIds((current) => {
+      if (allPageItemsSelected) {
+        return current.filter((id) => !paginatedWorkIds.includes(id));
+      }
+      return Array.from(new Set([...current, ...paginatedWorkIds]));
+    });
+  };
+
+  const applyBulkChanges = () => {
+    if (!selectedWorkIds.length) {
+      notify("변경할 영상을 먼저 선택해주세요.");
+      return;
+    }
+    if (!bulkCategory && !bulkStatus) {
+      notify("변경할 카테고리 또는 공개 상태를 선택해주세요.");
+      return;
+    }
+
+    const selectedIds = new Set(selectedWorkIds);
+    const applyChanges = (item) => selectedIds.has(item.id)
+      ? {
+          ...item,
+          ...(bulkCategory ? { category: bulkCategory } : {}),
+          ...(bulkStatus ? { status: bulkStatus } : {}),
+        }
+      : item;
+
+    setWorks((current) => current.map(applyChanges));
+    setLayoutItems((current) => current.map(applyChanges));
+    notify(`${selectedWorkIds.length}개 영상의 정보를 일괄 변경했습니다.`);
+    setSelectedWorkIds([]);
+    setBulkCategory("");
+    setBulkStatus("");
+  };
+
   const openEditor = () => {
     setEditingWorkId(null);
     setDraft({
@@ -288,8 +580,11 @@ const Admin = () => {
       section: section === "photo" ? "video" : section,
       category: section === "shorts" ? shortsCategories[0] : videoCategories[0],
       status: "draft",
+      duration: "",
     });
     setFormError("");
+    setMetadataState({ status: "idle", message: "", thumbnail: "" });
+    setShouldFetchMetadata(false);
     setIsEditorOpen(true);
   };
 
@@ -302,8 +597,15 @@ const Admin = () => {
       section: item.section,
       category: item.category,
       status: item.status,
+      duration: item.duration || "",
     });
     setFormError("");
+    setMetadataState({
+      status: "idle",
+      message: "링크를 변경하면 YouTube 정보를 다시 확인합니다.",
+      thumbnail: `https://img.youtube.com/vi/${item.src}/mqdefault.jpg`,
+    });
+    setShouldFetchMetadata(false);
     setIsEditorOpen(true);
   };
 
@@ -311,6 +613,8 @@ const Admin = () => {
     setIsEditorOpen(false);
     setEditingWorkId(null);
     setFormError("");
+    setMetadataState({ status: "idle", message: "", thumbnail: "" });
+    setShouldFetchMetadata(false);
   };
 
   const updateDraft = (field, value) => {
@@ -333,6 +637,13 @@ const Admin = () => {
       setFormError("작품 제목을 입력해주세요.");
       return;
     }
+    const duplicate = works.find((item) =>
+      item.src === parsedVideoId && item.id !== editingWorkId
+    );
+    if (duplicate) {
+      setFormError(`이미 등록된 영상입니다: ${duplicate.title}`);
+      return;
+    }
 
     const savedItem = {
       src: parsedVideoId,
@@ -341,6 +652,7 @@ const Admin = () => {
       section: draft.section,
       category: draft.category,
       status: draft.status,
+      duration: draft.duration || "",
     };
 
     if (editingWorkId) {
@@ -683,6 +995,47 @@ const Admin = () => {
           </ButtonGroup>
         </Toolbar>
 
+        {section !== "photo" && (
+          <BulkActionBar>
+            <BulkSelection>
+              <SelectionCheckbox
+                type="checkbox"
+                checked={allPageItemsSelected}
+                onChange={toggleCurrentPageSelection}
+                aria-label="현재 페이지 영상 전체 선택"
+              />
+              <span><strong>{selectedWorkIds.length}</strong>개 선택</span>
+              {selectedWorkIds.length > 0 && (
+                <button type="button" onClick={() => setSelectedWorkIds([])}>선택 해제</button>
+              )}
+            </BulkSelection>
+            <ButtonGroup>
+              <Select
+                aria-label="선택 영상 카테고리 일괄 변경"
+                value={bulkCategory}
+                onChange={(event) => setBulkCategory(event.target.value)}
+              >
+                <option value="">카테고리 변경</option>
+                {bulkCategories.map((category) => <option key={category}>{category}</option>)}
+              </Select>
+              <Select
+                aria-label="선택 영상 공개 상태 일괄 변경"
+                value={bulkStatus}
+                onChange={(event) => setBulkStatus(event.target.value)}
+              >
+                <option value="">공개 상태 변경</option>
+                <option value="published">공개</option>
+                <option value="draft">임시저장</option>
+              </Select>
+              <BulkApplyButton
+                type="button"
+                disabled={!selectedWorkIds.length || (!bulkCategory && !bulkStatus)}
+                onClick={applyBulkChanges}
+              >일괄 적용</BulkApplyButton>
+            </ButtonGroup>
+          </BulkActionBar>
+        )}
+
         {section === "photo" ? (
           <EmptyState>
             <strong>Photo 전용 관리 화면에서 수정할 수 있습니다.</strong>
@@ -693,6 +1046,14 @@ const Admin = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>
+                  <SelectionCheckbox
+                    type="checkbox"
+                    checked={allPageItemsSelected}
+                    onChange={toggleCurrentPageSelection}
+                    aria-label="현재 페이지 영상 전체 선택"
+                  />
+                </TableHead>
                 <TableHead>작품</TableHead>
                 <TableHead>카테고리</TableHead>
                 <TableHead>상태</TableHead>
@@ -701,8 +1062,16 @@ const Admin = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredWorks.slice(0, 9).map((item, index) => (
+              {paginatedWorks.map((item, index) => (
                 <TableRow key={item.id}>
+                  <TableCell>
+                    <SelectionCheckbox
+                      type="checkbox"
+                      checked={selectedWorkIds.includes(item.id)}
+                      onChange={() => toggleWorkSelection(item.id)}
+                      aria-label={`${item.title} 선택`}
+                    />
+                  </TableCell>
                   <TableCell>
                     <VideoIdentity>
                       <Thumbnail
@@ -722,7 +1091,7 @@ const Admin = () => {
                       {item.status === "published" ? "공개" : "임시저장"}
                     </Badge>
                   </TableCell>
-                  <TableCell>{String(index + 1).padStart(2, "0")}</TableCell>
+                  <TableCell>{String(pageStart + index + 1).padStart(2, "0")}</TableCell>
                   <TableCell>
                     <RowActions>
                       <IconButton
@@ -736,6 +1105,48 @@ const Admin = () => {
               ))}
             </TableBody>
           </Table>
+        )}
+        {section !== "photo" && filteredWorks.length > 0 && (
+          <PaginationBar>
+            <PaginationInfo>
+              <strong>{filteredWorks.length}</strong>개 중 {pageStart + 1}–{pageSize === "all" ? filteredWorks.length : Math.min(pageStart + pageSize, filteredWorks.length)}개 표시
+              <Select
+                aria-label="페이지당 콘텐츠 수"
+                value={pageSize}
+                onChange={(event) => setPageSize(event.target.value === "all" ? "all" : Number(event.target.value))}
+              >
+                <option value={9}>9개씩</option>
+                <option value={18}>18개씩</option>
+                <option value={36}>36개씩</option>
+                <option value="all">전체 보기</option>
+              </Select>
+            </PaginationInfo>
+            {pageSize !== "all" && totalPages > 1 && (
+              <PaginationPages aria-label="콘텐츠 페이지 이동">
+                <PaginationButton
+                  type="button"
+                  disabled={safeCurrentPage === 1}
+                  onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                  aria-label="이전 페이지"
+                >←</PaginationButton>
+                {visiblePageNumbers.map((page) => (
+                  <PaginationButton
+                    type="button"
+                    key={page}
+                    $active={safeCurrentPage === page}
+                    aria-current={safeCurrentPage === page ? "page" : undefined}
+                    onClick={() => setCurrentPage(page)}
+                  >{page}</PaginationButton>
+                ))}
+                <PaginationButton
+                  type="button"
+                  disabled={safeCurrentPage === totalPages}
+                  onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                  aria-label="다음 페이지"
+                >→</PaginationButton>
+              </PaginationPages>
+            )}
+          </PaginationBar>
         )}
       </Panel>
     </>
@@ -1108,7 +1519,7 @@ const Admin = () => {
       </Main>
 
       {isEditorOpen && (
-        <Aside role="dialog" aria-modal="true" aria-labelledby="editor-title">
+        <Aside $wide role="dialog" aria-modal="true" aria-labelledby="editor-title">
           <AsideHeader>
             <div>
               <PageTitle as="h2" id="editor-title">
@@ -1123,22 +1534,28 @@ const Admin = () => {
             <IconButton type="button" onClick={closeEditor} aria-label="닫기">×</IconButton>
           </AsideHeader>
           <form onSubmit={saveDraft}>
-            <FormGrid as="div">
+            <EditorWorkspace>
+              <div>
+                <FormGrid as="div">
               <Field>
                 <FormLabel htmlFor="source-url">YouTube 링크</FormLabel>
                 <Input
                   id="source-url"
                   value={draft.sourceUrl}
-                  onChange={(event) => updateDraft("sourceUrl", event.target.value)}
+                  onChange={(event) => {
+                    updateDraft("sourceUrl", event.target.value);
+                    setShouldFetchMetadata(true);
+                    setMetadataState({ status: "idle", message: "", thumbnail: "" });
+                  }}
                   placeholder="https://youtu.be/..."
                   autoFocus
                 />
-                <HelpText>일반 영상, Shorts, 공유 링크를 모두 인식합니다.</HelpText>
+                <HelpText>일반 영상, Shorts, 공유 링크를 모두 인식하고 중복 여부를 확인합니다.</HelpText>
               </Field>
 
               <PreviewFrame>
                 {parsedVideoId ? (
-                  <PreviewImage src={`https://img.youtube.com/vi/${parsedVideoId}/mqdefault.jpg`} alt="영상 미리보기" />
+                  <PreviewImage src={metadataState.thumbnail || `https://img.youtube.com/vi/${parsedVideoId}/mqdefault.jpg`} alt="영상 미리보기" />
                 ) : (
                   <PreviewPlaceholder>
                     <span>▶</span>
@@ -1146,6 +1563,23 @@ const Admin = () => {
                   </PreviewPlaceholder>
                 )}
               </PreviewFrame>
+
+              {metadataState.message && (
+                <MetadataNotice $status={metadataState.status} role="status">
+                  <span aria-hidden="true" />
+                  {metadataState.message}
+                </MetadataNotice>
+              )}
+
+              {parsedVideoId && (
+                <GhostButton
+                  type="button"
+                  onClick={() => {
+                    setShouldFetchMetadata(true);
+                    metadataRequestRef.current += 1;
+                  }}
+                >YouTube 정보 다시 불러오기</GhostButton>
+              )}
 
               <Field>
                 <FormLabel htmlFor="work-title">제목</FormLabel>
@@ -1155,6 +1589,16 @@ const Admin = () => {
                 <FormLabel htmlFor="work-subtitle">서브타이틀</FormLabel>
                 <TextArea id="work-subtitle" value={draft.subtitle} onChange={(event) => updateDraft("subtitle", event.target.value)} placeholder="선택 입력" rows="3" />
               </Field>
+              <MetadataSummary>
+                <div>
+                  <span>영상 ID</span>
+                  <strong>{parsedVideoId || "—"}</strong>
+                </div>
+                <div>
+                  <span>재생시간</span>
+                  <strong>{draft.duration || "확인 전"}</strong>
+                </div>
+              </MetadataSummary>
               <FormGrid as="div" $columns="2">
                 <Field>
                   <FormLabel htmlFor="work-section">구분</FormLabel>
@@ -1178,7 +1622,54 @@ const Admin = () => {
                 </Select>
               </Field>
               {formError && <HelpText $error>{formError}</HelpText>}
-            </FormGrid>
+                </FormGrid>
+              </div>
+              <EditorPreviewPanel>
+                <EditorPreviewTitle>
+                  <div>
+                    <strong>공개 카드 미리보기</strong>
+                    <span>입력한 정보가 PC·모바일 카드에 어떻게 보이는지 확인합니다.</span>
+                  </div>
+                  <span>LIVE</span>
+                </EditorPreviewTitle>
+                <PreviewCompare>
+                  <div>
+                    <PreviewCard $variant={draft.section === "shorts" ? "shorts" : "desktop"}>
+                      {parsedVideoId ? (
+                        <PreviewCardImage
+                          src={metadataState.thumbnail || `https://img.youtube.com/vi/${parsedVideoId}/mqdefault.jpg`}
+                          alt="PC 카드 썸네일 미리보기"
+                        />
+                      ) : <PreviewCardImage as="div" />}
+                      <PreviewCardInfo>
+                        <PreviewCardMeta>{draft.category || "CATEGORY"} · PC</PreviewCardMeta>
+                        <strong>{draft.title || "작품 제목"}</strong>
+                        <span>{draft.subtitle || "서브타이틀을 입력하면 여기에 표시됩니다."}</span>
+                        <PreviewCardPlay aria-hidden="true">▶</PreviewCardPlay>
+                      </PreviewCardInfo>
+                    </PreviewCard>
+                    <small>PC 카드 · {draft.section === "shorts" ? "9:16" : "16:9"}</small>
+                  </div>
+                  <div>
+                    <PreviewCard $variant={draft.section === "shorts" ? "shorts" : "mobile"}>
+                      {parsedVideoId ? (
+                        <PreviewCardImage
+                          src={metadataState.thumbnail || `https://img.youtube.com/vi/${parsedVideoId}/mqdefault.jpg`}
+                          alt="모바일 카드 썸네일 미리보기"
+                        />
+                      ) : <PreviewCardImage as="div" />}
+                      <PreviewCardInfo>
+                        <PreviewCardMeta>{draft.category || "CATEGORY"} · MOBILE</PreviewCardMeta>
+                        <strong>{draft.title || "작품 제목"}</strong>
+                        <span>{draft.subtitle || "서브타이틀을 입력하면 여기에 표시됩니다."}</span>
+                        <PreviewCardPlay aria-hidden="true">▶</PreviewCardPlay>
+                      </PreviewCardInfo>
+                    </PreviewCard>
+                    <small>모바일 카드 · {draft.section === "shorts" ? "9:16" : "3:1"}</small>
+                  </div>
+                </PreviewCompare>
+              </EditorPreviewPanel>
+            </EditorWorkspace>
             <AsideFooter>
               <GhostButton type="button" onClick={closeEditor}>취소</GhostButton>
               <ActionButton type="submit">

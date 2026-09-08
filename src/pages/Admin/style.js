@@ -384,12 +384,64 @@ export const TableHeader = styled.div``;
 export const TableBody = styled.div``;
 export const TableRow = styled.div`
   display: grid;
-  grid-template-columns: minmax(320px, 1.8fr) minmax(110px, .7fr) 110px 70px 48px;
+  grid-template-columns: 44px minmax(320px, 1.8fr) minmax(110px, .7fr) 110px 70px 48px;
   align-items: center;
   min-height: 82px;
   border-bottom: 1px solid ${border};
   &:last-child { border-bottom: 0; }
   ${TableHeader} & { min-height: 45px; color: ${muted}; font-size: 11px; letter-spacing: .08em; }
+`;
+
+export const SelectionCheckbox = styled.input`
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: var(--admin-accent);
+  cursor: pointer;
+`;
+
+export const BulkActionBar = styled.div`
+  display: flex;
+  min-width: 740px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 18px;
+  border-bottom: 1px solid ${border};
+  background: rgba(216,255,101,.025);
+  ${Select} { width: auto; min-width: 148px; min-height: 36px; }
+  @media (max-width: 860px) { min-width: 680px; }
+`;
+
+export const BulkSelection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: ${muted};
+  font-size: 12px;
+  strong { color: #fff; font-weight: 500; }
+  button {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: rgba(255,255,255,.5);
+    font-size: 11px;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+`;
+
+export const BulkApplyButton = styled.button`
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(216,255,101,.52);
+  border-radius: 7px;
+  background: rgba(216,255,101,.11);
+  color: var(--admin-accent);
+  font-size: 12px;
+  cursor: pointer;
+  &:hover:not(:disabled), &:focus-visible { background: rgba(216,255,101,.18); outline: none; }
+  &:disabled { border-color: ${border}; color: rgba(255,255,255,.28); cursor: default; }
 `;
 
 export const TableHead = styled.div`padding: 0 18px;`;
@@ -458,11 +510,57 @@ export const EmptyState = styled.div`
   span { color: ${muted}; font-size: 13px; }
 `;
 
+export const PaginationBar = styled.div`
+  display: flex;
+  min-width: 680px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px 18px;
+  border-top: 1px solid ${border};
+  @media (max-width: 760px) {
+    min-width: 0;
+    align-items: stretch;
+    flex-direction: column;
+  }
+`;
+
+export const PaginationInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: ${muted};
+  font-size: 12px;
+  strong { color: #fff; font-weight: 500; }
+  ${Select} { width: 112px; min-height: 36px; margin-left: 4px; }
+`;
+
+export const PaginationPages = styled.nav`
+  display: flex;
+  align-items: center;
+  gap: 5px;
+`;
+
+export const PaginationButton = styled.button`
+  display: grid;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid ${({ $active }) => $active ? "rgba(216,255,101,.68)" : border};
+  border-radius: 7px;
+  background: ${({ $active }) => $active ? "rgba(216,255,101,.12)" : "#111313"};
+  color: ${({ $active }) => $active ? "var(--admin-accent)" : "rgba(255,255,255,.68)"};
+  cursor: pointer;
+  &:hover:not(:disabled), &:focus-visible { border-color: rgba(216,255,101,.48); color: #fff; outline: none; }
+  &:disabled { cursor: default; opacity: .28; }
+`;
+
 export const Aside = styled.aside`
   position: fixed;
   inset: 0 0 0 auto;
   z-index: 100;
-  width: min(470px, 100%);
+  width: ${({ $wide }) => $wide ? "min(980px, 100%)" : "min(470px, 100%)"};
   overflow-y: auto;
   padding: 28px;
   border-left: 1px solid rgba(255,255,255,.16);
@@ -472,7 +570,7 @@ export const Aside = styled.aside`
   &::before {
     content: "";
     position: fixed;
-    inset: 0 min(470px, 100%) 0 0;
+    inset: 0 ${({ $wide }) => $wide ? "min(980px, 100%)" : "min(470px, 100%)"} 0 0;
     background: rgba(0,0,0,.52);
     pointer-events: none;
   }
@@ -515,6 +613,142 @@ export const PreviewPlaceholder = styled.div`
   text-align: center;
   font-size: 12px;
   span { color: #fff; font-size: 20px; }
+`;
+
+export const EditorWorkspace = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, .95fr);
+  align-items: start;
+  gap: 28px;
+  @media (max-width: 820px) { grid-template-columns: 1fr; }
+`;
+
+export const EditorPreviewPanel = styled.section`
+  position: sticky;
+  top: 0;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid ${border};
+  border-radius: 12px;
+  background: rgba(255,255,255,.025);
+  @media (max-width: 820px) { position: static; }
+`;
+
+export const EditorPreviewTitle = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  strong, span { display: block; }
+  strong { color: #fff; font-size: 14px; font-weight: 500; }
+  span { margin-top: 5px; color: ${muted}; font-size: 11px; line-height: 1.45; }
+  > span { margin-top: 1px; color: var(--admin-accent); font-size: 10px; letter-spacing: .1em; }
+`;
+
+export const PreviewCompare = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 12px;
+  > div { min-width: 0; }
+  small { display: block; margin-top: 8px; color: ${muted}; font-size: 10px; text-align: center; }
+  @media (max-width: 520px) { grid-template-columns: 1fr; }
+`;
+
+export const PreviewCard = styled.article`
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: ${({ $variant }) => $variant === "mobile" ? "3 / 1" : "16 / 9"};
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 8px;
+  background: #151717;
+  ${({ $variant }) => $variant === "shorts" && "aspect-ratio: 9 / 16;"}
+`;
+
+export const PreviewCardImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: linear-gradient(135deg, #252a2a, #0a0b0b);
+`;
+
+export const PreviewCardInfo = styled.div`
+  position: absolute;
+  inset: auto 0 0;
+  padding: 34px 10px 10px;
+  background: linear-gradient(transparent, rgba(0,0,0,.9));
+  span, strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  strong { color: #fff; font-size: 12px; font-weight: 500; }
+  > span:not(.preview-card-meta) { margin-top: 5px; color: rgba(255,255,255,.68); font-size: 10px; }
+`;
+
+export const PreviewCardMeta = styled.span`
+  margin-bottom: 5px;
+  color: rgba(255,255,255,.7);
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+`;
+
+export const PreviewCardPlay = styled.i`
+  position: absolute;
+  right: 9px;
+  bottom: 10px;
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.72);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 9px;
+  font-style: normal;
+`;
+
+export const MetadataNotice = styled.div`
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 11px;
+  border: 1px solid ${({ $status }) =>
+    $status === "duplicate" || $status === "error"
+      ? "rgba(255,118,118,.3)"
+      : $status === "success" ? "rgba(216,255,101,.26)" : border};
+  border-radius: 8px;
+  background: rgba(255,255,255,.025);
+  color: ${({ $status }) =>
+    $status === "duplicate" || $status === "error"
+      ? "#ff9898"
+      : "rgba(255,255,255,.65)"};
+  font-size: 11px;
+  line-height: 1.5;
+  > span {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: ${({ $status }) =>
+      $status === "duplicate" || $status === "error" ? "#ff7676" : "var(--admin-accent)"};
+    box-shadow: ${({ $status }) => $status === "loading" ? "0 0 0 5px rgba(216,255,101,.08)" : "none"};
+  }
+`;
+
+export const MetadataSummary = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  > div {
+    min-width: 0;
+    padding: 11px 12px;
+    border: 1px solid ${border};
+    border-radius: 8px;
+    background: rgba(255,255,255,.02);
+  }
+  span, strong { display: block; }
+  span { margin-bottom: 6px; color: ${muted}; font-size: 10px; }
+  strong { overflow: hidden; color: #fff; font-size: 12px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
 `;
 
 export const AsideFooter = styled.div`
