@@ -33,7 +33,6 @@ const REFERENCE_SUBTITLES = {
 
 const WorkGallery = ({ items = [], typeLabel }) => {
   const [selectedVideo, setSelectedVideo] = useState(null);
-  const total = String(items.length).padStart(2, "0");
 
   return (
     <>
@@ -68,7 +67,7 @@ const WorkGallery = ({ items = [], typeLabel }) => {
               <CardOverlay $desktopLayout={desktopLayout}>
                 <CardMeta $desktopLayout={desktopLayout}>
                   {index === 0 ? "Featured" : item.category || typeLabel}
-                  <CardNumber>{number} — {total}</CardNumber>
+                  <CardNumber>{number}</CardNumber>
                 </CardMeta>
                 <CardTitle $desktopLayout={desktopLayout}>{item.title}</CardTitle>
                 {subtitle && (

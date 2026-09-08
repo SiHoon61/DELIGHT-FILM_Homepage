@@ -31,7 +31,6 @@ const Shorts = ({ selectedCategory = "All" }) => {
   const visibleItems = selectedCategory === "All"
     ? shortsCatalog
     : shortsCatalog.filter((item) => item.category === selectedCategory);
-  const total = String(visibleItems.length).padStart(2, "0");
 
   return (
     <>
@@ -61,7 +60,7 @@ const Shorts = ({ selectedCategory = "All" }) => {
               <CardMeta>
                 <span>{item.category || "Shorts"}</span>
                 <CardNumber>
-                  {String(index + 1).padStart(2, "0")} — {total}
+                  {String(index + 1).padStart(2, "0")}
                 </CardNumber>
               </CardMeta>
               <CardTitle>{item.title}</CardTitle>
