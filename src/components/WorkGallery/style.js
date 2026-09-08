@@ -46,6 +46,17 @@ export const Card = styled.article`
   cursor: pointer;
   isolation: isolate;
 
+  @media (min-width: 701px) and (hover: hover) {
+    transition: transform 240ms cubic-bezier(0.2, 0.75, 0.25, 1), border-color 180ms ease, box-shadow 240ms ease;
+
+    &:hover {
+      z-index: 3;
+      border-color: rgba(255, 255, 255, 0.46);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+      transform: translateY(-2px) scale(1.012);
+    }
+  }
+
   &::after {
     content: "";
     position: absolute;
@@ -63,7 +74,7 @@ export const Card = styled.article`
 
   &:hover img,
   &:focus-visible img {
-    transform: scale(1.025);
+    transform: scale(1.012);
   }
 
   &:focus-visible {
@@ -205,6 +216,22 @@ export const CardSubtitle = styled.p`
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 
+  @media (min-width: 701px) {
+    max-height: 0;
+    margin-top: 0;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: max-height 220ms ease, margin-top 220ms ease, opacity 180ms ease, transform 220ms ease;
+
+    ${Card}:hover &,
+    ${Card}:focus-visible & {
+      max-height: 3em;
+      margin-top: 7px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   @media (max-width: 700px) {
     max-width: 210px;
     margin-top: 4px;
@@ -230,6 +257,15 @@ export const PlayButton = styled.span`
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.12);
   backdrop-filter: blur(4px);
+  opacity: 0.5;
+  transition: opacity 180ms ease, border-color 180ms ease, background-color 180ms ease;
+
+  ${Card}:hover &,
+  ${Card}:focus-visible & {
+    opacity: 1;
+    border-color: #fee500;
+    background: rgba(0, 0, 0, 0.28);
+  }
 
   @media (max-width: 700px) {
     right: 14px;
@@ -237,6 +273,7 @@ export const PlayButton = styled.span`
     width: 30px;
     height: 30px;
     border-width: 1px;
+    opacity: 1;
   }
 `;
 
@@ -247,6 +284,12 @@ export const PlayIcon = styled.span`
   border-top: 7px solid transparent;
   border-bottom: 7px solid transparent;
   border-left: 11px solid #fff;
+  transition: border-left-color 180ms ease;
+
+  ${Card}:hover &,
+  ${Card}:focus-visible & {
+    border-left-color: #fee500;
+  }
 
   @media (max-width: 700px) {
     border-top-width: 5px;

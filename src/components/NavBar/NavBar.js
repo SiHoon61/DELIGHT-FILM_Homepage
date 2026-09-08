@@ -14,7 +14,7 @@ const Nav = styled.nav`
     background: #343434;
     @media (max-width: 700px) {
         gap: 4px;
-        margin: 14px 8px;
+        margin: 8px 0;
         border: 0;
         background: transparent;
     }
@@ -37,19 +37,26 @@ const NavLink = styled.div`
     }
     @media (max-width: 700px) {
         margin: 0;
-        padding: 8px 10px;
+        padding: 7px 9px;
         box-sizing: border-box;
         border: 1px solid transparent;
         border-radius: 22px;
         color: ${({ $active }) => ($active ? '#000' : '#9D9D9D')};
-        background: ${({ $active }) =>
-            ($active
-                ? `linear-gradient(#eeeeec, #eeeeec) padding-box,
-                   linear-gradient(to right, #FFD700, #FF8C00) border-box`
-                : '#202025')};
-        box-shadow: ${({ $active }) =>
-            ($active ? '0 3px 12px rgba(255, 166, 0, 0.16)' : 'none')};
+        background: ${({ $active }) => ($active ? '#eeeeec' : '#202025')};
+        box-shadow: none;
         font-size: 13px;
+
+        &::after {
+            content: '';
+            position: absolute;
+            right: 28%;
+            bottom: 3px;
+            left: 28%;
+            height: 2px;
+            border-radius: 99px;
+            background: linear-gradient(to right, #FFD700, #FF8C00);
+            opacity: ${({ $active }) => ($active ? 1 : 0)};
+        }
 
         &:hover {
             color: ${({ $active }) => ($active ? '#000' : '#fff')};
@@ -64,18 +71,24 @@ const Background = styled.div`
     width: ${({ $width }) => $width}px;
     height: 40px;
     box-sizing: border-box;
-    border: 2px solid transparent;
     border-radius: 30px;
-    background:
-        linear-gradient(#eeeeec, #eeeeec) padding-box,
-        linear-gradient(to right, #FFD700, #FF8C00) border-box;
-    box-shadow:
-        0 0 0 1px rgba(255, 255, 255, 0.08),
-        0 4px 14px rgba(255, 166, 0, 0.16);
+    background: #eeeeec;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
     opacity: ${({ $ready }) => ($ready ? 1 : 0)};
     transform: translateY(-50%);
     transition: left 0.3s ease, width 0.3s ease, opacity 0.15s ease;
     pointer-events: none;
+
+    &::after {
+        content: '';
+        position: absolute;
+        right: 24%;
+        bottom: 3px;
+        left: 24%;
+        height: 2px;
+        border-radius: 99px;
+        background: linear-gradient(to right, #FFD700, #FF8C00);
+    }
 
     @media (prefers-reduced-motion: reduce) {
         transition: none;

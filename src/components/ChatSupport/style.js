@@ -27,7 +27,10 @@ export const ChatComposer = styled.div`
 `;
 
 export const ChatLauncher = styled.button`
+  display: inline-flex;
   min-height: 50px;
+  align-items: center;
+  gap: 9px;
   padding: 0 21px;
   border: 1px solid rgba(255, 255, 255, .3);
   border-radius: 999px;
@@ -42,14 +45,35 @@ export const ChatLauncher = styled.button`
   cursor: pointer;
   transition: border-color .2s, background-color .2s, color .2s, transform .2s;
 
+  &::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: #fee500;
+    box-shadow: 0 0 0 3px rgba(254, 229, 0, .12);
+  }
+
   &:hover,
-  &:focus-visible,
+  &:focus-visible {
+    border-color: #fee500;
+    background: rgba(11, 11, 11, .96);
+    color: #fff;
+    outline: none;
+    transform: translateY(-2px);
+  }
+
   &[aria-expanded='true'] {
     border-color: #fee500;
     background: #fee500;
     color: #111;
-    outline: none;
     transform: translateY(-2px);
+
+    &::before {
+      background: #111;
+      box-shadow: none;
+    }
   }
 
   @media (max-width: 700px) {

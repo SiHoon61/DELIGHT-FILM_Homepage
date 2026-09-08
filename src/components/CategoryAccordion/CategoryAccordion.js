@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Chevron,
   Container,
+  CurrentCount,
   CurrentLabel,
   Menu,
   MenuButton,
@@ -37,7 +38,10 @@ const CategoryAccordion = ({ categories, selected, onSelect, items }) => {
         aria-controls="work-category-menu"
         onClick={() => setIsOpen((open) => !open)}
       >
-        <CurrentLabel>{selected}</CurrentLabel>
+        <span>
+          <CurrentLabel>{selected}</CurrentLabel>
+          <CurrentCount>{String(countFor(selected)).padStart(2, "0")}</CurrentCount>
+        </span>
         <Chevron $isOpen={isOpen} aria-hidden="true" />
       </MenuButton>
 

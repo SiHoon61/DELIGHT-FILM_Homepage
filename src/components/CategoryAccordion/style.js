@@ -1,12 +1,17 @@
 import styled from "styled-components";
 
 export const Container = styled.div`
-  position: relative;
+  position: absolute;
+  right: clamp(20px, 3vw, 52px);
   display: flex;
   justify-content: flex-end;
-  margin: 0 0 20px auto;
-  width: min(230px, 60vw);
+  width: min(210px, 42vw);
   z-index: 30;
+
+  @media (max-width: 700px) {
+    right: 12px;
+    width: min(128px, 34vw);
+  }
 `;
 
 export const MenuButton = styled.button`
@@ -22,9 +27,20 @@ export const MenuButton = styled.button`
   color: #fff;
   cursor: pointer;
 
+  > span {
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+  }
+
   &:focus-visible {
     outline: 2px solid #fff;
     outline-offset: 3px;
+  }
+
+  @media (max-width: 700px) {
+    min-height: 38px;
+    padding: 0 13px;
   }
 `;
 
@@ -32,6 +48,14 @@ export const CurrentLabel = styled.span`
   font-family: var(--font-sansMedium);
   font-size: 14px;
   letter-spacing: 0.08em;
+  text-transform: uppercase;
+`;
+
+export const CurrentCount = styled.span`
+  color: rgba(255, 255, 255, 0.42);
+  font-family: var(--font-sansRegular);
+  font-size: 10px;
+  letter-spacing: 0.12em;
 `;
 
 export const Chevron = styled.span`

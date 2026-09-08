@@ -25,6 +25,9 @@ export const MenuContainer = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+    min-height: 70px;
+    padding: 0 clamp(20px, 3vw, 52px);
+    box-sizing: border-box;
     margin-top: 40px;
     position: -webkit-sticky; /* Safari */
     position: sticky;
@@ -36,30 +39,16 @@ export const MenuContainer = styled.div`
     }
     @media (max-width: 700px){
       justify-content: flex-start;
+      min-height: 52px;
+      padding: 0 12px;
       margin-top: 10px;
       top: 0;
-    }
-`
-
-export const WorkCount = styled.div`
-    display: none;
-
-    @media (max-width: 700px){
-      position: absolute;
-      right: 16px;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      color: rgba(255, 255, 255, 0.52);
-      font-family: var(--font-sansMedium);
-      font-size: 10px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-
-      strong {
-        color: #fff;
-        font-weight: 500;
-      }
+      border-bottom: 1px solid ${({ $mediaMode }) =>
+        $mediaMode ? 'rgba(255, 255, 255, 0.08)' : 'transparent'};
+      background: ${({ $mediaMode }) =>
+        $mediaMode ? 'rgba(0, 0, 0, 0.82)' : 'transparent'};
+      backdrop-filter: ${({ $mediaMode }) => ($mediaMode ? 'blur(10px)' : 'none')};
+      -webkit-backdrop-filter: ${({ $mediaMode }) => ($mediaMode ? 'blur(10px)' : 'none')};
     }
 `
 

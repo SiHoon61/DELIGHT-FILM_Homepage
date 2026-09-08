@@ -25,6 +25,14 @@ export const Card = styled.article`
   text-align: left;
   cursor: pointer;
 
+  @media (min-width: 701px) and (hover: hover) {
+    transition: transform 240ms cubic-bezier(0.2, 0.75, 0.25, 1);
+
+    &:hover {
+      transform: translateY(-2px) scale(1.015);
+    }
+  }
+
   &:focus-visible {
     outline: 2px solid #fff;
     outline-offset: 5px;
@@ -32,7 +40,7 @@ export const Card = styled.article`
 
   &:hover img,
   &:focus-visible img {
-    transform: scale(1.025);
+    transform: scale(1.01);
   }
 `;
 
@@ -45,6 +53,13 @@ export const ImageFrame = styled.span`
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   background: #111;
+  transition: border-color 180ms ease, box-shadow 240ms ease;
+
+  ${Card}:hover &,
+  ${Card}:focus-visible & {
+    border-color: rgba(255, 255, 255, 0.46);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.26);
+  }
 `;
 
 export const CardImage = styled.img`
@@ -66,6 +81,15 @@ export const PlayButton = styled.span`
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.24);
   backdrop-filter: blur(4px);
+  opacity: 0.5;
+  transition: opacity 180ms ease, background-color 180ms ease;
+
+  ${Card}:hover &,
+  ${Card}:focus-visible & {
+    opacity: 1;
+    border-color: #fee500;
+    background: rgba(0, 0, 0, 0.38);
+  }
 
   @media (max-width: 700px) {
     right: 9px;
@@ -73,6 +97,7 @@ export const PlayButton = styled.span`
     width: 31px;
     height: 31px;
     border-width: 1px;
+    opacity: 1;
   }
 `;
 
@@ -83,11 +108,27 @@ export const PlayIcon = styled.span`
   border-top: 6px solid transparent;
   border-bottom: 6px solid transparent;
   border-left: 9px solid #fff;
+  transition: border-left-color 180ms ease;
+
+  ${Card}:hover &,
+  ${Card}:focus-visible & {
+    border-left-color: #fee500;
+  }
 `;
 
 export const CardInfo = styled.span`
   display: block;
   padding-top: 12px;
+`;
+
+export const CardMeta = styled.span`
+  display: block;
+  margin-bottom: 6px;
+  color: rgba(255, 255, 255, 0.48);
+  font-family: var(--font-sansBold);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 `;
 
 export const CardTitle = styled.h2`
@@ -116,6 +157,21 @@ export const CardSubtitle = styled.p`
   color: rgba(255, 255, 255, 0.55);
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+
+  @media (min-width: 701px) {
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(5px);
+    transition: opacity 180ms ease, transform 220ms ease, visibility 0s linear 220ms;
+
+    ${Card}:hover &,
+    ${Card}:focus-visible & {
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 0s;
+    }
+  }
 
   @media (max-width: 700px) {
     font-size: 12px;
