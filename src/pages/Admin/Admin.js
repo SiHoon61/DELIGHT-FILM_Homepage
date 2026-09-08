@@ -37,6 +37,7 @@ import {
   ControlButton,
   DeviceButton,
   DeviceSwitch,
+  DangerButton,
   DimensionButton,
   DimensionControl,
   EmptyState,
@@ -685,6 +686,23 @@ const Admin = () => {
           ? "작품이 공개 목록에 추가되었습니다."
           : "임시저장 목록에 추가되었습니다."
     );
+  };
+
+  const deleteWork = () => {
+    if (!editingWorkId) return;
+    const target = works.find((item) => item.id === editingWorkId);
+    if (!target) return;
+
+    const confirmed = window.confirm(
+      `“${target.title}” 영상을 삭제할까요? 콘텐츠 목록과 화면 배치에서 함께 제거됩니다.`
+    );
+    if (!confirmed) return;
+
+    setWorks((current) => current.filter((item) => item.id !== editingWorkId));
+    setLayoutItems((current) => current.filter((item) => item.id !== editingWorkId));
+    setSelectedWorkIds((current) => current.filter((id) => id !== editingWorkId));
+    closeEditor();
+    notify("영상을 삭제했습니다.");
   };
 
   const addCategory = (targetSection) => {
@@ -1690,6 +1708,9 @@ const Admin = () => {
               </EditorPreviewPanel>
             </EditorWorkspace>
             <AsideFooter>
+              {editingWorkId && (
+                <DangerButton type="button" onClick={deleteWork}>영상 삭제</DangerButton>
+              )}
               <GhostButton type="button" onClick={closeEditor}>취소</GhostButton>
               <ActionButton type="submit">
                 {editingWorkId ? "수정사항 저장" : "저장하기"}

@@ -215,6 +215,15 @@ export const GhostButton = styled.button`
   &:hover { background: rgba(255,255,255,.07); }
 `;
 
+export const DangerButton = styled.button`
+  ${buttonBase};
+  margin-right: auto;
+  border: 1px solid rgba(255,118,118,.42);
+  background: rgba(255,118,118,.06);
+  color: #ff9898;
+  &:hover { border-color: rgba(255,118,118,.72); background: rgba(255,118,118,.12); }
+`;
+
 export const SiteLink = styled.a`
   ${buttonBase};
   display: inline-flex;
