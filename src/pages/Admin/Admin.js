@@ -191,6 +191,7 @@ const Admin = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [works, setWorks] = useState(INITIAL_WORKS);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [editingWorkId, setEditingWorkId] = useState(null);
   const [device, setDevice] = useState("desktop");
   const [layoutSection, setLayoutSection] = useState("video");
   const [layoutCategory, setLayoutCategory] = useState("All");
@@ -217,6 +218,9 @@ const Admin = () => {
   const [shortsCategories, setShortsCategories] = useState(
     SHORTS_CATEGORIES.filter((category) => category !== "All")
   );
+  const [draggedCategory, setDraggedCategory] = useState(null);
+  const [categoryEditor, setCategoryEditor] = useState(null);
+  const [categoryFormError, setCategoryFormError] = useState("");
   const [newCategory, setNewCategory] = useState({ video: "", shorts: "" });
   const [draft, setDraft] = useState({
     sourceUrl: "",
@@ -276,6 +280,7 @@ const Admin = () => {
   };
 
   const openEditor = () => {
+    setEditingWorkId(null);
     setDraft({
       sourceUrl: "",
       title: "",
@@ -286,6 +291,26 @@ const Admin = () => {
     });
     setFormError("");
     setIsEditorOpen(true);
+  };
+
+  const openWorkEditor = (item) => {
+    setEditingWorkId(item.id);
+    setDraft({
+      sourceUrl: `https://youtu.be/${item.src}`,
+      title: item.title,
+      subtitle: item.subtitle || "",
+      section: item.section,
+      category: item.category,
+      status: item.status,
+    });
+    setFormError("");
+    setIsEditorOpen(true);
+  };
+
+  const closeEditor = () => {
+    setIsEditorOpen(false);
+    setEditingWorkId(null);
+    setFormError("");
   };
 
   const updateDraft = (field, value) => {
@@ -309,8 +334,7 @@ const Admin = () => {
       return;
     }
 
-    const newItem = {
-      id: `preview-${Date.now()}`,
+    const savedItem = {
       src: parsedVideoId,
       title: draft.title.trim(),
       subtitle: draft.subtitle.trim(),
@@ -318,10 +342,31 @@ const Admin = () => {
       category: draft.category,
       status: draft.status,
     };
-    setWorks((current) => [newItem, ...current]);
+
+    if (editingWorkId) {
+      setWorks((current) => current.map((item) =>
+        item.id === editingWorkId ? { ...item, ...savedItem } : item
+      ));
+      setLayoutItems((current) => current.map((item) =>
+        item.id === editingWorkId ? { ...item, ...savedItem } : item
+      ));
+    } else {
+      const newItem = {
+        id: `preview-${Date.now()}`,
+        ...savedItem,
+      };
+      setWorks((current) => [newItem, ...current]);
+    }
+
     setSection(draft.section);
-    setIsEditorOpen(false);
-    notify(draft.status === "published" ? "작품이 공개 목록에 추가되었습니다." : "임시저장 목록에 추가되었습니다.");
+    closeEditor();
+    notify(
+      editingWorkId
+        ? "작품 상세 정보를 수정했습니다."
+        : draft.status === "published"
+          ? "작품이 공개 목록에 추가되었습니다."
+          : "임시저장 목록에 추가되었습니다."
+    );
   };
 
   const addCategory = (targetSection) => {
@@ -331,6 +376,96 @@ const Admin = () => {
     setter((current) => current.includes(value) ? current : [...current, value]);
     setNewCategory((current) => ({ ...current, [targetSection]: "" }));
     notify(`${value} 카테고리를 추가했습니다.`);
+  };
+
+  const reorderCategory = (targetSection, dropCategory) => {
+    if (
+      !draggedCategory ||
+      draggedCategory.section !== targetSection ||
+      draggedCategory.name === dropCategory
+    ) return;
+
+    const setter = targetSection === "video" ? setVideoCategories : setShortsCategories;
+    setter((current) => {
+      const next = [...current];
+      const dragIndex = next.indexOf(draggedCategory.name);
+      const dropIndex = next.indexOf(dropCategory);
+      if (dragIndex < 0 || dropIndex < 0) return current;
+      const [moved] = next.splice(dragIndex, 1);
+      next.splice(dropIndex, 0, moved);
+      return next;
+    });
+    setDraggedCategory(null);
+    notify("카테고리 순서를 변경했습니다.");
+  };
+
+  const openCategoryEditor = (targetSection, category) => {
+    setCategoryEditor({
+      section: targetSection,
+      originalName: category,
+      name: category,
+    });
+    setCategoryFormError("");
+  };
+
+  const closeCategoryEditor = () => {
+    setCategoryEditor(null);
+    setCategoryFormError("");
+  };
+
+  const saveCategoryName = (event) => {
+    event.preventDefault();
+    if (!categoryEditor) return;
+
+    const nextName = categoryEditor.name.trim();
+    if (!nextName) {
+      setCategoryFormError("카테고리 이름을 입력해주세요.");
+      return;
+    }
+
+    const targetCategories = categoryEditor.section === "video"
+      ? videoCategories
+      : shortsCategories;
+    const isDuplicate = targetCategories.some((category) =>
+      category !== categoryEditor.originalName &&
+      category.toLowerCase() === nextName.toLowerCase()
+    );
+    if (isDuplicate) {
+      setCategoryFormError("이미 사용 중인 카테고리 이름입니다.");
+      return;
+    }
+
+    const { section: targetSection, originalName } = categoryEditor;
+    const setter = targetSection === "video" ? setVideoCategories : setShortsCategories;
+    setter((current) => current.map((category) =>
+      category === originalName ? nextName : category
+    ));
+    setWorks((current) => current.map((item) =>
+      item.section === targetSection && item.category === originalName
+        ? { ...item, category: nextName }
+        : item
+    ));
+    setLayoutItems((current) => current.map((item) =>
+      item.section === targetSection && item.category === originalName
+        ? { ...item, category: nextName }
+        : item
+    ));
+    setDraft((current) =>
+      current.section === targetSection && current.category === originalName
+        ? { ...current, category: nextName }
+        : current
+    );
+    setLayoutDraft((current) =>
+      current?.section === targetSection && current.category === originalName
+        ? { ...current, category: nextName }
+        : current
+    );
+    if (layoutSection === targetSection && layoutCategory === originalName) {
+      setLayoutCategory(nextName);
+    }
+
+    closeCategoryEditor();
+    notify(`${originalName} 카테고리를 ${nextName}(으)로 변경했습니다.`);
   };
 
   const reorderLayout = (dropId) => {
@@ -590,7 +725,11 @@ const Admin = () => {
                   <TableCell>{String(index + 1).padStart(2, "0")}</TableCell>
                   <TableCell>
                     <RowActions>
-                      <IconButton type="button" aria-label={`${item.title} 수정`}>•••</IconButton>
+                      <IconButton
+                        type="button"
+                        aria-label={`${item.title} 상세 수정`}
+                        onClick={() => openWorkEditor(item)}
+                      >•••</IconButton>
                     </RowActions>
                   </TableCell>
                 </TableRow>
@@ -625,11 +764,24 @@ const Admin = () => {
             </ContentHeader>
             <CategoryList>
               {categories.map((category, index) => (
-                <CategoryItem key={category}>
-                  <span className="handle">⠿</span>
+                <CategoryItem
+                  key={category}
+                  draggable
+                  $dragging={draggedCategory?.section === key && draggedCategory?.name === category}
+                  aria-grabbed={draggedCategory?.section === key && draggedCategory?.name === category}
+                  onDragStart={() => setDraggedCategory({ section: key, name: category })}
+                  onDragEnd={() => setDraggedCategory(null)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={() => reorderCategory(key, category)}
+                >
+                  <span className="handle" title="드래그하여 순서 변경">⠿</span>
                   <strong>{category}</strong>
                   <span>{String(index + 1).padStart(2, "0")}</span>
-                  <IconButton type="button" aria-label={`${category} 메뉴`}>•••</IconButton>
+                  <IconButton
+                    type="button"
+                    aria-label={`${category} 이름 수정`}
+                    onClick={() => openCategoryEditor(key, category)}
+                  >•••</IconButton>
                 </CategoryItem>
               ))}
             </CategoryList>
@@ -959,10 +1111,16 @@ const Admin = () => {
         <Aside role="dialog" aria-modal="true" aria-labelledby="editor-title">
           <AsideHeader>
             <div>
-              <PageTitle as="h2" id="editor-title">새 작품 등록</PageTitle>
-              <PageDescription>YouTube 링크와 작품 정보를 입력하세요.</PageDescription>
+              <PageTitle as="h2" id="editor-title">
+                {editingWorkId ? "영상 상세 수정" : "새 작품 등록"}
+              </PageTitle>
+              <PageDescription>
+                {editingWorkId
+                  ? "링크와 작품 정보, 공개 상태를 수정합니다."
+                  : "YouTube 링크와 작품 정보를 입력하세요."}
+              </PageDescription>
             </div>
-            <IconButton type="button" onClick={() => setIsEditorOpen(false)} aria-label="닫기">×</IconButton>
+            <IconButton type="button" onClick={closeEditor} aria-label="닫기">×</IconButton>
           </AsideHeader>
           <form onSubmit={saveDraft}>
             <FormGrid as="div">
@@ -1022,8 +1180,48 @@ const Admin = () => {
               {formError && <HelpText $error>{formError}</HelpText>}
             </FormGrid>
             <AsideFooter>
-              <GhostButton type="button" onClick={() => setIsEditorOpen(false)}>취소</GhostButton>
-              <ActionButton type="submit">저장하기</ActionButton>
+              <GhostButton type="button" onClick={closeEditor}>취소</GhostButton>
+              <ActionButton type="submit">
+                {editingWorkId ? "수정사항 저장" : "저장하기"}
+              </ActionButton>
+            </AsideFooter>
+          </form>
+        </Aside>
+      )}
+
+      {categoryEditor && (
+        <Aside role="dialog" aria-modal="true" aria-labelledby="category-editor-title">
+          <AsideHeader>
+            <div>
+              <PageTitle as="h2" id="category-editor-title">카테고리 이름 수정</PageTitle>
+              <PageDescription>
+                {categoryEditor.section === "video" ? "Video" : "Shorts"}의 연결된 콘텐츠에도 함께 반영됩니다.
+              </PageDescription>
+            </div>
+            <IconButton type="button" onClick={closeCategoryEditor} aria-label="닫기">×</IconButton>
+          </AsideHeader>
+          <form onSubmit={saveCategoryName}>
+            <FormGrid as="div">
+              <Field>
+                <FormLabel htmlFor="category-name">카테고리 이름</FormLabel>
+                <Input
+                  id="category-name"
+                  value={categoryEditor.name}
+                  onChange={(event) => {
+                    setCategoryEditor((current) => ({ ...current, name: event.target.value }));
+                    setCategoryFormError("");
+                  }}
+                  autoFocus
+                />
+                <HelpText>
+                  기존 이름: {categoryEditor.originalName}
+                </HelpText>
+              </Field>
+              {categoryFormError && <HelpText $error>{categoryFormError}</HelpText>}
+            </FormGrid>
+            <AsideFooter>
+              <GhostButton type="button" onClick={closeCategoryEditor}>취소</GhostButton>
+              <ActionButton type="submit">이름 변경</ActionButton>
             </AsideFooter>
           </form>
         </Aside>

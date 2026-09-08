@@ -568,8 +568,11 @@ export const CategoryItem = styled.div`
   border-radius: 8px;
   color: ${muted};
   font-size: 12px;
+  opacity: ${({ $dragging }) => $dragging ? .46 : 1};
+  transition: border-color 160ms ease, background 160ms ease, opacity 160ms ease;
   strong { color: #fff; font-size: 14px; font-weight: 500; }
   .handle { color: rgba(255,255,255,.3); cursor: grab; }
+  &[aria-grabbed="true"] { border-color: rgba(216,255,101,.5); background: rgba(216,255,101,.05); }
 `;
 
 export const ControlButton = styled.button`
