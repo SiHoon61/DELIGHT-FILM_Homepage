@@ -55,11 +55,25 @@ export const ImageFrame = styled.span`
 `;
 
 export const CardImage = styled.img`
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   filter: brightness(0.96);
   transition: filter 200ms ease;
+`;
+
+export const CardOverlay = styled.span`
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 18px 16px 16px;
+  background: linear-gradient(180deg, rgba(0,0,0,.03) 22%, rgba(0,0,0,.88) 100%);
+  pointer-events: none;
 `;
 
 export const PlayButton = styled.span`
@@ -110,8 +124,7 @@ export const PlayIcon = styled.span`
 `;
 
 export const CardInfo = styled.span`
-  display: block;
-  padding-top: 12px;
+  display: none;
 `;
 
 export const CardMeta = styled.span`
@@ -120,7 +133,7 @@ export const CardMeta = styled.span`
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 6px;
-  color: rgba(255, 255, 255, 0.48);
+  color: rgba(255, 255, 255, 0.78);
   font-family: var(--font-sansBold);
   font-size: 10px;
   letter-spacing: 0.16em;
@@ -161,13 +174,17 @@ export const CardSubtitle = styled.p`
   -webkit-line-clamp: 2;
 
   @media (min-width: 701px) {
+    max-height: 0;
+    margin-top: 0;
     visibility: hidden;
     opacity: 0;
     transform: translateY(5px);
-    transition: opacity 180ms ease, transform 220ms ease, visibility 0s linear 220ms;
+    transition: max-height 220ms ease, margin-top 220ms ease, opacity 180ms ease, transform 220ms ease, visibility 0s linear 220ms;
 
     ${Card}:hover &,
     ${Card}:focus-visible & {
+      max-height: 3em;
+      margin-top: 5px;
       visibility: visible;
       opacity: 1;
       transform: translateY(0);

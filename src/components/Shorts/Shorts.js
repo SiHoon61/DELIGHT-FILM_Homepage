@@ -10,9 +10,9 @@ import YoutubeModal from "../../modal/YoutubeModal";
 import {
   Card,
   CardImage,
-  CardInfo,
   CardMeta,
   CardNumber,
+  CardOverlay,
   CardSubtitle,
   CardTitle,
   Grid,
@@ -52,20 +52,16 @@ const Shorts = ({ selectedCategory = "All" }) => {
                   event.currentTarget.src = `https://img.youtube.com/vi/${item.src}/maxresdefault.jpg`;
                 }}
               />
-              <PlayButton aria-hidden="true">
-                <PlayIcon />
-              </PlayButton>
+              <CardOverlay>
+                <CardMeta>
+                  <span>{item.category || "Shorts"}</span>
+                  <CardNumber>{String(index + 1).padStart(2, "0")}</CardNumber>
+                </CardMeta>
+                <CardTitle>{item.title}</CardTitle>
+                {item.subtitle && <CardSubtitle>{item.subtitle}</CardSubtitle>}
+              </CardOverlay>
+              <PlayButton aria-hidden="true"><PlayIcon /></PlayButton>
             </ImageFrame>
-            <CardInfo>
-              <CardMeta>
-                <span>{item.category || "Shorts"}</span>
-                <CardNumber>
-                  {String(index + 1).padStart(2, "0")}
-                </CardNumber>
-              </CardMeta>
-              <CardTitle>{item.title}</CardTitle>
-              {item.subtitle && <CardSubtitle>{item.subtitle}</CardSubtitle>}
-            </CardInfo>
           </Card>
         ))}
       </Grid>
