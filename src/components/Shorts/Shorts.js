@@ -12,6 +12,7 @@ import {
   CardImage,
   CardInfo,
   CardMeta,
+  CardNumber,
   CardSubtitle,
   CardTitle,
   Grid,
@@ -30,11 +31,12 @@ const Shorts = ({ selectedCategory = "All" }) => {
   const visibleItems = selectedCategory === "All"
     ? shortsCatalog
     : shortsCatalog.filter((item) => item.category === selectedCategory);
+  const total = String(visibleItems.length).padStart(2, "0");
 
   return (
     <>
       <Grid>
-        {visibleItems.map((item) => (
+        {visibleItems.map((item, index) => (
           <Card
             as="button"
             type="button"
@@ -56,7 +58,12 @@ const Shorts = ({ selectedCategory = "All" }) => {
               </PlayButton>
             </ImageFrame>
             <CardInfo>
-              <CardMeta>{item.category || "Shorts"}</CardMeta>
+              <CardMeta>
+                <span>{item.category || "Shorts"}</span>
+                <CardNumber>
+                  {String(index + 1).padStart(2, "0")} — {total}
+                </CardNumber>
+              </CardMeta>
               <CardTitle>{item.title}</CardTitle>
               {item.subtitle && <CardSubtitle>{item.subtitle}</CardSubtitle>}
             </CardInfo>

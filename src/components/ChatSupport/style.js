@@ -6,9 +6,10 @@ const panelIn = keyframes`
 `;
 
 export const ChatRoot = styled.div`
+  --chat-bottom-offset: ${({ $footerOffset }) => `${Math.max($footerOffset, 26)}px`};
   position: fixed;
   right: max(26px, env(safe-area-inset-right));
-  bottom: max(26px, calc(env(safe-area-inset-bottom) + 10px));
+  bottom: max(var(--chat-bottom-offset), calc(env(safe-area-inset-bottom) + 10px));
   z-index: 140;
   display: flex;
   flex-direction: column;
@@ -16,8 +17,9 @@ export const ChatRoot = styled.div`
   gap: 14px;
 
   @media (max-width: 700px) {
+    --chat-bottom-offset: ${({ $footerOffset }) => `${Math.max($footerOffset, 16)}px`};
     right: max(14px, env(safe-area-inset-right));
-    bottom: max(16px, env(safe-area-inset-bottom));
+    bottom: max(var(--chat-bottom-offset), env(safe-area-inset-bottom));
   }
 `;
 
@@ -57,7 +59,7 @@ export const ChatLauncher = styled.button`
 
   &:hover,
   &:focus-visible {
-    border-color: #fee500;
+    border-color: rgba(255, 255, 255, .58);
     background: rgba(11, 11, 11, .96);
     color: #fff;
     outline: none;
@@ -65,14 +67,14 @@ export const ChatLauncher = styled.button`
   }
 
   &[aria-expanded='true'] {
-    border-color: #fee500;
-    background: #fee500;
-    color: #111;
+    border-color: rgba(255, 255, 255, .58);
+    background: rgba(28, 28, 28, .98);
+    color: #fff;
     transform: translateY(-2px);
 
     &::before {
-      background: #111;
-      box-shadow: none;
+      background: #fee500;
+      box-shadow: 0 0 0 4px rgba(254, 229, 0, .14);
     }
   }
 
@@ -85,8 +87,8 @@ export const ChatLauncher = styled.button`
 
 export const ChatPanel = styled.section`
   width: min(390px, calc(100vw - 52px));
-  height: min(610px, calc(100vh - 104px));
-  min-height: 470px;
+  height: min(610px, calc(100vh - var(--chat-bottom-offset) - 82px));
+  min-height: min(470px, calc(100vh - var(--chat-bottom-offset) - 82px));
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, .2);
   border-radius: 18px;
@@ -96,8 +98,8 @@ export const ChatPanel = styled.section`
 
   @media (max-width: 700px) {
     width: min(360px, calc(100vw - 40px));
-    height: min(520px, calc(100svh - 112px));
-    min-height: min(400px, calc(100svh - 112px));
+    height: min(520px, calc(100svh - var(--chat-bottom-offset) - 72px));
+    min-height: min(360px, calc(100svh - var(--chat-bottom-offset) - 72px));
     border-radius: 15px;
   }
 

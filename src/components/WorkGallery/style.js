@@ -47,13 +47,12 @@ export const Card = styled.article`
   isolation: isolate;
 
   @media (min-width: 701px) and (hover: hover) {
-    transition: transform 240ms cubic-bezier(0.2, 0.75, 0.25, 1), border-color 180ms ease, box-shadow 240ms ease;
+    transition: border-color 180ms ease, box-shadow 200ms ease;
 
     &:hover {
       z-index: 3;
       border-color: rgba(255, 255, 255, 0.46);
       box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
-      transform: translateY(-2px) scale(1.012);
     }
   }
 
@@ -64,7 +63,7 @@ export const Card = styled.article`
     z-index: 1;
     background: rgba(255, 255, 255, 0.06);
     opacity: 0;
-    transition: opacity 220ms ease;
+    transition: opacity 180ms ease;
   }
 
   &:hover::after,
@@ -74,7 +73,7 @@ export const Card = styled.article`
 
   &:hover img,
   &:focus-visible img {
-    transform: scale(1.012);
+    filter: brightness(1.08) contrast(1.02);
   }
 
   &:focus-visible {
@@ -103,7 +102,8 @@ export const CardImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 480ms cubic-bezier(0.2, 0.75, 0.25, 1);
+  filter: brightness(0.96);
+  transition: filter 200ms ease;
 `;
 
 export const CardOverlay = styled.div`
@@ -161,21 +161,8 @@ export const CardMeta = styled.span`
 `;
 
 export const CardNumber = styled.span`
-  &::before {
-    content: "";
-    display: inline-block;
-    width: 24px;
-    height: 1px;
-    margin: 0 10px 3px 0;
-    background: currentColor;
-  }
-
-  @media (max-width: 700px) {
-    &::before {
-      width: 14px;
-      margin-right: 7px;
-    }
-  }
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 `;
 
 export const CardTitle = styled.h2`

@@ -46,7 +46,7 @@ const Works = () => {
                 return (
                     <CSSTransition
                         key="video"
-                        timeout={300}
+                        timeout={200}
                         classNames="fade"
                         nodeRef={refs.Video}
                     >
@@ -59,7 +59,7 @@ const Works = () => {
                 return (
                     <CSSTransition
                         key="shorts"
-                        timeout={300}
+                        timeout={200}
                         classNames="fade"
                         nodeRef={refs.Shorts}
                     >
@@ -72,7 +72,7 @@ const Works = () => {
                 return (
                     <CSSTransition
                         key="photo"
-                        timeout={300}
+                        timeout={200}
                         classNames="fade"
                         nodeRef={refs.Photo}
                     >

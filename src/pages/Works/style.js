@@ -61,22 +61,22 @@ export const MeneBox = styled.div`
 export const fadeIn = keyframes`
   from {
     opacity: 0;
-    transform: scale(0.9);
+    filter: brightness(1.16) contrast(0.96);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    filter: brightness(1) contrast(1);
   }
 `;
 
 export const fadeOut = keyframes`
   from {
     opacity: 1;
-    transform: scale(1);
+    filter: brightness(1) contrast(1);
   }
   to {
     opacity: 0;
-    transform: scale(0.9);
+    filter: brightness(1.12) contrast(0.96);
   }
 `;
 
@@ -86,10 +86,10 @@ export const AnimatedDefaultContainer = styled.div`
     padding: 0 clamp(20px, 3vw, 52px);
     margin-bottom: 80px;
     &.fade-enter {
-        animation: ${fadeIn} 300ms forwards;
+        animation: ${fadeIn} 200ms ease-out forwards;
     }
     &.fade-exit {
-        animation: ${fadeOut} 300ms forwards;
+        animation: ${fadeOut} 180ms ease-in forwards;
     }
     @media (max-width: 1000px){
       padding: 0 20px;
@@ -102,9 +102,9 @@ export const AnimatedDefaultContainer = styled.div`
 export const OnlyAnimatedContainer = styled.div`
     //padding: 0 20px;
     &.fade-enter {
-        animation: ${fadeIn} 300ms forwards;
+        animation: ${fadeIn} 200ms ease-out forwards;
     }
     &.fade-exit {
-        animation: ${fadeOut} 300ms forwards;
+        animation: ${fadeOut} 180ms ease-in forwards;
     }
 `

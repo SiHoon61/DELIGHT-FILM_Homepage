@@ -25,14 +25,6 @@ export const Card = styled.article`
   text-align: left;
   cursor: pointer;
 
-  @media (min-width: 701px) and (hover: hover) {
-    transition: transform 240ms cubic-bezier(0.2, 0.75, 0.25, 1);
-
-    &:hover {
-      transform: translateY(-2px) scale(1.015);
-    }
-  }
-
   &:focus-visible {
     outline: 2px solid #fff;
     outline-offset: 5px;
@@ -40,7 +32,7 @@ export const Card = styled.article`
 
   &:hover img,
   &:focus-visible img {
-    transform: scale(1.01);
+    filter: brightness(1.08) contrast(1.02);
   }
 `;
 
@@ -53,7 +45,7 @@ export const ImageFrame = styled.span`
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   background: #111;
-  transition: border-color 180ms ease, box-shadow 240ms ease;
+  transition: border-color 180ms ease, box-shadow 200ms ease;
 
   ${Card}:hover &,
   ${Card}:focus-visible & {
@@ -66,7 +58,8 @@ export const CardImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 480ms cubic-bezier(0.2, 0.75, 0.25, 1);
+  filter: brightness(0.96);
+  transition: filter 200ms ease;
 `;
 
 export const PlayButton = styled.span`
@@ -122,13 +115,22 @@ export const CardInfo = styled.span`
 `;
 
 export const CardMeta = styled.span`
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   margin-bottom: 6px;
   color: rgba(255, 255, 255, 0.48);
   font-family: var(--font-sansBold);
   font-size: 10px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
+`;
+
+export const CardNumber = styled.span`
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 `;
 
 export const CardTitle = styled.h2`

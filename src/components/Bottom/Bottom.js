@@ -47,7 +47,7 @@ const Bottom = () => {
                     </InfoBox>
                 </LogoImgBox>
 
-                <SnsBox>
+                <SnsBox data-footer-socials>
                     <KakaoImg
                         href="http://pf.kakao.com/_xgCxkUn/chat"
                         target="_blank"

@@ -56,6 +56,7 @@ const INITIAL_ANSWERS = {
 
 const ChatSupport = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [footerOffset, setFooterOffset] = useState(0);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState(INITIAL_ANSWERS);
   const [name, setName] = useState('');
@@ -70,6 +71,34 @@ const ChatSupport = () => {
     };
     window.addEventListener('keydown', closeWithEscape);
     return () => window.removeEventListener('keydown', closeWithEscape);
+  }, []);
+
+  useEffect(() => {
+    const updateFooterOffset = () => {
+      const socialLinks = document.querySelector('[data-footer-socials]');
+
+      if (!socialLinks) {
+        setFooterOffset(0);
+        return;
+      }
+
+      const socialRect = socialLinks.getBoundingClientRect();
+      const isVisible = socialRect.top < window.innerHeight && socialRect.bottom > 0;
+      const nextOffset = isVisible
+        ? Math.max(0, Math.ceil(window.innerHeight - socialRect.top + 16))
+        : 0;
+
+      setFooterOffset((current) => current === nextOffset ? current : nextOffset);
+    };
+
+    updateFooterOffset();
+    window.addEventListener('scroll', updateFooterOffset, { passive: true });
+    window.addEventListener('resize', updateFooterOffset);
+
+    return () => {
+      window.removeEventListener('scroll', updateFooterOffset);
+      window.removeEventListener('resize', updateFooterOffset);
+    };
   }, []);
 
   const selectAnswer = (key, value) => {
@@ -126,7 +155,7 @@ const ChatSupport = () => {
   const isComplete = name.trim() && phone.trim() && hasConsent;
 
   return (
-    <ChatRoot>
+    <ChatRoot $footerOffset={footerOffset}>
       {isOpen && (
         <ChatPanel id="realtime-consultation" role="dialog" aria-labelledby="chat-title">
           <ChatPanelHeader>
