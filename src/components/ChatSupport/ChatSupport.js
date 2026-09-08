@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import emailjs from '@emailjs/browser';
 
 import {
@@ -56,7 +56,8 @@ const INITIAL_ANSWERS = {
 
 const ChatSupport = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [footerOffset, setFooterOffset] = useState(0);
+  const [footerDock, setFooterDock] = useState({ isDocked: false, top: 0 });
+  const chatRootRef = useRef(null);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState(INITIAL_ANSWERS);
   const [name, setName] = useState('');
@@ -74,32 +75,54 @@ const ChatSupport = () => {
   }, []);
 
   useEffect(() => {
-    const updateFooterOffset = () => {
+    let animationFrame = 0;
+
+    const updateFooterDock = () => {
       const socialLinks = document.querySelector('[data-footer-socials]');
 
       if (!socialLinks) {
-        setFooterOffset(0);
+        setFooterDock((current) =>
+          current.isDocked || current.top ? { isDocked: false, top: 0 } : current
+        );
         return;
       }
 
       const socialRect = socialLinks.getBoundingClientRect();
-      const isVisible = socialRect.top < window.innerHeight && socialRect.bottom > 0;
-      const nextOffset = isVisible
-        ? Math.max(0, Math.ceil(window.innerHeight - socialRect.top + 16))
-        : 0;
+      const gap = 16;
+      const restingBottom = window.innerWidth <= 700 ? 16 : 26;
+      const isDocked = socialRect.top <= window.innerHeight - restingBottom + gap;
+      const socialTop = socialRect.top + window.scrollY;
+      const rootHeight = chatRootRef.current?.offsetHeight || (window.innerWidth <= 700 ? 44 : 50);
+      const top = Math.max(
+        0,
+        Math.floor(socialTop - gap - rootHeight)
+      );
 
-      setFooterOffset((current) => current === nextOffset ? current : nextOffset);
+      setFooterDock((current) =>
+        current.isDocked === isDocked && current.top === top
+          ? current
+          : { isDocked, top }
+      );
     };
 
-    updateFooterOffset();
-    window.addEventListener('scroll', updateFooterOffset, { passive: true });
-    window.addEventListener('resize', updateFooterOffset);
+    const scheduleFooterDockUpdate = () => {
+      if (animationFrame) return;
+      animationFrame = window.requestAnimationFrame(() => {
+        animationFrame = 0;
+        updateFooterDock();
+      });
+    };
+
+    updateFooterDock();
+    window.addEventListener('scroll', scheduleFooterDockUpdate, { passive: true });
+    window.addEventListener('resize', scheduleFooterDockUpdate);
 
     return () => {
-      window.removeEventListener('scroll', updateFooterOffset);
-      window.removeEventListener('resize', updateFooterOffset);
+      window.removeEventListener('scroll', scheduleFooterDockUpdate);
+      window.removeEventListener('resize', scheduleFooterDockUpdate);
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
     };
-  }, []);
+  }, [isOpen]);
 
   const selectAnswer = (key, value) => {
     setAnswers((current) => ({ ...current, [key]: value }));
@@ -155,7 +178,11 @@ const ChatSupport = () => {
   const isComplete = name.trim() && phone.trim() && hasConsent;
 
   return (
-    <ChatRoot $footerOffset={footerOffset}>
+    <ChatRoot
+      ref={chatRootRef}
+      $footerDocked={footerDock.isDocked}
+      $footerTop={footerDock.top}
+    >
       {isOpen && (
         <ChatPanel id="realtime-consultation" role="dialog" aria-labelledby="chat-title">
           <ChatPanelHeader>

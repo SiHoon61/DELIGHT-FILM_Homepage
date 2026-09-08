@@ -6,10 +6,12 @@ const panelIn = keyframes`
 `;
 
 export const ChatRoot = styled.div`
-  --chat-bottom-offset: ${({ $footerOffset }) => `${Math.max($footerOffset, 26)}px`};
-  position: fixed;
+  --chat-panel-reserve: ${({ $footerDocked }) => ($footerDocked ? '160px' : '104px')};
+  position: ${({ $footerDocked }) => ($footerDocked ? 'absolute' : 'fixed')};
+  top: ${({ $footerDocked, $footerTop }) => ($footerDocked ? `${$footerTop}px` : 'auto')};
   right: max(26px, env(safe-area-inset-right));
-  bottom: max(var(--chat-bottom-offset), calc(env(safe-area-inset-bottom) + 10px));
+  bottom: ${({ $footerDocked }) =>
+    $footerDocked ? 'auto' : 'max(26px, calc(env(safe-area-inset-bottom) + 10px))'};
   z-index: 140;
   display: flex;
   flex-direction: column;
@@ -17,9 +19,10 @@ export const ChatRoot = styled.div`
   gap: 14px;
 
   @media (max-width: 700px) {
-    --chat-bottom-offset: ${({ $footerOffset }) => `${Math.max($footerOffset, 16)}px`};
+    --chat-panel-reserve: ${({ $footerDocked }) => ($footerDocked ? '164px' : '112px')};
     right: max(14px, env(safe-area-inset-right));
-    bottom: max(var(--chat-bottom-offset), env(safe-area-inset-bottom));
+    bottom: ${({ $footerDocked }) =>
+      $footerDocked ? 'auto' : 'max(16px, env(safe-area-inset-bottom))'};
   }
 `;
 
@@ -87,8 +90,8 @@ export const ChatLauncher = styled.button`
 
 export const ChatPanel = styled.section`
   width: min(390px, calc(100vw - 52px));
-  height: min(610px, calc(100vh - var(--chat-bottom-offset) - 82px));
-  min-height: min(470px, calc(100vh - var(--chat-bottom-offset) - 82px));
+  height: min(610px, calc(100vh - var(--chat-panel-reserve)));
+  min-height: min(470px, calc(100vh - var(--chat-panel-reserve)));
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, .2);
   border-radius: 18px;
@@ -98,8 +101,8 @@ export const ChatPanel = styled.section`
 
   @media (max-width: 700px) {
     width: min(360px, calc(100vw - 40px));
-    height: min(520px, calc(100svh - var(--chat-bottom-offset) - 72px));
-    min-height: min(360px, calc(100svh - var(--chat-bottom-offset) - 72px));
+    height: min(520px, calc(100svh - var(--chat-panel-reserve)));
+    min-height: min(360px, calc(100svh - var(--chat-panel-reserve)));
     border-radius: 15px;
   }
 
