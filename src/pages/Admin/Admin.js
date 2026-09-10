@@ -12,6 +12,14 @@ import {
   VIDEO_CATEGORIES,
 } from "../../data/workSections";
 import {
+  createAdminLayoutPayload,
+  fetchAdminLayout,
+  reorderAdminLayoutItems,
+  saveAdminLayout,
+  sortAdminLayoutItems,
+  toAdminLayoutItems,
+} from "../../data/adminLayouts";
+import {
   ActionButton,
   AdminShell,
   Aside,
@@ -63,6 +71,7 @@ import {
   LayoutInspector,
   LayoutPanel,
   LayoutSelection,
+  LayoutStatus,
   Main,
   ManagementGrid,
   ManagementPanel,
@@ -157,21 +166,6 @@ const initialShortsItems = createShortsCatalog(
 }));
 
 const INITIAL_WORKS = [...initialVideoItems, ...initialShortsItems];
-
-const createLayoutItem = (item, index) => ({
-  ...item,
-  columns: index === 0 ? 2 : index < 3 ? 2 : 1,
-  rows: index === 0 ? 2 : 1,
-  crop: {
-    desktop: { x: 50, y: 50, zoom: 100 },
-    mobile: { x: 50, y: 50, zoom: 100 },
-  },
-});
-
-const LAYOUT_SEED = [
-  ...initialVideoItems.map(createLayoutItem),
-  ...initialShortsItems.map(createLayoutItem),
-];
 
 const INITIAL_PHOTOS = photoSources.map((src, index) => ({
   id: `photo-${index}`,
@@ -374,9 +368,14 @@ const Admin = () => {
   const [editingWorkId, setEditingWorkId] = useState(null);
   const [device, setDevice] = useState("desktop");
   const [layoutSection, setLayoutSection] = useState("video");
-  const [layoutCategory, setLayoutCategory] = useState("All");
-  const [layoutItems, setLayoutItems] = useState(LAYOUT_SEED);
-  const [selectedLayoutId, setSelectedLayoutId] = useState(LAYOUT_SEED[0]?.id);
+  const [layoutCategory, setLayoutCategory] = useState("all");
+  const [layoutItems, setLayoutItems] = useState([]);
+  const [layoutVersion, setLayoutVersion] = useState(null);
+  const [layoutLoadState, setLayoutLoadState] = useState({ status: "idle", message: "" });
+  const [layoutSaveState, setLayoutSaveState] = useState({ status: "idle", message: "" });
+  const [layoutDirty, setLayoutDirty] = useState({ desktop: false, mobile: false });
+  const [layoutReloadKey, setLayoutReloadKey] = useState(0);
+  const [selectedLayoutId, setSelectedLayoutId] = useState(null);
   const [draggedLayoutId, setDraggedLayoutId] = useState(null);
   const [isLayoutEditorOpen, setIsLayoutEditorOpen] = useState(false);
   const [layoutDraft, setLayoutDraft] = useState(null);
@@ -478,6 +477,43 @@ const Admin = () => {
   }, [section]);
 
   useEffect(() => {
+    if (activeView !== "layout") return undefined;
+
+    const controller = new AbortController();
+    setLayoutLoadState({ status: "loading", message: "DB에서 배치를 불러오는 중입니다." });
+    setLayoutSaveState({ status: "idle", message: "" });
+    setLayoutDirty({ desktop: false, mobile: false });
+    setLayoutItems([]);
+    setLayoutVersion(null);
+    setSelectedLayoutId(null);
+
+    fetchAdminLayout({
+      section: layoutSection,
+      categoryId: layoutCategory,
+      signal: controller.signal,
+    })
+      .then((data) => {
+        const nextItems = toAdminLayoutItems(data.items, data.section);
+        setLayoutItems(nextItems);
+        setLayoutVersion(data.version);
+        setSelectedLayoutId(nextItems[0]?.id || null);
+        setLayoutLoadState({
+          status: "ready",
+          message: `DB 배치 v${data.version} · ${nextItems.length}개 카드`,
+        });
+      })
+      .catch((error) => {
+        if (error.name === "AbortError") return;
+        setLayoutLoadState({
+          status: "error",
+          message: error.message || "배치를 불러오지 못했습니다.",
+        });
+      });
+
+    return () => controller.abort();
+  }, [activeView, layoutCategory, layoutReloadKey, layoutSection]);
+
+  useEffect(() => {
     if (activeView !== "preview" || !previewStageRef.current) return undefined;
     const stage = previewStageRef.current;
     const measure = () => setPreviewStageWidth(stage.clientWidth);
@@ -558,16 +594,11 @@ const Admin = () => {
   const layoutCategories = [
     "All",
     ...(layoutSection === "shorts" ? shortsCategories : videoCategories),
-  ].filter((category, index, categories) =>
-    categories.indexOf(category) === index &&
-    (category === "All" || layoutItems.some((item) =>
-      item.section === layoutSection && item.category === category
-    ))
-  );
-  const visibleLayoutItems = layoutItems.filter((item) =>
-    item.section === layoutSection &&
-    (layoutCategory === "All" || item.category === layoutCategory)
-  );
+  ].filter((category, index, categories) => categories.indexOf(category) === index)
+    .map((category) => ({ id: category.toLowerCase(), name: category }));
+  const activeLayoutCategory = layoutCategories.find((category) => category.id === layoutCategory)
+    || layoutCategories[0];
+  const visibleLayoutItems = sortAdminLayoutItems(layoutItems, device);
   const selectedLayoutItem = visibleLayoutItems.find((item) => item.id === selectedLayoutId) || visibleLayoutItems[0];
   const layoutDraftCategories = layoutDraft?.section === "shorts"
     ? shortsCategories
@@ -577,6 +608,43 @@ const Admin = () => {
   const notify = (message) => {
     setToast(message);
     window.setTimeout(() => setToast(""), 2200);
+  };
+
+  const saveLayoutChanges = async () => {
+    if (
+      layoutLoadState.status !== "ready" ||
+      layoutSaveState.status === "saving" ||
+      !layoutDirty[device] ||
+      !Number.isInteger(layoutVersion)
+    ) return;
+
+    setLayoutSaveState({ status: "saving", message: "변경사항을 저장하는 중입니다." });
+
+    try {
+      const result = await saveAdminLayout(
+        createAdminLayoutPayload({
+          section: layoutSection,
+          categoryId: layoutCategory,
+          device,
+          version: layoutVersion,
+          items: layoutItems,
+        })
+      );
+      setLayoutVersion(result.version);
+      setLayoutDirty((current) => ({ ...current, [device]: false }));
+      setLayoutSaveState({
+        status: "success",
+        message: `${device === "desktop" ? "PC" : "모바일"} 배치를 DB에 저장했습니다. · v${result.version}`,
+      });
+      notify(`${device === "desktop" ? "PC" : "모바일"} 배치를 저장했습니다.`);
+    } catch (error) {
+      setLayoutSaveState({
+        status: "error",
+        message: error.code === "layout_version_conflict"
+          ? "다른 변경사항이 먼저 저장되었습니다. 최신 배치를 다시 불러와주세요."
+          : error.message || "배치를 저장하지 못했습니다.",
+      });
+    }
   };
 
   const toggleWorkSelection = (id) => {
@@ -841,8 +909,8 @@ const Admin = () => {
         ? { ...current, category: nextName }
         : current
     );
-    if (layoutSection === targetSection && layoutCategory === originalName) {
-      setLayoutCategory(nextName);
+    if (layoutSection === targetSection && layoutCategory === originalName.toLowerCase()) {
+      setLayoutCategory(nextName.toLowerCase());
     }
     if (section === targetSection && categoryFilter === originalName) {
       setCategoryFilter(nextName);
@@ -853,39 +921,38 @@ const Admin = () => {
   };
 
   const reorderLayout = (dropId) => {
-    if (!draggedLayoutId || draggedLayoutId === dropId) return;
-    setLayoutItems((current) => {
-      const next = [...current];
-      const dragIndex = next.findIndex((item) => item.id === draggedLayoutId);
-      const dropIndex = next.findIndex((item) => item.id === dropId);
-      if (dragIndex < 0 || dropIndex < 0) return current;
-      const [moved] = next.splice(dragIndex, 1);
-      next.splice(dropIndex, 0, moved);
-      return next;
-    });
+    if (
+      layoutSaveState.status === "saving" ||
+      !draggedLayoutId ||
+      draggedLayoutId === dropId
+    ) return;
+    setLayoutItems((current) => reorderAdminLayoutItems({
+      items: current,
+      device,
+      draggedId: draggedLayoutId,
+      dropId,
+    }));
+    setLayoutDirty((current) => ({ ...current, [device]: true }));
+    setLayoutSaveState({ status: "idle", message: "" });
     setDraggedLayoutId(null);
   };
 
   const setLayoutDimension = (id, dimension, value) => {
+    if (layoutSaveState.status === "saving") return;
     setLayoutItems((current) => current.map((item) =>
       item.id === id ? { ...item, [dimension]: value } : item
     ));
+    setLayoutDirty((current) => ({ ...current, desktop: true }));
+    setLayoutSaveState({ status: "idle", message: "" });
   };
 
   const changeLayoutSection = (nextSection) => {
     setLayoutSection(nextSection);
-    setLayoutCategory("All");
-    const firstItem = layoutItems.find((item) => item.section === nextSection);
-    setSelectedLayoutId(firstItem?.id);
+    setLayoutCategory("all");
   };
 
   const changeLayoutCategory = (nextCategory) => {
     setLayoutCategory(nextCategory);
-    const firstItem = layoutItems.find((item) =>
-      item.section === layoutSection &&
-      (nextCategory === "All" || item.category === nextCategory)
-    );
-    setSelectedLayoutId(firstItem?.id);
   };
 
   const openLayoutEditor = (item) => {
@@ -955,7 +1022,7 @@ const Admin = () => {
         : item
     ));
     setLayoutSection(layoutDraft.section);
-    setLayoutCategory("All");
+    setLayoutCategory("all");
     setSelectedLayoutId(layoutDraft.id);
     setIsLayoutEditorOpen(false);
     notify("카드 상세 설정을 임시저장했습니다.");
@@ -1386,28 +1453,79 @@ const Admin = () => {
         <div>
           <PageTitle>화면 배치</PageTitle>
           <PageDescription>카드를 끌어서 순서를 바꾸고 PC 블록 크기를 지정합니다.</PageDescription>
+          <LayoutStatus $error={layoutLoadState.status === "error" || layoutSaveState.status === "error"}>
+            {layoutSaveState.message || layoutLoadState.message || "배치 API 연결 대기 중"}
+            {layoutDirty[device] && layoutSaveState.status !== "saving" ? " · 저장하지 않은 변경사항 있음" : ""}
+          </LayoutStatus>
         </div>
-        <ActionButton type="button" onClick={() => notify("배치 변경사항을 임시저장했습니다.")}>변경사항 저장</ActionButton>
+        <ButtonGroup>
+          {layoutSaveState.status === "error" && (
+            <GhostButton type="button" onClick={() => setLayoutReloadKey((key) => key + 1)}>
+              최신 배치 불러오기
+            </GhostButton>
+          )}
+          <ActionButton
+            type="button"
+            onClick={saveLayoutChanges}
+            disabled={
+              layoutLoadState.status !== "ready" ||
+              layoutSaveState.status === "saving" ||
+              !layoutDirty[device]
+            }
+          >
+            {layoutSaveState.status === "saving"
+              ? "저장 중..."
+              : `${device === "desktop" ? "PC" : "모바일"} 변경사항 저장`}
+          </ActionButton>
+        </ButtonGroup>
       </ContentHeader>
       <LayoutPanel>
         <LayoutHeader>
           <Tabs aria-label="배치 콘텐츠 유형">
             {[["video", "Video"], ["shorts", "Shorts"]].map(([key, label]) => (
-              <Tab type="button" key={key} $active={layoutSection === key} onClick={() => changeLayoutSection(key)}>{label}</Tab>
+              <Tab
+                type="button"
+                key={key}
+                $active={layoutSection === key}
+                disabled={layoutSaveState.status === "saving"}
+                onClick={() => changeLayoutSection(key)}
+              >{label}</Tab>
             ))}
           </Tabs>
           <Select
             aria-label="배치 카테고리"
             value={layoutCategory}
+            disabled={layoutSaveState.status === "saving"}
             onChange={(event) => changeLayoutCategory(event.target.value)}
           >
-            {layoutCategories.map((category) => <option key={category}>{category}</option>)}
+            {layoutCategories.map((category) => (
+              <option key={category.id} value={category.id}>{category.name}</option>
+            ))}
           </Select>
           <DeviceSwitch>
-            <DeviceButton type="button" $active={device === "desktop"} onClick={() => setDevice("desktop")}>PC</DeviceButton>
-            <DeviceButton type="button" $active={device === "mobile"} onClick={() => setDevice("mobile")}>Mobile</DeviceButton>
+            <DeviceButton type="button" $active={device === "desktop"} disabled={layoutSaveState.status === "saving"} onClick={() => setDevice("desktop")}>PC</DeviceButton>
+            <DeviceButton type="button" $active={device === "mobile"} disabled={layoutSaveState.status === "saving"} onClick={() => setDevice("mobile")}>Mobile</DeviceButton>
           </DeviceSwitch>
         </LayoutHeader>
+        {layoutLoadState.status === "loading" && (
+          <EmptyState>
+            <strong>배치를 불러오는 중입니다.</strong>
+            <span>{layoutSection === "video" ? "Video" : "Shorts"} · {activeLayoutCategory.name}</span>
+          </EmptyState>
+        )}
+        {layoutLoadState.status === "error" && (
+          <EmptyState>
+            <strong>배치를 불러오지 못했습니다.</strong>
+            <span>{layoutLoadState.message}</span>
+            <GhostButton type="button" onClick={() => setLayoutReloadKey((key) => key + 1)}>다시 불러오기</GhostButton>
+          </EmptyState>
+        )}
+        {layoutLoadState.status === "ready" && !visibleLayoutItems.length && (
+          <EmptyState>
+            <strong>배치할 카드가 없습니다.</strong>
+            <span>{activeLayoutCategory.name} 카테고리에 공개된 콘텐츠가 없습니다.</span>
+          </EmptyState>
+        )}
         {selectedLayoutItem && (
           <LayoutInspector>
             <LayoutSelection>
@@ -1417,7 +1535,7 @@ const Admin = () => {
                 style={{ objectPosition: `${selectedLayoutItem.crop?.[device]?.x || 50}% ${selectedLayoutItem.crop?.[device]?.y || 50}%` }}
               />
               <div>
-                <span>{layoutSection === "shorts" ? "Shorts" : "Video"} · {layoutCategory}</span>
+                <span>{layoutSection === "shorts" ? "Shorts" : "Video"} · {activeLayoutCategory.name}</span>
                 <strong>{selectedLayoutItem.title}</strong>
                 <small>{device === "desktop" ? `${selectedLayoutItem.columns}×${selectedLayoutItem.rows}` : "모바일 노출 순서 편집"}</small>
               </div>
@@ -1457,13 +1575,14 @@ const Admin = () => {
             <GhostButton type="button" onClick={() => openLayoutEditor(selectedLayoutItem)}>세부 편집</GhostButton>
           </LayoutInspector>
         )}
+        {layoutLoadState.status === "ready" && visibleLayoutItems.length > 0 && (
         <LayoutCanvas $device={device} $section={layoutSection}>
           {visibleLayoutItems.map((item, index) => {
             const crop = item.crop?.[device] || { x: 50, y: 50, zoom: 100 };
             return (
             <GridCard
               key={item.id}
-              draggable
+              draggable={layoutSaveState.status !== "saving"}
               onDragStart={() => setDraggedLayoutId(item.id)}
               onDragEnd={() => setDraggedLayoutId(null)}
               onDragOver={(event) => event.preventDefault()}
@@ -1490,6 +1609,7 @@ const Admin = () => {
             </GridCard>
           )})}
         </LayoutCanvas>
+        )}
       </LayoutPanel>
     </>
   );
@@ -1661,8 +1781,8 @@ const Admin = () => {
           ))}
         </Nav>
         <HelpText>
-          <strong>DESIGN PREVIEW</strong>
-          실제 로그인과 저장 기능은 데이터베이스 연결 후 활성화됩니다.
+          <strong>PARTIAL DB CONNECTION</strong>
+          화면 배치 조회와 저장은 Neon DB에 연결되어 있습니다. 나머지 관리 기능은 아직 미리보기 상태입니다.
         </HelpText>
       </Sidebar>
 
@@ -1670,7 +1790,7 @@ const Admin = () => {
         <Topbar>
           <div>
             <StatusDot />
-            <span>데이터 연결 전</span>
+            <span>화면 배치 DB 연결</span>
           </div>
           <TopbarActions>
             <SiteLink href="/" target="_blank" rel="noreferrer">본 사이트 바로가기 ↗</SiteLink>

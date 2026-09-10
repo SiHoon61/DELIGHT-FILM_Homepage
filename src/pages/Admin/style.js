@@ -195,6 +195,7 @@ const buttonBase = css`
   cursor: pointer;
   transition: background 160ms ease, color 160ms ease, border 160ms ease;
   &:focus-visible { outline: 2px solid var(--admin-accent); outline-offset: 2px; }
+  &:disabled { cursor: not-allowed; opacity: .45; }
 `;
 
 export const ActionButton = styled.button`
@@ -205,6 +206,8 @@ export const ActionButton = styled.button`
   font-family: var(--font-sansMedium);
   span { margin-right: 4px; font-size: 18px; }
   &:hover { background: #e5ff9a; }
+  &:disabled { cursor: not-allowed; opacity: .42; }
+  &:disabled:hover { background: var(--admin-accent); }
 `;
 
 export const GhostButton = styled.button`
@@ -308,6 +311,12 @@ export const LayoutPanel = styled.section`
   border: 1px solid ${border};
   border-radius: 14px;
   background: rgba(255,255,255,.025);
+`;
+
+export const LayoutStatus = styled.p`
+  margin: 7px 0 0;
+  color: ${({ $error }) => $error ? "#ff9d8f" : "var(--admin-accent)"};
+  font-size: 11px;
 `;
 
 export const Toolbar = styled.div`
@@ -964,6 +973,7 @@ export const DeviceButton = styled.button`
   color: ${({ $active }) => $active ? "#fff" : muted};
   font-size: 12px;
   cursor: pointer;
+  &:disabled { cursor: not-allowed; opacity: .45; }
 `;
 
 export const LayoutInspector = styled.div`
