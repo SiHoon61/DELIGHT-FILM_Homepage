@@ -16,11 +16,6 @@ import {
   ScreenReaderText,
 } from "./style";
 
-// 관리자 페이지 연결 전 사용하는 기본 배치입니다.
-// 각 항목에 layout.desktop / layout.mobile / layout.order 값이 생기면
-// 기본값 대신 관리자 설정을 바로 사용합니다.
-const DEFAULT_DESKTOP_LAYOUT = ["featured", "wide", "wide"];
-
 // 기존 JSON에 subtitle이 추가되면 그 값을 우선 사용합니다.
 // 아래 값은 현재 레퍼런스를 확인하기 위한 임시 표시 문구입니다.
 const REFERENCE_SUBTITLES = {
@@ -38,10 +33,9 @@ const WorkGallery = ({ items = [], typeLabel }) => {
     <>
       <GalleryGrid>
         {items.map((item, index) => {
-          const desktopLayout =
-            item.layout?.desktop || DEFAULT_DESKTOP_LAYOUT[index] || "standard";
-          const mobileLayout = item.layout?.mobile || "standard";
-          const order = item.layout?.order ?? index;
+          const columnSpan = Math.min(4, Math.max(1, item.layout?.desktopColumnSpan || 1));
+          const rowSpan = Math.min(4, Math.max(1, item.layout?.desktopRowSpan || 1));
+          const emphasized = columnSpan > 1 || rowSpan > 1;
           const number = String(index + 1).padStart(2, "0");
           const subtitle = item.subtitle || REFERENCE_SUBTITLES[item.src];
 
@@ -50,9 +44,8 @@ const WorkGallery = ({ items = [], typeLabel }) => {
               as="button"
               type="button"
               key={`${item.src}-${index}`}
-              $desktopLayout={desktopLayout}
-              $mobileLayout={mobileLayout}
-              $order={order}
+              $columnSpan={columnSpan}
+              $rowSpan={rowSpan}
               onClick={() => setSelectedVideo(item.src)}
               aria-label={`${item.title} 영상 재생`}
             >
@@ -64,18 +57,18 @@ const WorkGallery = ({ items = [], typeLabel }) => {
                   event.currentTarget.src = `https://img.youtube.com/vi/${item.src}/hqdefault.jpg`;
                 }}
               />
-              <CardOverlay $desktopLayout={desktopLayout}>
-                <CardMeta $desktopLayout={desktopLayout}>
+              <CardOverlay $emphasized={emphasized}>
+                <CardMeta $emphasized={emphasized}>
                   {index === 0 ? "Featured" : item.category || typeLabel}
                   <CardNumber>{number}</CardNumber>
                 </CardMeta>
-                <CardTitle $desktopLayout={desktopLayout}>{item.title}</CardTitle>
+                <CardTitle $emphasized={emphasized}>{item.title}</CardTitle>
                 {subtitle && (
-                  <CardSubtitle $desktopLayout={desktopLayout}>
+                  <CardSubtitle $emphasized={emphasized}>
                     {subtitle}
                   </CardSubtitle>
                 )}
-                <PlayButton $desktopLayout={desktopLayout} aria-hidden="true">
+                <PlayButton $emphasized={emphasized} aria-hidden="true">
                   <PlayIcon />
                 </PlayButton>
               </CardOverlay>

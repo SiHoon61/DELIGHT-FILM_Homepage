@@ -25,10 +25,11 @@ const CategoryAccordion = ({ categories, selected, onSelect, items }) => {
     return () => document.removeEventListener("mousedown", closeOnOutsideClick);
   }, []);
 
-  const countFor = (category) =>
-    category === "All"
+  const countFor = (categoryId) =>
+    categoryId === "all"
       ? items.length
-      : items.filter((item) => item.category === category).length;
+      : items.filter((item) => item.categoryId === categoryId).length;
+  const selectedCategory = categories.find((category) => category.id === selected);
 
   return (
     <Container ref={containerRef}>
@@ -39,7 +40,7 @@ const CategoryAccordion = ({ categories, selected, onSelect, items }) => {
         onClick={() => setIsOpen((open) => !open)}
       >
         <span>
-          <CurrentLabel>{selected}</CurrentLabel>
+          <CurrentLabel>{selectedCategory?.name || "All"}</CurrentLabel>
           <CurrentCount>{String(countFor(selected)).padStart(2, "0")}</CurrentCount>
         </span>
         <Chevron $isOpen={isOpen} aria-hidden="true" />
@@ -49,15 +50,15 @@ const CategoryAccordion = ({ categories, selected, onSelect, items }) => {
         {categories.map((category) => (
           <Option
             type="button"
-            key={category}
-            $active={category === selected}
+            key={category.id}
+            $active={category.id === selected}
             onClick={() => {
-              onSelect(category);
+              onSelect(category.id);
               setIsOpen(false);
             }}
           >
-            <span>{category}</span>
-            <OptionCount>{String(countFor(category)).padStart(2, "0")}</OptionCount>
+            <span>{category.name}</span>
+            <OptionCount>{String(countFor(category.id)).padStart(2, "0")}</OptionCount>
           </Option>
         ))}
       </Menu>

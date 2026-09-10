@@ -1,10 +1,5 @@
 import React, { useState } from "react";
 
-import videoList from "../../workList.json";
-import spareVideoList from "../../spareWorkList.json";
-import {
-  createShortsCatalog,
-} from "../../data/workSections";
 import ModalPortal from "../../modal/ModalPortal";
 import YoutubeModal from "../../modal/YoutubeModal";
 import {
@@ -21,21 +16,13 @@ import {
   PlayIcon,
 } from "./style";
 
-const Shorts = ({ selectedCategory = "All" }) => {
+const Shorts = ({ items = [] }) => {
   const [selectedVideo, setSelectedVideo] = useState(null);
-  const source = videoList || spareVideoList || {};
-  const shortsCatalog = createShortsCatalog(
-    source.videoJson || [],
-    source.broadcastJson || []
-  );
-  const visibleItems = selectedCategory === "All"
-    ? shortsCatalog
-    : shortsCatalog.filter((item) => item.category === selectedCategory);
 
   return (
     <>
       <Grid>
-        {visibleItems.map((item, index) => (
+        {items.map((item, index) => (
           <Card
             as="button"
             type="button"

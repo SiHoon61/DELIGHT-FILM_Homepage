@@ -1,14 +1,9 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
-const desktopColumns = ({ $desktopLayout }) => {
-  if ($desktopLayout === "featured" || $desktopLayout === "wide") {
-    return "span 2";
-  }
-  return "span 1";
-};
-
-const desktopRows = ({ $desktopLayout }) =>
-  $desktopLayout === "featured" ? "span 2" : "span 1";
+const revealGallery = keyframes`
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
 
 export const GalleryGrid = styled.div`
   display: grid;
@@ -17,6 +12,11 @@ export const GalleryGrid = styled.div`
   grid-auto-rows: clamp(190px, 17vw, 280px);
   gap: clamp(12px, 1.35vw, 22px);
   width: 100%;
+  animation: ${revealGallery} 340ms cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 
   @media (max-width: 1100px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -32,9 +32,8 @@ export const GalleryGrid = styled.div`
 
 export const Card = styled.article`
   position: relative;
-  grid-column: ${desktopColumns};
-  grid-row: ${desktopRows};
-  order: ${({ $order }) => $order};
+  grid-column: span ${({ $columnSpan }) => $columnSpan};
+  grid-row: span ${({ $rowSpan }) => $rowSpan};
   min-width: 0;
   overflow: hidden;
   padding: 0;
@@ -82,14 +81,12 @@ export const Card = styled.article`
   }
 
   @media (max-width: 1100px) {
-    grid-column: ${({ $desktopLayout }) =>
-      $desktopLayout === "standard" ? "span 1" : "span 2"};
+    grid-column: span ${({ $columnSpan }) => Math.min(2, $columnSpan)};
   }
 
   @media (max-width: 700px) {
     width: 100%;
-    aspect-ratio: ${({ $mobileLayout }) =>
-      $mobileLayout === "portrait" ? "4 / 5" : "3 / 1"};
+    aspect-ratio: 3 / 1;
     min-height: 0;
     border-width: 0 0 1px;
     border-radius: 0;
@@ -113,8 +110,8 @@ export const CardOverlay = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: ${({ $desktopLayout }) =>
-    $desktopLayout === "standard" ? "18px" : "clamp(18px, 2.15vw, 36px)"};
+  padding: ${({ $emphasized }) =>
+    $emphasized ? "clamp(18px, 2.15vw, 36px)" : "18px"};
   background: linear-gradient(
     180deg,
     rgba(0, 0, 0, 0.04) 24%,
@@ -145,8 +142,8 @@ export const CardMeta = styled.span`
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.75);
 
-  ${({ $desktopLayout }) =>
-    $desktopLayout === "standard" &&
+  ${({ $emphasized }) =>
+    !$emphasized &&
     `
       gap: 8px;
       margin-bottom: 7px;
@@ -166,21 +163,20 @@ export const CardNumber = styled.span`
 `;
 
 export const CardTitle = styled.h2`
-  max-width: ${({ $desktopLayout }) =>
-    $desktopLayout === "standard" ? "calc(100% - 48px)" : "calc(100% - 66px)"};
+  max-width: ${({ $emphasized }) =>
+    $emphasized ? "calc(100% - 66px)" : "calc(100% - 48px)"};
   margin: 0;
   overflow: hidden;
   font-family: var(--font-sansMedium);
-  font-size: ${({ $desktopLayout }) =>
-    $desktopLayout === "standard"
-      ? "clamp(16px, 1.2vw, 20px)"
-      : "clamp(17px, 1.55vw, 27px)"};
+  font-size: ${({ $emphasized }) =>
+    $emphasized
+      ? "clamp(17px, 1.55vw, 27px)"
+      : "clamp(16px, 1.2vw, 20px)"};
   font-weight: 500;
   line-height: 1.35;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: ${({ $desktopLayout }) =>
-    $desktopLayout === "standard" ? 3 : 2};
+  -webkit-line-clamp: ${({ $emphasized }) => ($emphasized ? 2 : 3)};
 
   @media (max-width: 700px) {
     max-width: 220px;
@@ -191,13 +187,13 @@ export const CardTitle = styled.h2`
 
 export const CardSubtitle = styled.p`
   display: -webkit-box;
-  max-width: ${({ $desktopLayout }) =>
-    $desktopLayout === "standard" ? "calc(100% - 48px)" : "calc(100% - 66px)"};
+  max-width: ${({ $emphasized }) =>
+    $emphasized ? "calc(100% - 66px)" : "calc(100% - 48px)"};
   margin: 7px 0 0;
   overflow: hidden;
   font-family: var(--font-sansRegular);
-  font-size: ${({ $desktopLayout }) =>
-    $desktopLayout === "standard" ? "13px" : "clamp(13px, 1vw, 16px)"};
+  font-size: ${({ $emphasized }) =>
+    $emphasized ? "clamp(13px, 1vw, 16px)" : "13px"};
   line-height: 1.45;
   color: rgba(255, 255, 255, 0.68);
   -webkit-box-orient: vertical;
@@ -230,15 +226,15 @@ export const CardSubtitle = styled.p`
 
 export const PlayButton = styled.span`
   position: absolute;
-  right: ${({ $desktopLayout }) =>
-    $desktopLayout === "standard" ? "16px" : "clamp(18px, 2vw, 32px)"};
-  bottom: ${({ $desktopLayout }) =>
-    $desktopLayout === "standard" ? "16px" : "clamp(18px, 2vw, 32px)"};
+  right: ${({ $emphasized }) =>
+    $emphasized ? "clamp(18px, 2vw, 32px)" : "16px"};
+  bottom: ${({ $emphasized }) =>
+    $emphasized ? "clamp(18px, 2vw, 32px)" : "16px"};
   display: grid;
-  width: ${({ $desktopLayout }) =>
-    $desktopLayout === "standard" ? "38px" : "clamp(42px, 3.5vw, 56px)"};
-  height: ${({ $desktopLayout }) =>
-    $desktopLayout === "standard" ? "38px" : "clamp(42px, 3.5vw, 56px)"};
+  width: ${({ $emphasized }) =>
+    $emphasized ? "clamp(42px, 3.5vw, 56px)" : "38px"};
+  height: ${({ $emphasized }) =>
+    $emphasized ? "clamp(42px, 3.5vw, 56px)" : "38px"};
   place-items: center;
   border: 2px solid rgba(255, 255, 255, 0.9);
   border-radius: 50%;
