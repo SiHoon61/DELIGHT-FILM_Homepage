@@ -1,3 +1,4 @@
+const { requireAdmin } = require("../../server/adminAuth");
 const {
   LayoutApiError,
   getLayoutScope,
@@ -11,6 +12,7 @@ const parseBody = (body) => {
 
 module.exports = async function handler(request, response) {
   response.setHeader("Cache-Control", "no-store");
+  if (!await requireAdmin(request, response)) return;
 
   try {
     if (request.method === "GET") {

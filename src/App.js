@@ -8,7 +8,7 @@ import Home from './pages/Home/Home';
 import Works from './pages/Works/Works'
 import About from './pages/About/About';
 import Contact from './pages/Contact/Contact';
-import Admin from './pages/Admin/Admin';
+import AdminAccess from './pages/Admin/AdminAccess';
 import ChatSupport from './components/ChatSupport/ChatSupport';
 
 import {
@@ -41,7 +41,7 @@ function App() {
               <Route path="/About" element={<About />}></Route>
               <Route path="/Works" element={<Works />}></Route>
               <Route path="/Contact" element={<Contact />}></Route>
-              <Route path="/admin" element={<Admin />}></Route>
+              <Route path="/admin" element={<AdminAccess />}></Route>
             </Routes>
           </Page>
 

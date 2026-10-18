@@ -24,6 +24,7 @@
     "build": "react-scripts build",
     "db:migrate": "node scripts/db/migrate.js",
     "db:seed": "node scripts/db/seed.js",
+    "admin:credentials": "node scripts/admin/generateCredentials.js",
     "test:server": "node --test server/*.test.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

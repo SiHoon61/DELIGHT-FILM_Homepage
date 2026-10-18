@@ -331,7 +331,7 @@ const extractYouTubeId = (value) => {
   }
 };
 
-const Admin = () => {
+const Admin = ({ onLogout, isLoggingOut = false, logoutError = "" }) => {
   const [activeView, setActiveView] = useState("content");
   const [section, setSection] = useState("video");
   const [search, setSearch] = useState("");
@@ -1827,7 +1827,9 @@ const Admin = () => {
             <span>{isLocalAdminPreview ? "로컬 샘플 미리보기 · 새로고침 시 초기화" : "콘텐츠 · 카테고리 · 화면 배치 DB 연동"}</span>
           </div>
           <TopbarActions>
+            {logoutError && <HelpText $error role="alert">{logoutError}</HelpText>}
             <SiteLink href="/" target="_blank" rel="noreferrer">본 사이트 바로가기 ↗</SiteLink>
+            {onLogout && <GhostButton type="button" onClick={onLogout} disabled={isLoggingOut}>{isLoggingOut ? "로그아웃 중..." : "로그아웃"}</GhostButton>}
             <div className="profile">DF</div>
           </TopbarActions>
         </Topbar>

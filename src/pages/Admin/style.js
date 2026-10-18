@@ -16,6 +16,25 @@ export const AdminShell = styled.div`
   button, input, select, textarea { font: inherit; }
 `;
 
+export const LoginScreen = styled.main`
+  display: grid;
+  min-height: 100svh;
+  padding: 24px;
+  place-items: center;
+`;
+
+export const LoginPanel = styled.section`
+  display: grid;
+  width: min(440px, 100%);
+  min-width: 0;
+  gap: 30px;
+  padding: clamp(24px, 5vw, 40px);
+  border: 1px solid ${border};
+  border-radius: 16px;
+  background: #0d0f0f;
+  button:disabled { cursor: wait; opacity: .5; }
+`;
+
 export const Sidebar = styled.aside`
   position: fixed;
   inset: 0 auto 0 0;

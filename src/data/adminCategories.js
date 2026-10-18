@@ -1,8 +1,9 @@
 import { isLocalAdminPreview, writeLocalCategories } from "./adminLocalPreview";
+import { adminFetch } from "./adminAuth";
 
 export const writeAdminCategories = async (method, body) => {
   if (isLocalAdminPreview) return writeLocalCategories(method, body);
-  const response = await fetch("/api/admin/categories", {
+  const response = await adminFetch("/api/admin/categories", {
     method,
     headers: { Accept: "application/json", "Content-Type": "application/json" },
     body: JSON.stringify(body),

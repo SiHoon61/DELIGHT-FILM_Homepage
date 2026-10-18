@@ -1,8 +1,10 @@
 const { ContentApiError } = require("../../server/contentRepository");
+const { requireAdmin } = require("../../server/adminAuth");
 const { getAdminCategories, writeAdminCategories } = require("../../server/categoryRepository");
 
 module.exports = async function handler(request, response) {
   response.setHeader("Cache-Control", "no-store");
+  if (!await requireAdmin(request, response)) return;
   if (!["GET", "POST", "PUT", "PATCH"].includes(request.method)) {
     response.setHeader("Allow", "GET, POST, PUT, PATCH");
     return response.status(405).json({ error: "method_not_allowed", message: "지원하지 않는 요청입니다." });

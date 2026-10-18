@@ -1,9 +1,10 @@
 import { isLocalAdminPreview, readLocalContents, writeLocalContents } from "./adminLocalPreview";
+import { adminFetch } from "./adminAuth";
 
 const request = async (method, body, signal) => {
   if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
   if (isLocalAdminPreview) return method === "GET" ? readLocalContents() : writeLocalContents(method, body);
-  const response = await fetch("/api/admin/contents", {
+  const response = await adminFetch("/api/admin/contents", {
     method,
     headers: { Accept: "application/json", ...(body ? { "Content-Type": "application/json" } : {}) },
     ...(body ? { body: JSON.stringify(body) } : {}),

@@ -1,4 +1,5 @@
 import { isLocalAdminPreview, readLocalLayout, saveLocalLayout } from "./adminLocalPreview";
+import { adminFetch } from "./adminAuth";
 
 const parseResponse = async (response) => {
   const data = await response.json().catch(() => ({}));
@@ -17,7 +18,7 @@ export const fetchAdminLayout = async ({ section, categoryId, signal }) => {
   if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
   if (isLocalAdminPreview) return readLocalLayout({ section, categoryId });
   const search = new URLSearchParams({ section, category: categoryId });
-  const response = await fetch(`/api/admin/layouts?${search.toString()}`, {
+  const response = await adminFetch(`/api/admin/layouts?${search.toString()}`, {
     method: "GET",
     headers: { Accept: "application/json" },
     signal,
@@ -32,7 +33,7 @@ export const fetchAdminLayout = async ({ section, categoryId, signal }) => {
 
 export const saveAdminLayout = async (payload) => {
   if (isLocalAdminPreview) return saveLocalLayout(payload);
-  const response = await fetch("/api/admin/layouts", {
+  const response = await adminFetch("/api/admin/layouts", {
     method: "PUT",
     headers: {
       Accept: "application/json",
