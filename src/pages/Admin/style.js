@@ -578,7 +578,7 @@ export const Aside = styled.aside`
   position: fixed;
   inset: 0 0 0 auto;
   z-index: 100;
-  width: ${({ $wide }) => $wide ? "min(980px, 100%)" : "min(470px, 100%)"};
+  width: ${({ $wide }) => $wide ? "min(1440px, 100%)" : "min(470px, 100%)"};
   overflow-y: auto;
   padding: 28px;
   border-left: 1px solid rgba(255,255,255,.16);
@@ -588,7 +588,7 @@ export const Aside = styled.aside`
   &::before {
     content: "";
     position: fixed;
-    inset: 0 ${({ $wide }) => $wide ? "min(980px, 100%)" : "min(470px, 100%)"} 0 0;
+    inset: 0 ${({ $wide }) => $wide ? "min(1440px, 100%)" : "min(470px, 100%)"} 0 0;
     background: rgba(0,0,0,.52);
     pointer-events: none;
   }
@@ -635,10 +635,11 @@ export const PreviewPlaceholder = styled.div`
 
 export const EditorWorkspace = styled.div`
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, .95fr);
+  grid-template-columns: minmax(320px, .85fr) minmax(0, 1.15fr);
   align-items: start;
-  gap: 28px;
-  @media (max-width: 820px) { grid-template-columns: 1fr; }
+  gap: 36px;
+  > div { min-width: 0; }
+  @media (max-width: 1100px) { grid-template-columns: 1fr; gap: 24px; }
 `;
 
 export const EditorPreviewPanel = styled.section`
@@ -649,7 +650,7 @@ export const EditorPreviewPanel = styled.section`
   border: 1px solid ${border};
   border-radius: 12px;
   background: rgba(255,255,255,.025);
-  @media (max-width: 820px) { position: static; }
+  @media (max-width: 1100px) { position: static; }
 `;
 
 export const EditorPreviewTitle = styled.div`
@@ -666,9 +667,9 @@ export const EditorPreviewTitle = styled.div`
 
 export const PreviewCompare = styled.div`
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: ${({ $shorts }) => $shorts ? "repeat(2, minmax(0, 1fr))" : "minmax(0, 1fr)"};
   align-items: end;
-  gap: 12px;
+  gap: 20px;
   > div { min-width: 0; }
   small { display: block; margin-top: 8px; color: ${muted}; font-size: 10px; text-align: center; }
   @media (max-width: 520px) { grid-template-columns: 1fr; }
@@ -792,7 +793,7 @@ export const PreviewCardImage = styled.img`
 export const PreviewCardInfo = styled.div`
   position: absolute;
   inset: auto 0 0;
-  padding: 34px 10px 10px;
+  padding: ${({ $compact }) => $compact ? "20px 10px 8px" : "34px 10px 10px"};
   background: linear-gradient(transparent, rgba(0,0,0,.9));
   span, strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   strong { color: #fff; font-size: 12px; font-weight: 500; }

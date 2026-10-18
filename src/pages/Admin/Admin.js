@@ -2,13 +2,12 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 
 import { fetchAdminContents, writeAdminContents } from "../../data/adminContents";
+import { writeAdminCategories } from "../../data/adminCategories";
+import { isLocalAdminPreview } from "../../data/adminLocalPreview";
+import YoutubeThumbnail from "../../components/YoutubeThumbnail";
 import mainVideo from "../../assets/Home/mainVideo.mp4";
 import aboutImage from "../../assets/About/aboutImg.svg";
 import { images as photoSources } from "../../components/Photo/Photo";
-import {
-  SHORTS_CATEGORIES,
-  VIDEO_CATEGORIES,
-} from "../../data/workSections";
 import {
   createAdminLayoutPayload,
   fetchAdminLayout,
@@ -144,6 +143,8 @@ import {
   VideoSlotHeader,
   VideoIdentity,
 } from "./style";
+
+const CONTENT_STORAGE = isLocalAdminPreview ? "로컬 샘플" : "DB";
 
 const INITIAL_PHOTOS = photoSources.map((src, index) => ({
   id: `photo-${index}`,
@@ -342,7 +343,7 @@ const Admin = () => {
   const [bulkCategory, setBulkCategory] = useState("");
   const [bulkStatus, setBulkStatus] = useState("");
   const [works, setWorks] = useState([]);
-  const [contentState, setContentState] = useState({ status: "loading", message: "DB에서 콘텐츠를 불러오는 중입니다." });
+  const [contentState, setContentState] = useState({ status: "loading", message: "콘텐츠를 불러오는 중입니다." });
   const [contentSaving, setContentSaving] = useState(false);
   const contentWriteRef = useRef(false);
   const [contentReloadKey, setContentReloadKey] = useState(0);
@@ -374,15 +375,12 @@ const Admin = () => {
     "딜라이트 필름은 분야를 가리지 않고, 다양한 영상을 제작하는 영상 제작 프로덕션입니다.\n\n콘서트, 이벤트, 세미나 등의 라이브 중계부터 드론 촬영, 유튜브 예능, TVCF제작, 홈쇼핑 제작, 웹드라마와 단편영화 촬영까지 장르를 넘나드는 다양한 프로젝트를 진행하고 있습니다.\n\n딜라이트 필름은 고객과의 소통을 가장 중시하며, 항상 기대 이상의 결과를 만들어내기 위해 최선을 다하고 있습니다.\n\n감사합니다."
   );
   const [toast, setToast] = useState("");
-  const [videoCategories, setVideoCategories] = useState(
-    VIDEO_CATEGORIES.filter((category) => category !== "All")
-  );
-  const [shortsCategories, setShortsCategories] = useState(
-    SHORTS_CATEGORIES.filter((category) => category !== "All")
-  );
+  const [videoCategories, setVideoCategories] = useState([]);
+  const [shortsCategories, setShortsCategories] = useState([]);
   const [draggedCategory, setDraggedCategory] = useState(null);
   const [categoryEditor, setCategoryEditor] = useState(null);
   const [categoryFormError, setCategoryFormError] = useState("");
+  const [categoryError, setCategoryError] = useState("");
   const [newCategory, setNewCategory] = useState({ video: "", shorts: "" });
   const [draft, setDraft] = useState({
     sourceUrl: "",
@@ -410,29 +408,29 @@ const Admin = () => {
     setDbCategories(data.categories);
     setVideoCategories(data.categories.filter((category) => category.section === "video").map((category) => category.name));
     setShortsCategories(data.categories.filter((category) => category.section === "shorts").map((category) => category.name));
-    setContentState({ status: "ready", message: `DB 콘텐츠 · ${data.items.length}개` });
+    setContentState({ status: "ready", message: `${CONTENT_STORAGE} 콘텐츠 · ${data.items.length}개` });
   }, []);
 
   useEffect(() => {
     const controller = new AbortController();
-    setContentState({ status: "loading", message: "DB에서 콘텐츠를 불러오는 중입니다." });
+    setContentState({ status: "loading", message: "콘텐츠를 불러오는 중입니다." });
     fetchAdminContents(controller.signal).then(applyContentData).catch((error) => {
       if (error.name !== "AbortError") setContentState({ status: "error", message: error.message });
     });
     return () => controller.abort();
   }, [applyContentData, contentReloadKey]);
 
-  const persistContent = async (method, body) => {
+  const persistAdminChange = async (method, body, writer = writeAdminContents) => {
     if (contentWriteRef.current || contentState.status !== "ready") return false;
     contentWriteRef.current = true;
     setContentSaving(true);
     try {
-      await writeAdminContents(method, body);
+      await writer(method, body);
       setLayoutReloadKey((key) => key + 1);
       try {
         applyContentData(await fetchAdminContents());
       } catch (error) {
-        setContentState({ status: "error", message: `DB 저장은 완료했지만 목록을 다시 불러오지 못했습니다. ${error.message}` });
+        setContentState({ status: "error", message: `저장은 완료했지만 목록을 다시 불러오지 못했습니다. ${error.message}` });
         setWorks([]);
       }
       return true;
@@ -503,7 +501,7 @@ const Admin = () => {
     if (activeView !== "layout") return undefined;
 
     const controller = new AbortController();
-    setLayoutLoadState({ status: "loading", message: "DB에서 배치를 불러오는 중입니다." });
+    setLayoutLoadState({ status: "loading", message: "배치를 불러오는 중입니다." });
     setLayoutSaveState({ status: "idle", message: "" });
     setLayoutDirty({ desktop: false, mobile: false });
     setLayoutItems([]);
@@ -522,7 +520,7 @@ const Admin = () => {
         setSelectedLayoutId(nextItems[0]?.id || null);
         setLayoutLoadState({
           status: "ready",
-          message: `DB 배치 v${data.version} · ${nextItems.length}개 카드`,
+          message: `${CONTENT_STORAGE} 배치 v${data.version} · ${nextItems.length}개 카드`,
         });
       })
       .catch((error) => {
@@ -615,10 +613,9 @@ const Admin = () => {
     photo: photos.length,
   };
   const layoutCategories = [
-    "All",
-    ...(layoutSection === "shorts" ? shortsCategories : videoCategories),
-  ].filter((category, index, categories) => categories.indexOf(category) === index)
-    .map((category) => ({ id: category.toLowerCase(), name: category }));
+    { id: "all", name: "All" },
+    ...dbCategories.filter((category) => category.section === layoutSection),
+  ];
   const activeLayoutCategory = layoutCategories.find((category) => category.id === layoutCategory)
     || layoutCategories[0];
   const visibleLayoutItems = sortAdminLayoutItems(layoutItems, device);
@@ -657,7 +654,7 @@ const Admin = () => {
       setLayoutDirty((current) => ({ ...current, [device]: false }));
       setLayoutSaveState({
         status: "success",
-        message: `${device === "desktop" ? "PC" : "모바일"} 배치를 DB에 저장했습니다. · v${result.version}`,
+        message: `${device === "desktop" ? "PC" : "모바일"} 배치를 ${CONTENT_STORAGE}에 저장했습니다. · v${result.version}`,
       });
       notify(`${device === "desktop" ? "PC" : "모바일"} 배치를 저장했습니다.`);
     } catch (error) {
@@ -699,14 +696,14 @@ const Admin = () => {
 
     try {
       const categoryId = bulkCategory ? getCategoryId(section, bulkCategory) : undefined;
-      if (bulkCategory && !categoryId) throw new Error("DB에 등록된 카테고리를 선택해주세요.");
-      const saved = await persistContent("PATCH", {
+      if (bulkCategory && !categoryId) throw new Error("콘텐츠 목록에 등록된 카테고리를 선택해주세요.");
+      const saved = await persistAdminChange("PATCH", {
         ids: selectedWorkIds, section,
         ...(categoryId ? { categoryId } : {}),
         ...(bulkStatus ? { status: bulkStatus } : {}),
       });
       if (!saved) return;
-      notify(`${selectedWorkIds.length}개 영상의 정보를 DB에 저장했습니다.`);
+      notify(`${selectedWorkIds.length}개 영상의 정보를 ${CONTENT_STORAGE}에 저장했습니다.`);
       setSelectedWorkIds([]);
       setBulkCategory("");
       setBulkStatus("");
@@ -803,11 +800,11 @@ const Admin = () => {
     };
 
     try {
-      const saved = await persistContent(editingWorkId ? "PUT" : "POST", { ...savedItem, ...(editingWorkId ? { id: editingWorkId } : {}) });
+      const saved = await persistAdminChange(editingWorkId ? "PUT" : "POST", { ...savedItem, ...(editingWorkId ? { id: editingWorkId } : {}) });
       if (!saved) return;
       setSection(draft.section);
       closeEditor();
-      notify("작품 정보를 DB에 저장했습니다.");
+      notify(`작품 정보를 ${CONTENT_STORAGE}에 저장했습니다.`);
     } catch (error) {
       setFormError(error.message);
     }
@@ -824,47 +821,55 @@ const Admin = () => {
     if (!confirmed) return;
 
     try {
-      if (!await persistContent("DELETE", { id: editingWorkId })) return;
+      if (!await persistAdminChange("DELETE", { id: editingWorkId })) return;
       setSelectedWorkIds((current) => current.filter((id) => id !== editingWorkId));
       closeEditor();
-      notify("영상을 DB에서 삭제했습니다.");
+      notify(`영상을 ${CONTENT_STORAGE}에서 삭제했습니다.`);
     } catch (error) {
       setFormError(error.message);
     }
   };
 
-  const addCategory = (targetSection) => {
+  const addCategory = async (targetSection) => {
     const value = newCategory[targetSection].trim();
     if (!value) return;
-    const setter = targetSection === "video" ? setVideoCategories : setShortsCategories;
-    setter((current) => current.includes(value) ? current : [...current, value]);
-    setNewCategory((current) => ({ ...current, [targetSection]: "" }));
-    notify(`${value} 카테고리를 추가했습니다.`);
+    setCategoryError("");
+    try {
+      if (!await persistAdminChange("POST", { section: targetSection, name: value }, writeAdminCategories)) return;
+      setNewCategory((current) => ({ ...current, [targetSection]: "" }));
+      notify(`${value} 카테고리를 ${CONTENT_STORAGE}에 추가했습니다.`);
+    } catch (error) {
+      setCategoryError(error.message);
+    }
   };
 
-  const reorderCategory = (targetSection, dropCategory) => {
+  const reorderCategory = async (targetSection, dropCategory) => {
     if (
+      contentWriteRef.current || contentState.status !== "ready" ||
       !draggedCategory ||
       draggedCategory.section !== targetSection ||
       draggedCategory.name === dropCategory
     ) return;
 
-    const setter = targetSection === "video" ? setVideoCategories : setShortsCategories;
-    setter((current) => {
-      const next = [...current];
-      const dragIndex = next.indexOf(draggedCategory.name);
-      const dropIndex = next.indexOf(dropCategory);
-      if (dragIndex < 0 || dropIndex < 0) return current;
-      const [moved] = next.splice(dragIndex, 1);
-      next.splice(dropIndex, 0, moved);
-      return next;
-    });
+    const next = dbCategories.filter((category) => category.section === targetSection);
+    const dragIndex = next.findIndex((category) => category.name === draggedCategory.name);
+    const dropIndex = next.findIndex((category) => category.name === dropCategory);
+    if (dragIndex < 0 || dropIndex < 0) return;
+    const [moved] = next.splice(dragIndex, 1);
+    next.splice(dropIndex, 0, moved);
     setDraggedCategory(null);
-    notify("카테고리 순서를 변경했습니다.");
+    setCategoryError("");
+    try {
+      if (!await persistAdminChange("PATCH", { section: targetSection, ids: next.map((category) => category.id) }, writeAdminCategories)) return;
+      notify(`카테고리 순서를 ${CONTENT_STORAGE}에 저장했습니다.`);
+    } catch (error) {
+      setCategoryError(error.message);
+    }
   };
 
   const openCategoryEditor = (targetSection, category) => {
     setCategoryEditor({
+      id: getCategoryId(targetSection, category),
       section: targetSection,
       originalName: category,
       name: category,
@@ -873,11 +878,12 @@ const Admin = () => {
   };
 
   const closeCategoryEditor = () => {
+    if (contentWriteRef.current) return;
     setCategoryEditor(null);
     setCategoryFormError("");
   };
 
-  const saveCategoryName = (event) => {
+  const saveCategoryName = async (event) => {
     event.preventDefault();
     if (!categoryEditor) return;
 
@@ -899,21 +905,14 @@ const Admin = () => {
       return;
     }
 
-    const { section: targetSection, originalName } = categoryEditor;
-    const setter = targetSection === "video" ? setVideoCategories : setShortsCategories;
-    setter((current) => current.map((category) =>
-      category === originalName ? nextName : category
-    ));
-    setWorks((current) => current.map((item) =>
-      item.section === targetSection && item.category === originalName
-        ? { ...item, category: nextName }
-        : item
-    ));
-    setLayoutItems((current) => current.map((item) =>
-      item.section === targetSection && item.category === originalName
-        ? { ...item, category: nextName }
-        : item
-    ));
+    const { id, section: targetSection, originalName } = categoryEditor;
+    setCategoryFormError("");
+    try {
+      if (!await persistAdminChange("PUT", { id, section: targetSection, name: nextName }, writeAdminCategories)) return;
+    } catch (error) {
+      setCategoryFormError(error.message);
+      return;
+    }
     setDraft((current) =>
       current.section === targetSection && current.category === originalName
         ? { ...current, category: nextName }
@@ -924,9 +923,6 @@ const Admin = () => {
         ? { ...current, category: nextName }
         : current
     );
-    if (layoutSection === targetSection && layoutCategory === originalName.toLowerCase()) {
-      setLayoutCategory(nextName.toLowerCase());
-    }
     if (section === targetSection && categoryFilter === originalName) {
       setCategoryFilter(nextName);
     }
@@ -1189,7 +1185,7 @@ const Admin = () => {
       </ContentHeader>
 
       <LayoutStatus $error={contentState.status === "error"} role={contentState.status === "error" ? "alert" : "status"}>
-        {contentSaving ? "DB에 변경사항을 저장하는 중입니다." : contentState.message}
+        {contentSaving ? "변경사항을 저장하는 중입니다." : contentState.message}
       </LayoutStatus>
       {contentState.status === "error" && (
         <GhostButton type="button" onClick={() => setContentReloadKey((key) => key + 1)}>콘텐츠 다시 불러오기</GhostButton>
@@ -1329,7 +1325,9 @@ const Admin = () => {
                   <TableCell>
                     <VideoIdentity>
                       <Thumbnail
-                        src={`https://img.youtube.com/vi/${item.src}/mqdefault.jpg`}
+                        as={YoutubeThumbnail}
+                        videoId={item.src}
+                        section={item.section}
                         alt=""
                       />
                       <div>
@@ -1414,7 +1412,13 @@ const Admin = () => {
           <PageDescription>아코디언에 표시할 이름과 순서를 관리합니다.</PageDescription>
         </div>
       </ContentHeader>
-      <CategoryGrid>
+      <LayoutStatus $error={Boolean(categoryError) || contentState.status === "error"} role={categoryError || contentState.status === "error" ? "alert" : "status"}>
+        {categoryError || (contentSaving ? "카테고리 변경사항을 저장하는 중입니다." : contentState.status !== "ready" ? contentState.message : `${CONTENT_STORAGE} 카테고리 · ${dbCategories.length}개`)}
+      </LayoutStatus>
+      {(categoryError || contentState.status === "error") && (
+        <GhostButton type="button" disabled={contentSaving} onClick={() => { setCategoryError(""); setContentReloadKey((key) => key + 1); }}>최신 목록 불러오기</GhostButton>
+      )}
+      <CategoryGrid as="fieldset" disabled={contentSaving || contentState.status !== "ready"} style={{ margin: 0, padding: 0, border: 0, minWidth: 0 }}>
         {[
           ["video", "Video", videoCategories],
           ["shorts", "Shorts", shortsCategories],
@@ -1431,7 +1435,7 @@ const Admin = () => {
               {categories.map((category, index) => (
                 <CategoryItem
                   key={category}
-                  draggable
+                  draggable={!contentSaving && contentState.status === "ready"}
                   $dragging={draggedCategory?.section === key && draggedCategory?.name === category}
                   aria-grabbed={draggedCategory?.section === key && draggedCategory?.name === category}
                   onDragStart={() => setDraggedCategory({ section: key, name: category })}
@@ -1554,7 +1558,9 @@ const Admin = () => {
           <LayoutInspector>
             <LayoutSelection>
               <Thumbnail
-                src={`https://img.youtube.com/vi/${selectedLayoutItem.src}/mqdefault.jpg`}
+                as={YoutubeThumbnail}
+                videoId={selectedLayoutItem.src}
+                section={layoutSection}
                 alt=""
                 style={{ objectPosition: `${selectedLayoutItem.crop?.[device]?.x || 50}% ${selectedLayoutItem.crop?.[device]?.y || 50}%` }}
               />
@@ -1619,7 +1625,9 @@ const Admin = () => {
               $selected={selectedLayoutItem.id === item.id}
             >
               <GridCardImage
-                src={`https://img.youtube.com/vi/${item.src}/mqdefault.jpg`}
+                as={YoutubeThumbnail}
+                videoId={item.src}
+                section={layoutSection}
                 alt=""
                 $cropX={crop.x}
                 $cropY={crop.y}
@@ -1805,8 +1813,10 @@ const Admin = () => {
           ))}
         </Nav>
         <HelpText>
-          <strong>PARTIAL DB CONNECTION</strong>
-          콘텐츠 조회·추가·수정·삭제와 화면 배치 저장은 Neon DB에 연결됩니다. 카테고리 편집·Photo·메인 영상·About은 아직 미리보기 상태입니다.
+          <strong>{isLocalAdminPreview ? "LOCAL PREVIEW" : "PARTIAL DB CONNECTION"}</strong>
+          {isLocalAdminPreview
+            ? "로컬 샘플 데이터로 콘텐츠·카테고리·화면 배치를 미리봅니다. 변경사항은 새로고침하면 초기화됩니다."
+            : "콘텐츠·카테고리 관리와 화면 배치 저장은 Neon DB에 연결됩니다. Photo·메인 영상·About은 아직 미리보기 상태입니다."}
         </HelpText>
       </Sidebar>
 
@@ -1814,7 +1824,7 @@ const Admin = () => {
         <Topbar>
           <div>
             <StatusDot />
-            <span>콘텐츠 · 화면 배치 DB 연동</span>
+            <span>{isLocalAdminPreview ? "로컬 샘플 미리보기 · 새로고침 시 초기화" : "콘텐츠 · 카테고리 · 화면 배치 DB 연동"}</span>
           </div>
           <TopbarActions>
             <SiteLink href="/" target="_blank" rel="noreferrer">본 사이트 바로가기 ↗</SiteLink>
@@ -1869,7 +1879,7 @@ const Admin = () => {
 
               <PreviewFrame>
                 {parsedVideoId ? (
-                  <PreviewImage src={metadataState.thumbnail || `https://img.youtube.com/vi/${parsedVideoId}/mqdefault.jpg`} alt="영상 미리보기" />
+                  <PreviewImage as={YoutubeThumbnail} videoId={parsedVideoId} section={draft.section} alt="영상 미리보기" />
                 ) : (
                   <PreviewPlaceholder>
                     <span>▶</span>
@@ -1947,12 +1957,14 @@ const Admin = () => {
                   </div>
                   <span>LIVE</span>
                 </EditorPreviewTitle>
-                <PreviewCompare>
+                <PreviewCompare $shorts={draft.section === "shorts"}>
                   <div>
                     <PreviewCard $variant={draft.section === "shorts" ? "shorts" : "desktop"}>
                       {parsedVideoId ? (
                         <PreviewCardImage
-                          src={metadataState.thumbnail || `https://img.youtube.com/vi/${parsedVideoId}/mqdefault.jpg`}
+                          as={YoutubeThumbnail}
+                          videoId={parsedVideoId}
+                          section={draft.section}
                           alt="PC 카드 썸네일 미리보기"
                         />
                       ) : <PreviewCardImage as="div" />}
@@ -1969,11 +1981,13 @@ const Admin = () => {
                     <PreviewCard $variant={draft.section === "shorts" ? "shorts" : "mobile"}>
                       {parsedVideoId ? (
                         <PreviewCardImage
-                          src={metadataState.thumbnail || `https://img.youtube.com/vi/${parsedVideoId}/mqdefault.jpg`}
+                          as={YoutubeThumbnail}
+                          videoId={parsedVideoId}
+                          section={draft.section}
                           alt="모바일 카드 썸네일 미리보기"
                         />
                       ) : <PreviewCardImage as="div" />}
-                      <PreviewCardInfo>
+                      <PreviewCardInfo $compact={draft.section !== "shorts"}>
                         <PreviewCardMeta>{draft.category || "CATEGORY"} · MOBILE</PreviewCardMeta>
                         <strong>{draft.title || "작품 제목"}</strong>
                         <span>{draft.subtitle || "서브타이틀을 입력하면 여기에 표시됩니다."}</span>
@@ -2015,6 +2029,7 @@ const Admin = () => {
                 <FormLabel htmlFor="category-name">카테고리 이름</FormLabel>
                 <Input
                   id="category-name"
+                  disabled={contentSaving}
                   value={categoryEditor.name}
                   onChange={(event) => {
                     setCategoryEditor((current) => ({ ...current, name: event.target.value }));
@@ -2030,7 +2045,7 @@ const Admin = () => {
             </FormGrid>
             <AsideFooter>
               <GhostButton type="button" onClick={closeCategoryEditor}>취소</GhostButton>
-              <ActionButton type="submit">이름 변경</ActionButton>
+              <ActionButton type="submit" disabled={contentSaving || contentState.status !== "ready"}>{contentSaving ? "저장 중..." : "이름 변경"}</ActionButton>
             </AsideFooter>
           </form>
         </Aside>
@@ -2054,14 +2069,13 @@ const Admin = () => {
                 $rows={selectedLayoutItem?.rows || 1}
               >
                 <CropPreviewImage
-                  src={`https://img.youtube.com/vi/${selectedLayoutItem?.src}/maxresdefault.jpg`}
+                  as={YoutubeThumbnail}
+                  videoId={selectedLayoutItem?.src}
+                  section={layoutDraft.section}
                   alt="썸네일 크롭 미리보기"
                   $cropX={activeCropDraft.x}
                   $cropY={activeCropDraft.y}
                   $zoom={activeCropDraft.zoom}
-                  onError={(event) => {
-                    event.currentTarget.src = `https://img.youtube.com/vi/${selectedLayoutItem?.src}/hqdefault.jpg`;
-                  }}
                 />
                 <span>{device === "desktop" ? `${selectedLayoutItem?.columns}×${selectedLayoutItem?.rows}` : layoutDraft.section === "shorts" ? "Mobile · 9:16" : "Mobile · 3:1"}</span>
               </CropPreview>
