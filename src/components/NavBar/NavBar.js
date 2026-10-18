@@ -11,7 +11,7 @@ const Nav = styled.nav`
     position: relative;
     border-radius: 30px;
     border: 2px solid #FFF;
-    background: #343434;
+    background: transparent;
     @media (max-width: 700px) {
         gap: 4px;
         margin: 8px 0;
@@ -42,7 +42,7 @@ const NavLink = styled.div`
         border: 1px solid transparent;
         border-radius: 22px;
         color: ${({ $active }) => ($active ? '#000' : '#9D9D9D')};
-        background: ${({ $active }) => ($active ? '#eeeeec' : '#202025')};
+        background: ${({ $active }) => ($active ? '#eeeeec' : 'transparent')};
         box-shadow: none;
         font-size: 13px;
 
