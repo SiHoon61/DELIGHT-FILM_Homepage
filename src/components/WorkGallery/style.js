@@ -37,7 +37,7 @@ export const Card = styled.article`
   min-width: 0;
   overflow: hidden;
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 0;
   border-radius: 10px;
   background: #101010;
   color: #fff;
@@ -46,12 +46,8 @@ export const Card = styled.article`
   isolation: isolate;
 
   @media (min-width: 701px) and (hover: hover) {
-    transition: border-color 180ms ease, box-shadow 200ms ease;
-
     &:hover {
       z-index: 3;
-      border-color: rgba(255, 255, 255, 0.46);
-      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
     }
   }
 
@@ -88,7 +84,6 @@ export const Card = styled.article`
     width: 100%;
     aspect-ratio: 3 / 1;
     min-height: 0;
-    border-width: 0 0 1px;
     border-radius: 0;
   }
 `;

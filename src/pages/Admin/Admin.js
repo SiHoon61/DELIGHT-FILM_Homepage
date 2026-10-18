@@ -1,13 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 
-import workList from "../../workList.json";
+import { fetchAdminContents, writeAdminContents } from "../../data/adminContents";
 import mainVideo from "../../assets/Home/mainVideo.mp4";
 import aboutImage from "../../assets/About/aboutImg.svg";
 import { images as photoSources } from "../../components/Photo/Photo";
 import {
-  createShortsCatalog,
-  createVideoCatalog,
   SHORTS_CATEGORIES,
   VIDEO_CATEGORIES,
 } from "../../data/workSections";
@@ -146,26 +144,6 @@ import {
   VideoSlotHeader,
   VideoIdentity,
 } from "./style";
-
-const initialVideoItems = createVideoCatalog(
-  workList.videoJson || [],
-  workList.broadcastJson || []
-).map((item, index) => ({
-  ...item,
-  id: `video-${item.src}-${index}`,
-  status: index < 118 ? "published" : "draft",
-}));
-
-const initialShortsItems = createShortsCatalog(
-  workList.videoJson || [],
-  workList.broadcastJson || []
-).map((item, index) => ({
-  ...item,
-  id: `shorts-${item.src}-${index}`,
-  status: "published",
-}));
-
-const INITIAL_WORKS = [...initialVideoItems, ...initialShortsItems];
 
 const INITIAL_PHOTOS = photoSources.map((src, index) => ({
   id: `photo-${index}`,
@@ -363,7 +341,12 @@ const Admin = () => {
   const [selectedWorkIds, setSelectedWorkIds] = useState([]);
   const [bulkCategory, setBulkCategory] = useState("");
   const [bulkStatus, setBulkStatus] = useState("");
-  const [works, setWorks] = useState(INITIAL_WORKS);
+  const [works, setWorks] = useState([]);
+  const [contentState, setContentState] = useState({ status: "loading", message: "DB에서 콘텐츠를 불러오는 중입니다." });
+  const [contentSaving, setContentSaving] = useState(false);
+  const contentWriteRef = useRef(false);
+  const [contentReloadKey, setContentReloadKey] = useState(0);
+  const [dbCategories, setDbCategories] = useState([]);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingWorkId, setEditingWorkId] = useState(null);
   const [device, setDevice] = useState("desktop");
@@ -421,6 +404,46 @@ const Admin = () => {
   const [previewPresetId, setPreviewPresetId] = useState("desktop-1920");
   const [previewStageWidth, setPreviewStageWidth] = useState(0);
   const previewStageRef = useRef(null);
+
+  const applyContentData = useCallback((data) => {
+    setWorks(data.items);
+    setDbCategories(data.categories);
+    setVideoCategories(data.categories.filter((category) => category.section === "video").map((category) => category.name));
+    setShortsCategories(data.categories.filter((category) => category.section === "shorts").map((category) => category.name));
+    setContentState({ status: "ready", message: `DB 콘텐츠 · ${data.items.length}개` });
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setContentState({ status: "loading", message: "DB에서 콘텐츠를 불러오는 중입니다." });
+    fetchAdminContents(controller.signal).then(applyContentData).catch((error) => {
+      if (error.name !== "AbortError") setContentState({ status: "error", message: error.message });
+    });
+    return () => controller.abort();
+  }, [applyContentData, contentReloadKey]);
+
+  const persistContent = async (method, body) => {
+    if (contentWriteRef.current || contentState.status !== "ready") return false;
+    contentWriteRef.current = true;
+    setContentSaving(true);
+    try {
+      await writeAdminContents(method, body);
+      setLayoutReloadKey((key) => key + 1);
+      try {
+        applyContentData(await fetchAdminContents());
+      } catch (error) {
+        setContentState({ status: "error", message: `DB 저장은 완료했지만 목록을 다시 불러오지 못했습니다. ${error.message}` });
+        setWorks([]);
+      }
+      return true;
+    } finally {
+      contentWriteRef.current = false;
+      setContentSaving(false);
+    }
+  };
+
+  const getCategoryId = (targetSection, name) =>
+    dbCategories.find((category) => category.section === targetSection && category.name === name)?.id;
 
   const parsedVideoId = extractYouTubeId(draft.sourceUrl);
   const currentCategories = draft.section === "shorts"
@@ -531,7 +554,7 @@ const Admin = () => {
     if (!isEditorOpen || !shouldFetchMetadata || !parsedVideoId) return undefined;
 
     const duplicate = works.find((item) =>
-      item.src === parsedVideoId && item.id !== editingWorkId
+      item.src === parsedVideoId && item.section === draft.section && item.id !== editingWorkId
     );
     if (duplicate) {
       setMetadataState({
@@ -584,7 +607,7 @@ const Admin = () => {
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [editingWorkId, isEditorOpen, parsedVideoId, shouldFetchMetadata, works]);
+  }, [draft.section, editingWorkId, isEditorOpen, parsedVideoId, shouldFetchMetadata, works]);
 
   const counts = {
     video: works.filter((item) => item.section === "video").length,
@@ -664,7 +687,7 @@ const Admin = () => {
     });
   };
 
-  const applyBulkChanges = () => {
+  const applyBulkChanges = async () => {
     if (!selectedWorkIds.length) {
       notify("변경할 영상을 먼저 선택해주세요.");
       return;
@@ -674,21 +697,23 @@ const Admin = () => {
       return;
     }
 
-    const selectedIds = new Set(selectedWorkIds);
-    const applyChanges = (item) => selectedIds.has(item.id)
-      ? {
-          ...item,
-          ...(bulkCategory ? { category: bulkCategory } : {}),
-          ...(bulkStatus ? { status: bulkStatus } : {}),
-        }
-      : item;
-
-    setWorks((current) => current.map(applyChanges));
-    setLayoutItems((current) => current.map(applyChanges));
-    notify(`${selectedWorkIds.length}개 영상의 정보를 일괄 변경했습니다.`);
-    setSelectedWorkIds([]);
-    setBulkCategory("");
-    setBulkStatus("");
+    try {
+      const categoryId = bulkCategory ? getCategoryId(section, bulkCategory) : undefined;
+      if (bulkCategory && !categoryId) throw new Error("DB에 등록된 카테고리를 선택해주세요.");
+      const saved = await persistContent("PATCH", {
+        ids: selectedWorkIds, section,
+        ...(categoryId ? { categoryId } : {}),
+        ...(bulkStatus ? { status: bulkStatus } : {}),
+      });
+      if (!saved) return;
+      notify(`${selectedWorkIds.length}개 영상의 정보를 DB에 저장했습니다.`);
+      setSelectedWorkIds([]);
+      setBulkCategory("");
+      setBulkStatus("");
+    } catch (error) {
+      setContentState((current) => ({ ...current, message: error.message }));
+      notify(error.message);
+    }
   };
 
   const openEditor = () => {
@@ -730,6 +755,7 @@ const Admin = () => {
   };
 
   const closeEditor = () => {
+    if (contentWriteRef.current) return;
     setIsEditorOpen(false);
     setEditingWorkId(null);
     setFormError("");
@@ -747,7 +773,7 @@ const Admin = () => {
     });
   };
 
-  const saveDraft = (event) => {
+  const saveDraft = async (event) => {
     event.preventDefault();
     if (!parsedVideoId) {
       setFormError("올바른 YouTube 링크를 입력해주세요.");
@@ -758,7 +784,8 @@ const Admin = () => {
       return;
     }
     const duplicate = works.find((item) =>
-      item.src === parsedVideoId && item.id !== editingWorkId
+      item.src === parsedVideoId && item.section === draft.section && item.id !== editingWorkId
+        && !(editingWorkId && works.some((original) => original.id === editingWorkId && original.src === parsedVideoId && original.section === draft.section))
     );
     if (duplicate) {
       setFormError(`이미 등록된 영상입니다: ${duplicate.title}`);
@@ -766,42 +793,27 @@ const Admin = () => {
     }
 
     const savedItem = {
-      src: parsedVideoId,
+      youtubeVideoId: parsedVideoId,
       title: draft.title.trim(),
       subtitle: draft.subtitle.trim(),
       section: draft.section,
-      category: draft.category,
+      categoryId: getCategoryId(draft.section, draft.category),
       status: draft.status,
       duration: draft.duration || "",
     };
 
-    if (editingWorkId) {
-      setWorks((current) => current.map((item) =>
-        item.id === editingWorkId ? { ...item, ...savedItem } : item
-      ));
-      setLayoutItems((current) => current.map((item) =>
-        item.id === editingWorkId ? { ...item, ...savedItem } : item
-      ));
-    } else {
-      const newItem = {
-        id: `preview-${Date.now()}`,
-        ...savedItem,
-      };
-      setWorks((current) => [newItem, ...current]);
+    try {
+      const saved = await persistContent(editingWorkId ? "PUT" : "POST", { ...savedItem, ...(editingWorkId ? { id: editingWorkId } : {}) });
+      if (!saved) return;
+      setSection(draft.section);
+      closeEditor();
+      notify("작품 정보를 DB에 저장했습니다.");
+    } catch (error) {
+      setFormError(error.message);
     }
-
-    setSection(draft.section);
-    closeEditor();
-    notify(
-      editingWorkId
-        ? "작품 상세 정보를 수정했습니다."
-        : draft.status === "published"
-          ? "작품이 공개 목록에 추가되었습니다."
-          : "임시저장 목록에 추가되었습니다."
-    );
   };
 
-  const deleteWork = () => {
+  const deleteWork = async () => {
     if (!editingWorkId) return;
     const target = works.find((item) => item.id === editingWorkId);
     if (!target) return;
@@ -811,11 +823,14 @@ const Admin = () => {
     );
     if (!confirmed) return;
 
-    setWorks((current) => current.filter((item) => item.id !== editingWorkId));
-    setLayoutItems((current) => current.filter((item) => item.id !== editingWorkId));
-    setSelectedWorkIds((current) => current.filter((id) => id !== editingWorkId));
-    closeEditor();
-    notify("영상을 삭제했습니다.");
+    try {
+      if (!await persistContent("DELETE", { id: editingWorkId })) return;
+      setSelectedWorkIds((current) => current.filter((id) => id !== editingWorkId));
+      closeEditor();
+      notify("영상을 DB에서 삭제했습니다.");
+    } catch (error) {
+      setFormError(error.message);
+    }
   };
 
   const addCategory = (targetSection) => {
@@ -1168,10 +1183,17 @@ const Admin = () => {
           <PageTitle>콘텐츠</PageTitle>
           <PageDescription>작품 정보와 공개 상태를 관리합니다.</PageDescription>
         </div>
-        <ActionButton type="button" onClick={openEditor}>
+        <ActionButton type="button" onClick={openEditor} disabled={contentSaving || contentState.status !== "ready"}>
           <span>＋</span> 새 작품 등록
         </ActionButton>
       </ContentHeader>
+
+      <LayoutStatus $error={contentState.status === "error"} role={contentState.status === "error" ? "alert" : "status"}>
+        {contentSaving ? "DB에 변경사항을 저장하는 중입니다." : contentState.message}
+      </LayoutStatus>
+      {contentState.status === "error" && (
+        <GhostButton type="button" onClick={() => setContentReloadKey((key) => key + 1)}>콘텐츠 다시 불러오기</GhostButton>
+      )}
 
       <MetricRow>
         {Object.entries(counts).map(([key, value]) => (
@@ -1215,6 +1237,7 @@ const Admin = () => {
               <option value="all">모든 상태</option>
               <option value="published">공개</option>
               <option value="draft">임시저장</option>
+              <option value="hidden">숨김</option>
             </Select>
             <SearchInput
               value={search}
@@ -1256,10 +1279,11 @@ const Admin = () => {
                 <option value="">공개 상태 변경</option>
                 <option value="published">공개</option>
                 <option value="draft">임시저장</option>
+                <option value="hidden">숨김</option>
               </Select>
               <BulkApplyButton
                 type="button"
-                disabled={!selectedWorkIds.length || (!bulkCategory && !bulkStatus)}
+                disabled={contentSaving || contentState.status !== "ready" || !selectedWorkIds.length || (!bulkCategory && !bulkStatus)}
                 onClick={applyBulkChanges}
               >일괄 적용</BulkApplyButton>
             </ButtonGroup>
@@ -1318,7 +1342,7 @@ const Admin = () => {
                   <TableCell>
                     <Badge $status={item.status}>
                       <StatusDot />
-                      {item.status === "published" ? "공개" : "임시저장"}
+                      {item.status === "published" ? "공개" : item.status === "hidden" ? "숨김" : "임시저장"}
                     </Badge>
                   </TableCell>
                   <TableCell>{String(pageStart + index + 1).padStart(2, "0")}</TableCell>
@@ -1782,7 +1806,7 @@ const Admin = () => {
         </Nav>
         <HelpText>
           <strong>PARTIAL DB CONNECTION</strong>
-          화면 배치 조회와 저장은 Neon DB에 연결되어 있습니다. 나머지 관리 기능은 아직 미리보기 상태입니다.
+          콘텐츠 조회·추가·수정·삭제와 화면 배치 저장은 Neon DB에 연결됩니다. 카테고리 편집·Photo·메인 영상·About은 아직 미리보기 상태입니다.
         </HelpText>
       </Sidebar>
 
@@ -1790,7 +1814,7 @@ const Admin = () => {
         <Topbar>
           <div>
             <StatusDot />
-            <span>화면 배치 DB 연결</span>
+            <span>콘텐츠 · 화면 배치 DB 연동</span>
           </div>
           <TopbarActions>
             <SiteLink href="/" target="_blank" rel="noreferrer">본 사이트 바로가기 ↗</SiteLink>
@@ -1909,6 +1933,7 @@ const Admin = () => {
                 <Select id="work-status" value={draft.status} onChange={(event) => updateDraft("status", event.target.value)}>
                   <option value="draft">임시저장</option>
                   <option value="published">바로 공개</option>
+                  <option value="hidden">숨김</option>
                 </Select>
               </Field>
               {formError && <HelpText $error>{formError}</HelpText>}
@@ -1962,11 +1987,11 @@ const Admin = () => {
             </EditorWorkspace>
             <AsideFooter>
               {editingWorkId && (
-                <DangerButton type="button" onClick={deleteWork}>영상 삭제</DangerButton>
+                <DangerButton type="button" onClick={deleteWork} disabled={contentSaving || contentState.status !== "ready"}>영상 삭제</DangerButton>
               )}
               <GhostButton type="button" onClick={closeEditor}>취소</GhostButton>
-              <ActionButton type="submit">
-                {editingWorkId ? "수정사항 저장" : "저장하기"}
+              <ActionButton type="submit" disabled={contentSaving || contentState.status !== "ready"}>
+                {contentSaving ? "저장 중..." : editingWorkId ? "수정사항 저장" : "저장하기"}
               </ActionButton>
             </AsideFooter>
           </form>

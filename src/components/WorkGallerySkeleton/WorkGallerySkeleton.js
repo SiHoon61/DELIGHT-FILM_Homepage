@@ -6,7 +6,6 @@ import {
   ShortsSkeletonGrid,
   SkeletonLine,
   SkeletonLines,
-  SkeletonPlay,
   VideoSkeletonCard,
   VideoSkeletonGrid,
 } from "./style";
@@ -28,7 +27,6 @@ const SkeletonDetails = ({ compact = false }) => (
       <SkeletonLine $short />
       <SkeletonLine />
     </SkeletonLines>
-    <SkeletonPlay aria-hidden="true" />
   </>
 );
 

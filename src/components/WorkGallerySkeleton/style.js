@@ -9,7 +9,7 @@ const skeletonSurface = css`
   position: relative;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 0;
   border-radius: 10px;
   background: #101010;
   isolation: isolate;
@@ -77,7 +77,6 @@ export const VideoSkeletonCard = styled.div`
   @media (max-width: 700px) {
     width: 100%;
     aspect-ratio: 3 / 1;
-    border-width: 0 0 1px;
     border-radius: 0;
   }
 `;
@@ -128,24 +127,6 @@ export const SkeletonLine = styled.span`
   border-radius: 999px;
   background: ${({ $short }) =>
     $short ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.16)"};
-`;
-
-export const SkeletonPlay = styled.span`
-  position: absolute;
-  right: 16px;
-  bottom: 16px;
-  z-index: 1;
-  width: 38px;
-  height: 38px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 50%;
-
-  @media (max-width: 700px) {
-    right: 14px;
-    bottom: 14px;
-    width: 30px;
-    height: 30px;
-  }
 `;
 
 export const ScreenReaderStatus = styled.span`

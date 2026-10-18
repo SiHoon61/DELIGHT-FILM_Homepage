@@ -52,16 +52,9 @@ export const ImageFrame = styled.span`
   width: 100%;
   overflow: hidden;
   aspect-ratio: 9 / 16;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 0;
   border-radius: 8px;
   background: #111;
-  transition: border-color 180ms ease, box-shadow 200ms ease;
-
-  ${Card}:hover &,
-  ${Card}:focus-visible & {
-    border-color: rgba(255, 255, 255, 0.46);
-    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.26);
-  }
 `;
 
 export const CardImage = styled.img`
@@ -88,6 +81,7 @@ export const CardOverlay = styled.span`
 
 export const PlayButton = styled.span`
   position: absolute;
+  z-index: 2;
   right: 12px;
   bottom: 12px;
   display: grid;
@@ -98,12 +92,11 @@ export const PlayButton = styled.span`
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.24);
   backdrop-filter: blur(4px);
-  opacity: 0.5;
-  transition: opacity 180ms ease, background-color 180ms ease;
+  opacity: 1;
+  transition: background-color 180ms ease;
 
   ${Card}:hover &,
   ${Card}:focus-visible & {
-    opacity: 1;
     border-color: #fee500;
     background: rgba(0, 0, 0, 0.38);
   }
@@ -114,7 +107,6 @@ export const PlayButton = styled.span`
     width: 31px;
     height: 31px;
     border-width: 1px;
-    opacity: 1;
   }
 `;
 
@@ -140,8 +132,8 @@ export const CardInfo = styled.span`
 export const CardMeta = styled.span`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: flex-start;
+  gap: 8px;
   margin-bottom: 6px;
   color: rgba(255, 255, 255, 0.78);
   font-family: var(--font-sansBold);
